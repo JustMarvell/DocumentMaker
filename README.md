@@ -34,12 +34,13 @@ Document Maker is a template-based document generation website that streamlines 
 
 ### Prerequisites
 
-> _List your tech stack requirements here, e.g.:_
+```
 - Node.js v18+
 - A modern web browser
 - docxtpl python library `pip install docxtpl`
 - xlsxtpl python library `pip install xlsxtpl`
 - php, composer, artisan, & laravel
+```
 
 ### Installation
 
