@@ -119,6 +119,209 @@
                 </div>
 
                 {{-- ================================================== --}}
+                {{-- Employee Performance Targets Form --}}
+                {{-- ================================================== --}}
+                <div id="employee-performance-targets-form">
+                
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
+                        Data Pegawai yang Dinilai
+                    </h3>
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Awal Periode
+                                    Penilaian</label>
+                                <input type="date" name="ept_appraisal_period_start" id="ept-appraisal-period-start"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Akhir Periode
+                                    Penilaian</label>
+                                <input type="date" name="ept_appraisal_period_end" id="ept-appraisal-period-end"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pegawai</label>
+                            <input type="text" name="ept_employee_name" id="ept-employee-name"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="John Doe..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
+                            <input type="text" name="ept_employee_nip" id="ept-employee-nip"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="7104334234242..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat / Gol. Ruang</label>
+                            <input type="text" name="ept_employee_rank" id="ept-employee-rank"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Penata Tingkat I..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
+                            <input type="text" name="ept_employee_position" id="ept-employee-position"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Staf Administratif..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja Pegawai</label>
+                            <input type="text" name="ept_employee_work_unit" id="ept-employee-work-unit"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Unit Administratif..." />
+                        </div>
+                
+                    </div>
+                
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
+                        Data Pejabat Penilai
+                    </h3>
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Penilai</label>
+                            <input type="text" name="ept_appraisal_name" id="ept-appraisal-name"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Jane Doe..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">NIP Penilai</label>
+                            <input type="text" name="ept_appraisal_nip" id="ept-appraisal-nip"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="71034234235" />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat / Gol. Ruang
+                                Penilai</label>
+                            <input type="text" name="ept_appraisal_rank" id="ept-appraisal-rank"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Penata II" />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan Penilai</label>
+                            <input type="text" name="ept_appraisal_position" id="ept-appraisal-position"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Staf Administratif" />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja Penilai</label>
+                            <input type="text" name="ept_appraisal_work_unit" id="ept-appraisal-work-unit"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Unit Staff..." />
+                        </div>
+                
+                    </div>
+                
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
+                        Rencana Hasil Kerja
+                    </h3>
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Rencana Hasil Kerja
+                                Pimpinan</label>
+                            <input type="text" name="ept_leadership_work_result_plan" id="ept-leadership-work-result-plan"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Rencana kerja pimpinan..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Rencana Hasil Kerja</label>
+                            <input type="text" name="ept_work_result_plan" id="ept-work-result-plan"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Rencana hasil kerja..." />
+                        </div>
+                
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Indikator Kuantitas</label>
+                                <input type="text" name="ept_work_quantity_indicator" id="ept-work-quantity-indicator"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Jumlah dokumen..." />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Target Kuantitas</label>
+                                <input type="text" name="ept_work_quantity_target" id="ept-work-quantity-target"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="12 dokumen..." />
+                            </div>
+                        </div>
+                
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Indikator Kualitas</label>
+                                <input type="text" name="ept_work_quality_indicator" id="ept-work-quality-indicator"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Ketepatan isi..." />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Target Kualitas</label>
+                                <input type="text" name="ept_work_quality_target" id="ept-work-quality-target"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="100%..." />
+                            </div>
+                        </div>
+                
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Indikator Waktu</label>
+                                <input type="text" name="ept_work_time_indicator" id="ept-work-time-indicator"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Tepat waktu..." />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Target Waktu</label>
+                                <input type="text" name="ept_work_time_target" id="ept-work-time-target"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="12 bulan..." />
+                            </div>
+                        </div>
+                
+                    </div>
+                
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
+                        Perilaku Kerja Tambahan
+                    </h3>
+                    <div class="grid grid-cols-1 gap-4">
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Perilaku Kerja Tambahan</label>
+                            <input type="text" name="ept_additional_work_behaviour_1" id="ept-additional-work-behaviour-1"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Integritas..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Perilaku Kerja</label>
+                            <input type="text" name="ept_additional_work_behaviour_1_description"
+                                id="ept-additional-work-behaviour-1-description"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Bertindak jujur dan konsisten..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ekspektasi Spesifik
+                                Pimpinan</label>
+                            <input type="text" name="ept_leadership_spesific_expectation" id="ept-leadership-spesific-expectation"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Meningkatkan kualitas laporan..." />
+                        </div>
+                
+                    </div>
+                </div>
+
+                {{-- ================================================== --}}
                 {{-- Letter of Assignment Form --}}
                 {{-- ================================================== --}}
                 <div id="letter-of-assignment-form" class="hidden">
@@ -194,7 +397,7 @@
                 {{-- ================================================== --}}
                 {{-- Permission Letter Form --}}
                 {{-- ================================================== --}}
-                <div id="permission-letter-form">
+                <div id="permission-letter-form" class="hidden">
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
                         Data Surat Izin Sakit
                     </h3>
@@ -278,212 +481,6 @@
                                 <input type="date" name="pl_end_date" id="pl-end-date"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                {{-- ================================================== --}}
-                {{-- Employee Performance Targets Form --}}
-                {{-- ================================================== --}}
-                <div id="employee-performance-targets-form" class="hidden">
-
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
-                        Data Pegawai yang Dinilai
-                    </h3>
-                    <div class="grid grid-cols-1 gap-4 mb-6">
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Awal Periode
-                                    Penilaian</label>
-                                <input type="date" name="ept_appraisal_period_start" id="ept-appraisal-period-start"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Akhir Periode
-                                    Penilaian</label>
-                                <input type="date" name="ept_appraisal_period_end" id="ept-appraisal-period-end"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pegawai</label>
-                            <input type="text" name="ept_employee_name" id="ept-employee-name"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="John Doe..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
-                            <input type="text" name="ept_employee_nip" id="ept-employee-nip"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="7104334234242..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat / Gol. Ruang</label>
-                            <input type="text" name="ept_employee_rank" id="ept-employee-rank"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Penata Tingkat I..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                            <input type="text" name="ept_employee_position" id="ept-employee-position"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Staf Administratif..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja Pegawai</label>
-                            <input type="text" name="ept_employee_work_unit" id="ept-employee-work-unit"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Unit Administratif..." />
-                        </div>
-
-                    </div>
-
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
-                        Data Pejabat Penilai
-                    </h3>
-                    <div class="grid grid-cols-1 gap-4 mb-6">
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Penilai</label>
-                            <input type="text" name="ept_appraisal_name" id="ept-appraisal-name"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Jane Doe..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">NIP Penilai</label>
-                            <input type="text" name="ept_appraisal_nip" id="ept-appraisal-nip"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="71034234235" />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat / Gol. Ruang
-                                Penilai</label>
-                            <input type="text" name="ept_appraisal_rank" id="ept-appraisal-rank"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Penata II" />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan Penilai</label>
-                            <input type="text" name="ept_appraisal_position" id="ept-appraisal-position"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Staf Administratif" />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja Penilai</label>
-                            <input type="text" name="ept_appraisal_work_unit" id="ept-appraisal-work-unit"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Unit Staff..." />
-                        </div>
-
-                    </div>
-
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
-                        Rencana Hasil Kerja
-                    </h3>
-                    <div class="grid grid-cols-1 gap-4 mb-6">
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Rencana Hasil Kerja
-                                Pimpinan</label>
-                            <input type="text" name="ept_leadership_work_result_plan"
-                                id="ept-leadership-work-result-plan"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Rencana kerja pimpinan..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Rencana Hasil Kerja</label>
-                            <input type="text" name="ept_work_result_plan" id="ept-work-result-plan"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Rencana hasil kerja..." />
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Indikator Kuantitas</label>
-                                <input type="text" name="ept_work_quantity_indicator" id="ept-work-quantity-indicator"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Jumlah dokumen..." />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Target Kuantitas</label>
-                                <input type="text" name="ept_work_quantity_target" id="ept-work-quantity-target"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="12 dokumen..." />
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Indikator Kualitas</label>
-                                <input type="text" name="ept_work_quality_indicator" id="ept-work-quality-indicator"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Ketepatan isi..." />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Target Kualitas</label>
-                                <input type="text" name="ept_work_quality_target" id="ept-work-quality-target"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="100%..." />
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Indikator Waktu</label>
-                                <input type="text" name="ept_work_time_indicator" id="ept-work-time-indicator"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Tepat waktu..." />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Target Waktu</label>
-                                <input type="text" name="ept_work_time_target" id="ept-work-time-target"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="12 bulan..." />
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
-                        Perilaku Kerja Tambahan
-                    </h3>
-                    <div class="grid grid-cols-1 gap-4">
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Perilaku Kerja Tambahan</label>
-                            <input type="text" name="ept_additional_work_behaviour_1"
-                                id="ept-additional-work-behaviour-1"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Integritas..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Perilaku Kerja</label>
-                            <input type="text" name="ept_additional_work_behaviour_1_description"
-                                id="ept-additional-work-behaviour-1-description"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Bertindak jujur dan konsisten..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Ekspektasi Spesifik
-                                Pimpinan</label>
-                            <input type="text" name="ept_leadership_spesific_expectation"
-                                id="ept-leadership-spesific-expectation"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Meningkatkan kualitas laporan..." />
                         </div>
 
                     </div>
