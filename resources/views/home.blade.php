@@ -119,6 +119,79 @@
                 </div>
 
                 {{-- ================================================== --}}
+                {{-- Letter of Assignment Form --}}
+                {{-- ================================================== --}}
+                <div id="letter-of-assignment-form" class="hidden">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
+                        Data Surat Tugas Perjalanan Dinas
+                    </h3>
+                    <div class="grid grid-cols-1 gap-4">
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pegawai</label>
+                            <input type="text" name="la_employee_name" id="la-employee-name"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="John Doe..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan Pegawai</label>
+                            <input type="text" name="la_employee_position" id="la-employee-position"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Staff ABC..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Pegawai</label>
+                            <input type="text" name="la_employee_address" id="la-employee-address"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="JL. 123 Tomohon..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Surat</label>
+                            <input type="text" name="la_letter_number" id="la-letter-number"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="123/ABC/X/YZ..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Penulisan Surat</label>
+                            <input type="date" name="la_letter_date" id="la-letter-date"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tujuan Tugas</label>
+                            <input type="text" name="la_assignment_objective" id="la-assignment-objective"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="perjalanan dinas ke..." />
+                        </div>
+                
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Instansi Tujuan</label>
+                            <input type="text" name="la_destination_agency" id="la-destination-agency"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="PT. ABCD EFG..." />
+                        </div>
+                
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Berangkat</label>
+                                <input type="date" name="la_departure_date" id="la-departure-date"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kembali</label>
+                                <input type="date" name="la_return_date" id="la-return-date"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                        </div>
+                
+                    </div>
+                </div>
+
+                {{-- ================================================== --}}
                 {{-- Permission Letter Form --}}
                 {{-- ================================================== --}}
                 <div id="permission-letter-form">
@@ -203,79 +276,6 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Akhir Cuti</label>
                                 <input type="date" name="pl_end_date" id="pl-end-date"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                {{-- ================================================== --}}
-                {{-- Letter of Assignment Form --}}
-                {{-- ================================================== --}}
-                <div id="letter-of-assignment-form" class="hidden">
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
-                        Data Surat Tugas Perjalanan Dinas
-                    </h3>
-                    <div class="grid grid-cols-1 gap-4">
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pegawai</label>
-                            <input type="text" name="la_employee_name" id="la-employee-name"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="John Doe..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan Pegawai</label>
-                            <input type="text" name="la_employee_position" id="la-employee-position"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Staff ABC..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Pegawai</label>
-                            <input type="text" name="la_employee_address" id="la-employee-address"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="JL. 123 Tomohon..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Surat</label>
-                            <input type="text" name="la_letter_number" id="la-letter-number"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="123/ABC/X/YZ..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Penulisan Surat</label>
-                            <input type="date" name="la_letter_date" id="la-letter-date"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tujuan Tugas</label>
-                            <input type="text" name="la_assignment_objective" id="la-assignment-objective"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="perjalanan dinas ke..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Instansi Tujuan</label>
-                            <input type="text" name="la_destination_agency" id="la-destination-agency"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="PT. ABCD EFG..." />
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Berangkat</label>
-                                <input type="date" name="la_departure_date" id="la-departure-date"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kembali</label>
-                                <input type="date" name="la_return_date" id="la-return-date"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
                         </div>
