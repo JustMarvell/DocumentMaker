@@ -55,6 +55,7 @@ Route::middleware('auth')->group(function() {
         Route::patch('/users/{user}/role', [AdminController::class,'updateUserRole'])->name('users.updateRole');
         Route::get('/document-types', [AdminController::class,'documentTypes'])->name('document-types');
         Route::patch('/document-types/{documentType}/toggle', [AdminController::class,'toggleDocumentType'])->name('document-types.toggle');
+        Route::get('/staff-data', [AdminController::class,'staffData'])->name('staff-data');
     });
 });
 

@@ -92,4 +92,8 @@ class AdminController extends Controller
 
         return back()->with('success', "{$documentType->name} berhasil {$status}.");
     }
+
+    public function staffData() {
+        return view('admin.staff-data');
+    }
 }
