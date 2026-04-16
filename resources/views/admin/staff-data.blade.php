@@ -1,101 +1,248 @@
 @extends('admin.layout')
 
 @section('content')
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Managemen Staff</h1>
 
-    <h3 class="text-l font-bold text-gray-600 mb-6">Tambah Staff</h3>
-    <div class="bg-white rounded-lg shadow p-4 mb-6 grid grid-cols-2 gap-4">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pegawai</label>
-            <input type="text" name="asd-employee_name" id="asd-employee-name"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="John Doe..." />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
-            <input type="text" name="asd-nip" id="asd-nip"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="71030504050001..." />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" name="asd-email" id="asd-email"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="email@gmail.com..." />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja</label>
-            <input type="text" name="asd-work-unit" id="asd-work-unit"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Bidang Bina Marga..." />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan / Gol. Pangkat</label>
-            <input type="text" name="asd-rank" id="asd-rank"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Pembina Tkd. I..." />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Posisi</label>
-            <input type="text" name="asd-position" id="asd-position"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Staff..." />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">No. Hp</label>
-            <input type="text" name="asd-phone-number" id="asd-phone-number"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="082256472819..." />
-        </div>
-        <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi</label>
-            <button type="post" class="bg-blue-600 text-white px-2 py-2 rounded text-xs hover:bg-blue-700">
-                Tambah
-            </button>
-        </div>
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Manajemen Data Staff</h1>
+
+    {{-- ============================================================ --}}
+    {{-- Add Staff Form --}}
+    {{-- ============================================================ --}}
+    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Tambah Staff</h3>
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <form method="POST" action="{{ route('admin.staff-data.store') }}">
+            @csrf
+            <div class="grid grid-cols-2 gap-4">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pegawai <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" name="staff_name"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="John Doe..." value="{{ old('staff_name') }}" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">NIP <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" name="nip"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="71030504050001..." value="{{ old('nip') }}" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email <span
+                            class="text-red-500">*</span></label>
+                    <input type="email" name="email"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="email@gmail.com..." value="{{ old('email') }}" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" name="work_unit"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Bidang Bina Marga..." value="{{ old('work_unit') }}" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan / Gol. Pangkat</label>
+                    <input type="text" name="rank"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Pembina Tkd. I..." value="{{ old('rank') }}" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Posisi</label>
+                    <input type="text" name="position"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Staff..." value="{{ old('position') }}" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">No. HP</label>
+                    <input type="text" name="phone_number"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="082256472819..." value="{{ old('phone_number') }}" />
+                </div>
+
+                <div class="flex items-end">
+                    <button type="submit"
+                        class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium">
+                        + Tambah Staff
+                    </button>
+                </div>
+
+            </div>
+        </form>
     </div>
 
-    <h3 class="text-l font-bold text-gray-600 mb-6">Daftar Staff</h3>
+    {{-- ============================================================ --}}
+    {{-- Staff Table --}}
+    {{-- ============================================================ --}}
+    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Daftar Staff</h3>
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <table class="w-full text-sm">
-            <thead class="bg-gray-50 text-gray-500 text-center">
+            <thead class="bg-gray-50 text-gray-500 text-left">
                 <tr>
-                    <th class="px-1 py-3">No</th>
+                    <th class="px-3 py-3 text-center">No</th>
                     <th class="px-4 py-3">Nama</th>
-                    <th class="px-4 py-3">Nip</th>
+                    <th class="px-4 py-3">NIP</th>
                     <th class="px-4 py-3">Email</th>
                     <th class="px-4 py-3">Unit Kerja</th>
-                    <th class="px-4 py-3">Jabatan / Gol.Pangkat</th>
+                    <th class="px-4 py-3">Jabatan / Gol. Pangkat</th>
                     <th class="px-4 py-3">Posisi</th>
-                    <th class="px-4 py-3">No. Hp</th>
-                    <th class="px-4 py-3">Edit Data</th>
+                    <th class="px-4 py-3">No. HP</th>
+                    <th class="px-4 py-3 text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-                <tr>
-                    <td class="px-1 py-3 text-gray-250 text-center">1</td>
-                    <td class="px-4 py-3 font-medium text-left">nama</td>
-                    <td class="px-4 py-3 text-gray-500 text-left">nip</td>
-                    <td class="px-4 py-3 text-gray-500 text-left">email</td>
-                    <td class="px-4 py-3 text-gray-500 text-left">unit kerja</td>
-                    <td class="px-4 py-3 text-gray-500 text-left">jabatan</td>
-                    <td class="px-4 py-3 text-gray-500 text-left">posisi</td>
-                    <td class="px-4 py-3 text-gray-500 text-left">no hp</td>
-                    <td class="px-4 py-3 text-center">
-                        <button type="post"
-                            class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">
-                            Edit
-                        </button>
-                        <button type="post"
-                            class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">
-                            Hapus
-                        </button>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="9" class="px-4 py-6 text-center text-gray-400">Belum ada data.</td>
-                </tr>
+                @forelse ($staffList as $index => $staff)
+                    <tr>
+                        <td class="px-3 py-3 text-center text-gray-400">{{ $staffList->firstItem() + $index }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ $staff->staff_name }}</td>
+                        <td class="px-4 py-3 text-gray-500 font-mono text-xs">{{ $staff->nip }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $staff->email }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $staff->work_unit }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $staff->rank ?? '—' }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $staff->position ?? '—' }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $staff->phone_number ?? '—' }}</td>
+                        <td class="px-4 py-3 text-center flex gap-2 justify-center">
+
+                            {{-- Edit button — opens modal --}}
+                            <button type="button"
+                                onclick="openEditModal({{ $staff->id }}, '{{ addslashes($staff->staff_name) }}', '{{ $staff->nip }}', '{{ $staff->email }}', '{{ addslashes($staff->work_unit) }}', '{{ addslashes($staff->rank) }}', '{{ addslashes($staff->position) }}', '{{ $staff->phone_number }}')"
+                                class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
+                                Edit
+                            </button>
+
+                            {{-- Delete button --}}
+                            <form method="POST" action="{{ route('admin.staff-data.destroy', $staff) }}"
+                                onsubmit="return confirm('Hapus data {{ addslashes($staff->staff_name) }}?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700">
+                                    Hapus
+                                </button>
+                            </form>
+
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="9" class="px-4 py-8 text-center text-gray-400">
+                            Belum ada data staff. Tambahkan menggunakan form di atas.
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
-@endsection()
+
+    {{-- Pagination --}}
+    <div class="mt-4">
+        {{ $staffList->links() }}
+    </div>
+
+    {{-- ============================================================ --}}
+    {{-- Edit Modal --}}
+    {{-- ============================================================ --}}
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-800">Edit Data Staff</h2>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">✕</button>
+            </div>
+
+            <form method="POST" id="edit-form" action="">
+                @csrf
+                @method('PATCH')
+                <div class="grid grid-cols-2 gap-4">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pegawai <span
+                                class="text-red-500">*</span></label>
+                        <input type="text" name="staff_name" id="edit-staff-name"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">NIP <span
+                                class="text-red-500">*</span></label>
+                        <input type="text" name="nip" id="edit-nip"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email <span
+                                class="text-red-500">*</span></label>
+                        <input type="email" name="email" id="edit-email"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja <span
+                                class="text-red-500">*</span></label>
+                        <input type="text" name="work_unit" id="edit-work-unit"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan / Gol. Pangkat</label>
+                        <input type="text" name="rank" id="edit-rank"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Posisi</label>
+                        <input type="text" name="position" id="edit-position"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">No. HP</label>
+                        <input type="text" name="phone_number" id="edit-phone-number"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                </div>
+
+                <div class="flex gap-3 mt-6 justify-end">
+                    <button type="button" onclick="closeEditModal()"
+                        class="px-4 py-2 rounded-lg border text-sm text-gray-600 hover:bg-gray-50">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(id, name, nip, email, workUnit, rank, position, phone) {
+            document.getElementById('edit-form').action = `/admin/staff-data/${id}`;
+            document.getElementById('edit-staff-name').value = name;
+            document.getElementById('edit-nip').value = nip;
+            document.getElementById('edit-email').value = email;
+            document.getElementById('edit-work-unit').value = workUnit;
+            document.getElementById('edit-rank').value = rank !== 'null' ? rank : '';
+            document.getElementById('edit-position').value = position !== 'null' ? position : '';
+            document.getElementById('edit-phone-number').value = phone !== 'null' ? phone : '';
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('edit-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeEditModal();
+        });
+    </script>
+
+@endsection
