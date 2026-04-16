@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\DocumentLog;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -18,8 +19,18 @@ class PurgeCachedDocuments extends Command
         $dir = public_path('cached_result');
         $deleted = 0;
 
-        foreach(glob("{$dir}/*") as $file) {
-            if (is_file($file) && (time() - filemtime($file)) >= $ttl) {
+        foreach (glob("{$dir}/*") as $file) {
+            if (!is_file($file))
+                continue;
+
+            if ((time() - filemtime($file)) >= $ttl) {
+                $filename = basename($file);
+
+                // Update the log record before deleting
+                DocumentLog::where('output_filename', $filename)
+                    ->whereNull('deleted_at')
+                    ->update(['deleted_at' => now()]);
+
                 unlink($file);
                 $deleted++;
             }
