@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StaffDataController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -50,13 +51,22 @@ Route::middleware('auth')->group(function() {
     // Admin only
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function() {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+
         Route::get('/logs', [AdminController::class,'logs'])->name('logs');
+
         Route::get('/users', [AdminController::class,'users'])->name('users');
         Route::patch('/users/{user}/role', [AdminController::class,'updateUserRole'])->name('users.updateRole');
+        
         Route::get('/document-types', [AdminController::class,'documentTypes'])->name('document-types');
         Route::patch('/document-types/{documentType}/toggle', [AdminController::class,'toggleDocumentType'])->name('document-types.toggle');
+
         Route::get('/staff-data', [AdminController::class,'staffData'])->name('staff-data');
+        Route::post('/staff-data', [StaffDataController::class, 'store'])->name('staff-data.store');
+        Route::patch('/staff-data/{staffDatum}', [StaffDataController::class, 'update'])->name('staff-data.update');
+        Route::delete('/staff-data/{staffDatum}', [StaffDataController::class, 'destroy'])->name('staff-data.destroy');
     });
+
+    Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');
 });
 
 require __DIR__.'/auth.php';
