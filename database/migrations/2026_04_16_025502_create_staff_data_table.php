@@ -16,13 +16,11 @@ return new class extends Migration
             $table->string('staff_name');
             $table->string('nip')->unique();
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('phone_number')->nullable();
             $table->string('rank')->nullable();
             $table->string('position')->nullable();
             $table->string('work_unit');
-            $table->rememberToken();
-            $table->timestamp('created_at')->nullable();
+            $table->timestamps();
         });
     }
 
