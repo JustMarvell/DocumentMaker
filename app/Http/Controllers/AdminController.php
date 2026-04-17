@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DocumentLog;
 use App\Models\DocumentType;
 use App\Models\User;
+use App\Models\StaffData;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -93,8 +94,50 @@ class AdminController extends Controller
         return back()->with('success', "{$documentType->name} berhasil {$status}.");
     }
 
-    public function staffData() {
-        $staffList = \App\Models\StaffData::orderBy('staff_name')->paginate(20);
-        return view('admin.staff-data', compact('staffList'));
+    public function staffData(Request $request) {
+        $querry = StaffData::orderBy('staff_name');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $querry->where(function ($q) use ($search) {
+                $q->where('staff_name', 'like', "%{$search}%")
+                ->orWhere('nip', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('work_unit')) {
+            $querry->where('work_unit', $request->work_unit);
+        }
+
+        if ($request->filled('rank')) {
+            $querry->where('rank', $request->rank);
+        }
+
+        if ($request->filled('position')) {
+            $querry->where('position', $request->position);
+        }
+
+        $staffList = $querry->paginate(20)->appends($request->querry());
+
+        $workUnits = StaffData::distinct()
+            ->pluck('work_unit')
+            ->filter(fn($value) => !is_null($value))
+            ->sort()
+            ->values();
+
+        $ranks = StaffData::whereNotNull('rank')
+            ->distinct()
+            ->pluck('rank')
+            ->sort()
+            ->values();
+            
+        $positions = StaffData::whereNotNull('position')
+            ->distinct()
+            ->pluck('position')
+            ->sort()
+            ->values();
+
+        return view('admin.staff-data', compact('staffList', 'workUnits', 'ranks', 'positions'));
     }
 }
