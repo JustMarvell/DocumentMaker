@@ -95,11 +95,11 @@ class AdminController extends Controller
     }
 
     public function staffData(Request $request) {
-        $querry = StaffData::orderBy('staff_name');
+        $query = StaffData::orderBy('staff_name');
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $querry->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('staff_name', 'like', "%{$search}%")
                 ->orWhere('nip', 'like', "%{$search}%")
                 ->orWhere('email', 'like', "%{$search}%");
@@ -107,18 +107,18 @@ class AdminController extends Controller
         }
 
         if ($request->filled('work_unit')) {
-            $querry->where('work_unit', $request->work_unit);
+            $query->where('work_unit', $request->work_unit);
         }
 
         if ($request->filled('rank')) {
-            $querry->where('rank', $request->rank);
+            $query->where('rank', $request->rank);
         }
 
         if ($request->filled('position')) {
-            $querry->where('position', $request->position);
+            $query->where('position', $request->position);
         }
 
-        $staffList = $querry->paginate(20)->appends($request->querry());
+        $staffList = $query->paginate(20)->appends($request->query());
 
         $workUnits = StaffData::distinct()
             ->pluck('work_unit')
