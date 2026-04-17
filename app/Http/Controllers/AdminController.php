@@ -92,4 +92,9 @@ class AdminController extends Controller
 
         return back()->with('success', "{$documentType->name} berhasil {$status}.");
     }
+
+    public function staffData() {
+        $staffList = \App\Models\StaffData::orderBy('staff_name')->paginate(20);
+        return view('admin.staff-data', compact('staffList'));
+    }
 }

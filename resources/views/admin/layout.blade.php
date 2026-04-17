@@ -30,6 +30,10 @@
                 class="text-sm {{ request()->routeIs('admin.document-types') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' }}">
                 Jenis Dokumen
             </a>
+            <a href="{{ route('admin.staff-data') }}"
+                class="text-sm {{ request()->routeIs('admin.staff-data') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' }}">
+                Data Staff
+            </a>
         </div>
         <div class="flex items-center gap-4">
             <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>

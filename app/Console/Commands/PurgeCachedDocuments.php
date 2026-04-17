@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
 class PurgeCachedDocuments extends Command
 {
     
-    protected $signature = 'documents:purge {--ttl=600}';
+    protected $signature = 'documents:purge {--ttl=300}';
     protected $description = 'Delete generated documents older that the specified time';
 
     public function handle()

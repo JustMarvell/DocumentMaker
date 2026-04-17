@@ -11,7 +11,7 @@
 <body class="bg-gray-100 font-sans">
 
     {{-- ============================================================ --}}
-    {{-- Navbar (matches admin panel) --}}
+    {{-- Navbar --}}
     {{-- ============================================================ --}}
     <nav class="bg-white shadow px-6 py-4 flex items-center justify-between">
         <span class="font-bold text-gray-800">DINAS PUPRD Kota Tomohon</span>
@@ -47,7 +47,6 @@
     {{-- ============================================================ --}}
     <main class="max-w-3xl mx-auto px-6 py-8">
 
-        {{-- Page header --}}
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Sistem Automatisasi Surat</h1>
             <p class="text-sm text-gray-500 mt-1">
@@ -55,7 +54,7 @@
             </p>
         </div>
 
-        {{-- Flash: validation errors --}}
+        {{-- Flash messages --}}
         @if ($errors->any())
             <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-4">
                 <ul class="list-disc list-inside text-sm space-y-1">
@@ -66,7 +65,6 @@
             </div>
         @endif
 
-        {{-- Flash: success + download --}}
         @if (session('success'))
             <div
                 class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-4 flex items-center justify-between">
@@ -80,14 +78,12 @@
             </div>
         @endif
 
-        {{-- Flash: generation error --}}
         @if (session('error'))
             <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-4 text-sm">
                 {{ session('error') }}
             </div>
         @endif
 
-        {{-- Guest notice --}}
         @auth
             @if (auth()->user()->isGuest())
                 <div class="bg-yellow-50 border border-yellow-300 text-yellow-800 px-4 py-3 rounded mb-4 text-sm">
@@ -121,10 +117,25 @@
                 {{-- ================================================== --}}
                 {{-- Permission Letter Form --}}
                 {{-- ================================================== --}}
-                <div id="permission-letter-form">
+                <div id="permission-letter-form" class="hidden">
+
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
                         Data Surat Izin Sakit
                     </h3>
+
+                    {{-- Staff selector --}}
+                    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <label class="block text-sm font-medium text-blue-700 mb-1">
+                            Pilih dari Data Staff (opsional)
+                        </label>
+                        <select onchange="fillForm('pl', this.value)"
+                            class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="">— Pilih staff untuk mengisi otomatis —</option>
+                        </select>
+                        <p class="text-xs text-blue-500 mt-1">Memilih staff akan mengisi otomatis nama, NIP, jabatan,
+                            dan unit kerja.</p>
+                    </div>
+
                     <div class="grid grid-cols-1 gap-4">
 
                         <div>
@@ -214,9 +225,24 @@
                 {{-- Letter of Assignment Form --}}
                 {{-- ================================================== --}}
                 <div id="letter-of-assignment-form" class="hidden">
+
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
                         Data Surat Tugas Perjalanan Dinas
                     </h3>
+
+                    {{-- Staff selector --}}
+                    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <label class="block text-sm font-medium text-blue-700 mb-1">
+                            Pilih dari Data Staff (opsional)
+                        </label>
+                        <select onchange="fillForm('la', this.value)"
+                            class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="">— Pilih staff untuk mengisi otomatis —</option>
+                        </select>
+                        <p class="text-xs text-blue-500 mt-1">Memilih staff akan mengisi otomatis nama, jabatan, dan
+                            alamat.</p>
+                    </div>
+
                     <div class="grid grid-cols-1 gap-4">
 
                         <div>
@@ -286,11 +312,23 @@
                 {{-- ================================================== --}}
                 {{-- Employee Performance Targets Form --}}
                 {{-- ================================================== --}}
-                <div id="employee-performance-targets-form" class="hidden">
+                <div id="employee-performance-targets-form">
 
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
                         Data Pegawai yang Dinilai
                     </h3>
+
+                    {{-- Staff selector for employee --}}
+                    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <label class="block text-sm font-medium text-blue-700 mb-1">
+                            Pilih Pegawai yang Dinilai (opsional)
+                        </label>
+                        <select onchange="fillForm('ept_employee', this.value)"
+                            class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="">— Pilih staff untuk mengisi otomatis —</option>
+                        </select>
+                    </div>
+
                     <div class="grid grid-cols-1 gap-4 mb-6">
 
                         <div class="grid grid-cols-2 gap-4">
@@ -348,6 +386,18 @@
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">
                         Data Pejabat Penilai
                     </h3>
+
+                    {{-- Staff selector for appraiser --}}
+                    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <label class="block text-sm font-medium text-blue-700 mb-1">
+                            Pilih Pejabat Penilai (opsional)
+                        </label>
+                        <select onchange="fillForm('ept_appraisal', this.value)"
+                            class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="">— Pilih staff untuk mengisi otomatis —</option>
+                        </select>
+                    </div>
+
                     <div class="grid grid-cols-1 gap-4 mb-6">
 
                         <div>
@@ -489,9 +539,7 @@
                     </div>
                 </div>
 
-                {{-- ================================================== --}}
                 {{-- Consent + Submit --}}
-                {{-- ================================================== --}}
                 <div class="mt-6 pt-4 border-t flex items-center gap-3">
                     <input type="checkbox" id="consent" class="rounded border-gray-300 text-blue-600" required />
                     <label for="consent" class="text-sm text-gray-600">
@@ -509,6 +557,9 @@
     </main>
 
     <script>
+        // ============================================================
+        // Form section show/hide
+        // ============================================================
         const formSections = [
             'permission-letter-form',
             'letter-of-assignment-form',
@@ -519,17 +570,100 @@
             formSections.forEach(function (sectionId) {
                 document.getElementById(sectionId).classList.add('hidden');
             });
-
             const map = {
                 'permission-letter': 'permission-letter-form',
                 'letter-of-assignment': 'letter-of-assignment-form',
                 'employee-performance-targets': 'employee-performance-targets-form',
             };
-
             if (map[selectedValue]) {
                 document.getElementById(map[selectedValue]).classList.remove('hidden');
             }
         }
+
+        // ============================================================
+        // Staff data — fetched once on page load, shared by all dropdowns
+        // ============================================================
+        let staffData = [];
+
+        async function loadStaffData() {
+            try {
+                const response = await fetch('{{ route('api.staff') }}');
+                staffData = await response.json();
+                populateAllDropdowns();
+            } catch (e) {
+                console.warn('Could not load staff data:', e);
+            }
+        }
+
+        function populateAllDropdowns() {
+            const dropdowns = document.querySelectorAll('select[onchange^="fillForm"]');
+            dropdowns.forEach(function (select) {
+                // Keep the placeholder option
+                const placeholder = select.options[0];
+                select.innerHTML = '';
+                select.appendChild(placeholder);
+
+                staffData.forEach(function (staff) {
+                    const option = document.createElement('option');
+                    option.value = staff.id;
+                    option.textContent = staff.staff_name + (staff.nip ? ' — ' + staff.nip : '');
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // ============================================================
+        // Auto-fill logic
+        // prefix = 'pl' | 'la' | 'ept_employee' | 'ept_appraisal'
+        // ============================================================
+        function fillForm(prefix, staffId) {
+            if (!staffId) return;
+
+            const staff = staffData.find(s => s.id == staffId);
+            if (!staff) return;
+
+            // Map of prefix → which fields to fill and their field-name suffixes
+            const fieldMaps = {
+                'pl': {
+                    'employee-name': staff.staff_name,
+                    'employee-position': staff.position ?? '',
+                    'employee-id-number': staff.nip ?? '',
+                },
+                'la': {
+                    'employee-name': staff.staff_name,
+                    'employee-position': staff.position ?? '',
+                    'employee-address': staff.work_unit ?? '',
+                },
+                'ept_employee': {
+                    'employee-name': staff.staff_name,
+                    'employee-nip': staff.nip ?? '',
+                    'employee-rank': staff.rank ?? '',
+                    'employee-position': staff.position ?? '',
+                    'employee-work-unit': staff.work_unit ?? '',
+                },
+                'ept_appraisal': {
+                    'appraisal-name': staff.staff_name,
+                    'appraisal-nip': staff.nip ?? '',
+                    'appraisal-rank': staff.rank ?? '',
+                    'appraisal-position': staff.position ?? '',
+                    'appraisal-work-unit': staff.work_unit ?? '',
+                },
+            };
+
+            const fields = fieldMaps[prefix];
+            if (!fields) return;
+
+            // Derive the HTML id prefix (pl → pl, la → la, ept_employee → ept, ept_appraisal → ept)
+            const idPrefix = prefix.replace('_employee', '').replace('_appraisal', '');
+
+            Object.entries(fields).forEach(function ([fieldSuffix, value]) {
+                const el = document.getElementById(idPrefix + '-' + fieldSuffix);
+                if (el && value) el.value = value;
+            });
+        }
+
+        // Load staff data when the page is ready
+        document.addEventListener('DOMContentLoaded', loadStaffData);
     </script>
 
 </body>
