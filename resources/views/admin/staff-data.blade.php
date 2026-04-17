@@ -78,6 +78,79 @@
     </div>
 
     {{-- ============================================================ --}}
+    {{-- Search & Filter Bar --}}
+    {{-- ============================================================ --}}
+    <div class="mb-8 bg-white rounded-lg shadow p-6">
+        <form method="GET" action="{{ route('admin.staff-data') }}" class="flex flex-wrap gap-4 items-end">
+
+            <!-- Search Bar -->
+            <div class="flex-1 min-w-[240px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Pencarian</label>
+                <input type="text" name="search" value="{{ request('search') }}"
+                    placeholder="Cari nama, NIP, email, unit kerja..."
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Filter: Unit Kerja -->
+            <div class="min-w-[180px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja</label>
+                <select name="work_unit"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Unit Kerja</option>
+                    @foreach ($workUnits ?? [] as $unit)
+                        <option value="{{ $unit }}" {{ request('work_unit') == $unit ? 'selected' : '' }}>
+                            {{ $unit }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Filter: Jabatan / Gol. Pangkat -->
+            <div class="min-w-[180px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan / Gol. Pangkat</label>
+                <select name="rank"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Jabatan / Pangkat</option>
+                    @foreach ($ranks ?? [] as $rank)
+                        <option value="{{ $rank }}" {{ request('rank') == $rank ? 'selected' : '' }}>
+                            {{ $rank }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Filter: Posisi -->
+            <div class="min-w-[180px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Posisi</label>
+                <select name="position"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Posisi</option>
+                    @foreach ($positions ?? [] as $position)
+                        <option value="{{ $position }}" {{ request('position') == $position ? 'selected' : '' }}>
+                            {{ $position }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-end gap-3">
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium">
+                    Cari
+                </button>
+
+                @if (request()->filled('search') || request()->filled('work_unit') || request()->filled('rank') || request()->filled('position'))
+                    <a href="{{ route('admin.staff-data') }}"
+                        class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg text-sm">
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
+    {{-- ============================================================ --}}
     {{-- Staff Table --}}
     {{-- ============================================================ --}}
     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Daftar Staff</h3>
