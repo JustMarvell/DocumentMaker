@@ -51,14 +51,20 @@ Route::middleware('auth')->group(function() {
     // Admin only
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function() {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-
         Route::get('/logs', [AdminController::class,'logs'])->name('logs');
-
         Route::get('/users', [AdminController::class,'users'])->name('users');
         Route::patch('/users/{user}/role', [AdminController::class,'updateUserRole'])->name('users.updateRole');
-        
+
         Route::get('/document-types', [AdminController::class,'documentTypes'])->name('document-types');
         Route::patch('/document-types/{documentType}/toggle', [AdminController::class,'toggleDocumentType'])->name('document-types.toggle');
+        Route::get('/document-types/create', [AdminController::class, 'createDocumentType'])->name('document-types.create');
+        Route::post('/document-types', [AdminController::class, 'storeDocumentType'])->name('document-types.store');
+
+        Route::get('/document-types/{documentType}/fields', [AdminController::class, 'manageFields'])->name('document-types.fields');
+        Route::post('/document-types/{documentType}/fields', [AdminController::class, 'storeField'])->name('document-types.fields.store');
+        Route::patch('/document-types/{documentType}/fields/{field}', [AdminController::class, 'updateField'])->name('document-types.fields.update');
+        Route::delete('/document-types/{documentType}/fields/{field}', [AdminController::class, 'destroyField'])->name('document-types.fields.destroy');
+        Route::post('/document-types/{documentType}/fields/reorder', [AdminController::class, 'reorderFields'])->name('document-types.fields.reorder');
 
         Route::get('/staff-data', [AdminController::class,'staffData'])->name('staff-data');
         Route::post('/staff-data', [StaffDataController::class, 'store'])->name('staff-data.store');
