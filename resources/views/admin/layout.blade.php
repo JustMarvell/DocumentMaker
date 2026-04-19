@@ -27,7 +27,7 @@
                 Pengguna
             </a>
             <a href="{{ route('admin.document-types') }}"
-                class="text-sm {{ request()->routeIs('admin.document-types') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' }}">
+                class="text-sm {{ request()->routeIs('admin.document-types*') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' }}">
                 Jenis Dokumen
             </a>
             <a href="{{ route('admin.staff-data') }}"
