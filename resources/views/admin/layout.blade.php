@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin — {{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="bg-gray-100 font-sans">
@@ -27,7 +28,7 @@
                 Pengguna
             </a>
             <a href="{{ route('admin.document-types') }}"
-                class="text-sm {{ request()->routeIs('admin.document-types') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' }}">
+                class="text-sm {{ request()->routeIs('admin.document-types*') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' }}">
                 Jenis Dokumen
             </a>
             <a href="{{ route('admin.staff-data') }}"
