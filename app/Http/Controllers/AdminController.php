@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DocumentField;
 use App\Models\DocumentLog;
 use App\Models\DocumentType;
 use App\Models\User;
 use App\Models\StaffData;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -92,6 +94,140 @@ class AdminController extends Controller
         $status = $documentType->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
         return back()->with('success', "{$documentType->name} berhasil {$status}.");
+    }
+
+    public function createDocumentType() {
+        return view('admin.document-type-create');
+    }
+
+    public function storeDocumentType(Request $request) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'key' => 'required|string|unique:document_types,key|regex:/^[a-z0-9\-]+$/',
+            'access_level' => 'required|in:guest,staff',
+            'file_type' => 'required|in:docx,xlsx',
+            'staff_autofill_role' => 'required|in:none,employee,appraiser,both',
+            'template_file' => 'required|file|mimes:docx,xlsx,vnd.openxmlformats-officedocument.wordprocessingml.document,vnd.openxmlformats-officedocument.spreadsheetml.sheet|max:10240',
+        ]);
+
+        $file = $request->file('template_file');
+        $extension = $file->getClientOriginalExtension();
+        $filename = Str::slug($request->key) . '.' . $extension;
+        $file->move(base_path('document_templates'), $filename);
+
+        $documentType = DocumentType::create([
+            'name' => $request->name,
+            'key' => $request->key,
+            'script_name' => $request->file_type === 'docx' ? 'docx_generator.py' : 'xlsx_generator.py',
+            'template_filename' => $filename,
+            'output_filename' => Str::slug($request->key),
+            'access_level' => $request->access_level,
+            'file_type' => $request->file_type,
+            'staff_autofill_role' => $request->staff_autofill_role,
+            'is_active' => true,
+        ]);
+
+        return redirect()
+            ->route('admin.document-types.fields', $documentType)
+            ->with('success', "Template '{$documentType->name}' berhasil ditambahkan. Sekarang tambahkan field untuk template ini.");
+    }
+
+    public function manageFields(DocumentType $documentType)
+    {
+        $fields       = $documentType->fields()->get();
+        $staffColumns = DocumentField::staffColumns();
+ 
+        return view('admin.document-type-fields', compact('documentType', 'fields', 'staffColumns'));
+    }
+
+    public function storeField(Request $request, DocumentType $documentType)
+    {
+        $request->validate([
+            'field_key'            => ['required', 'string', 'regex:/^[a-z0-9_]+$/', 'max:100',
+                                       \Illuminate\Validation\Rule::unique('document_fields')->where('document_type_id', $documentType->id)],
+            'label'                => 'required|string|max:255',
+            'field_type'           => 'required|in:text,textarea,date,number,select,checkbox,repeating_group',
+            'field_options'        => 'nullable|string',
+            'is_required'          => 'boolean',
+            'section_label'        => 'nullable|string|max:255',
+            'group_key'            => 'nullable|string|max:100',
+            'is_group_child'       => 'boolean',
+            'staff_autofill_column'=> 'nullable|string',
+        ]);
+ 
+        $fieldOptions = null;
+        if ($request->field_type === 'select' && $request->filled('field_options')) {
+            $fieldOptions = array_map('trim', explode(',', $request->field_options));
+        }
+ 
+        $maxOrder = $documentType->fields()->max('sort_order') ?? 0;
+ 
+        DocumentField::create([
+            'document_type_id'      => $documentType->id,
+            'field_key'             => $request->field_key,
+            'label'                 => $request->label,
+            'field_type'            => $request->field_type,
+            'field_options'         => $fieldOptions,
+            'is_required'           => $request->boolean('is_required'),
+            'sort_order'            => $maxOrder + 1,
+            'section_label'         => $request->section_label,
+            'group_key'             => $request->group_key,
+            'is_group_child'        => $request->boolean('is_group_child'),
+            'staff_autofill_column' => $request->staff_autofill_column ?: null,
+        ]);
+ 
+        return back()->with('success', "Field '{$request->label}' berhasil ditambahkan.");
+    }
+
+    public function updateField(Request $request, DocumentType $documentType, DocumentField $field)
+    {
+        $request->validate([
+            'label' => 'required|string|max:255',
+            'field_type' => 'required|in:text,textarea,date,number,select,checkbox,repeating_group',
+            'field_options' => 'nullable|string',
+            'is_required' => 'boolean',
+            'section_label' => 'nullable|string|max:255',
+            'staff_autofill_column' => 'nullable|string',
+        ]);
+
+        $fieldOptions = $field->field_options;
+        if ($request->field_type === 'select' && $request->filled('field_options')) {
+            $fieldOptions = array_map('trim', explode(',', $request->field_options));
+        }
+
+        $field->update([
+            'label' => $request->label,
+            'field_type' => $request->field_type,
+            'field_options' => $fieldOptions,
+            'is_required' => $request->boolean('is_required'),
+            'section_label' => $request->section_label,
+            'staff_autofill_column' => $request->staff_autofill_column ?: null,
+        ]);
+
+        return back()->with('success', "Field '{$field->label}' berhasil diperbarui.");
+    }
+
+    public function destroyField(DocumentType $documentType, DocumentField $field)
+    {
+        $label = $field->label;
+        $field->delete();
+        return back()->with('success', "Field '{$label}' berhasil dihapus.");
+    }
+
+    public function reorderFields(Request $request, DocumentType $documentType)
+    {
+        $request->validate([
+            'order'   => 'required|array',
+            'order.*' => 'integer|exists:document_fields,id',
+        ]);
+ 
+        foreach ($request->order as $sortOrder => $fieldId) {
+            DocumentField::where('id', $fieldId)
+                ->where('document_type_id', $documentType->id)
+                ->update(['sort_order' => $sortOrder + 1]);
+        }
+ 
+        return response()->json(['success' => true]);
     }
 
     public function staffData(Request $request) {
