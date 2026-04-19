@@ -10,6 +10,7 @@ class DocumentType extends Model
     protected $fillable = [
         'name', 'key', 'script_name', 'template_filename', 
         'output_filename', 'access_level', 'is_active',
+        'file_type', 'staff_autofill_role',
     ];
 
     protected function casts() : array
@@ -23,6 +24,16 @@ class DocumentType extends Model
     public function documentLogs() : HasMany
     {
         return $this->hasMany(DocumentLog::class);
+    }
+
+    public function fields() : HasMany {
+        return $this->hasMany(DocumentField::class)->orderBy('sort_order');
+    }
+
+    public function topLevelFields() : HasMany {
+        return $this->hasMany(DocumentField::class)
+            ->where('is_group_child', false)
+            ->orderBy('sort_order');
     }
 
     // scopessldkfjlsdfjs
