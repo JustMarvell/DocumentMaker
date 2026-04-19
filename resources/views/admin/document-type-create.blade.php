@@ -93,11 +93,11 @@
                     </label>
                     <input type="file" name="template_file" accept=".docx,.xlsx"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
-                    <p class="text-xs text-gray-400 mt-1">
-                        Upload file .docx atau .xlsx yang sudah berisi placeholder <code
-                            class="bg-gray-100 px-1 rounded">{{ '{{ variable_name }}' }}</code>.
-                        Maksimal 10MB.
-                    </p>
+                        <p class="text-xs text-gray-400 mt-1">
+                            Upload file .docx atau .xlsx yang sudah berisi placeholder
+                            <code class="bg-gray-100 px-1 rounded">@verbatim{{ variable_name }}@endverbatim</code>.
+                            Maksimal 10MB.
+                        </p>
                     @error('template_file') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
