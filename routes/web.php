@@ -35,7 +35,7 @@ Route::middleware('auth')->group(function() {
     Route::delete('/profile', [ProfileController::class,'destroy'])->name('profile.destroy');
 
     // document generator -> all logeged user
-    Route::middleware('role:guest,staff,admin')->group(function(){
+    Route::middleware('auth')->group(function(){
         Route::get('/home', [DocumentController::class,'index'])->name('home');
         Route::post('/generate', [DocumentController::class,'generate'])->name('document.generate');
         Route::get('/download/{filename}', [DocumentController::class, 'download'])->name('document.download');
