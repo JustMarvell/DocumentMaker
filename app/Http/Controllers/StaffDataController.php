@@ -17,7 +17,7 @@ class StaffDataController extends Controller
         $request->validate([
             'staff_name' => 'required|string|max:255',
             'nip' => 'required|string|unique:staff_data,nip',
-            'email' => 'required|email|unique:staff_data,email',
+            'email' => 'required|email',
             'work_unit' => 'required|string|max:255',
             'rank' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
@@ -41,7 +41,7 @@ class StaffDataController extends Controller
         $request->validate([
             'staff_name' => 'required|string|max:255',
             'nip' => 'required|string|unique:staff_data,nip' . $staffDatum->id,
-            'email' => 'required|email|unique:staff_data,email' . $staffDatum->id,
+            'email' => 'required|email',
             'work_unit' => 'required|string|max:255',
             'rank' => 'required|string|max:255',
             'position' => 'required|string|max:255',
