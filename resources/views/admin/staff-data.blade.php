@@ -30,8 +30,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email <span
-                            class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input type="email" name="email"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="email@gmail.com..." value="{{ old('email') }}" />
@@ -46,14 +45,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan / Gol. Pangkat</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat / Gol. Pangkat</label>
                     <input type="text" name="rank"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Pembina Tkd. I..." value="{{ old('rank') }}" />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Posisi</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
                     <input type="text" name="position"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Staff..." value="{{ old('position') }}" />
