@@ -20,6 +20,7 @@ class DocumentField extends Model
         'group_key',
         'is_group_child',
         'staff_autofill_column',
+        'autofill_role',
     ];
 
     protected function casts() : array {
