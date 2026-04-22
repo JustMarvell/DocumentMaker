@@ -5,6 +5,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffDataController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OfficialDataController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -72,9 +73,15 @@ Route::middleware('auth')->group(function() {
         Route::post('/staff-data', [StaffDataController::class, 'store'])->name('staff-data.store');
         Route::patch('/staff-data/{staffDatum}', [StaffDataController::class, 'update'])->name('staff-data.update');
         Route::delete('/staff-data/{staffDatum}', [StaffDataController::class, 'destroy'])->name('staff-data.destroy');
+
+        Route::get('/official-data', [AdminController::class, 'officialData'])->name('official-data');
+        Route::post('/official-data', [OfficialDataController::class, 'store'])->name('official-data.store');
+        Route::patch('/official-data/{officialDatum}', [OfficialDataController::class, 'update'])->name('official-data.update');
+        Route::delete('/official-data/{officialDatum}', [OfficialDataController::class, 'destroy'])->name('official-data.destroy');
     });
 
     Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');
+    Route::get('/api/officials', [OfficialDataController::class, 'index'])->name('api.officials');
 });
 
 require __DIR__.'/auth.php';
