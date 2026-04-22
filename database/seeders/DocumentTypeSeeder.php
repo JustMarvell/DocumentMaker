@@ -120,6 +120,7 @@ class DocumentTypeSeeder extends Seeder
                     'group_key' => null,
                     'is_group_child' => false,
                     'staff_autofill_column' => null,
+                    'autofill_role' => 'none',   // new default
                     'field_options' => null,
                 ], $field)
             );
