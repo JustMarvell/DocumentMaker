@@ -18,9 +18,9 @@
                     <th class="px-4 py-3">Key</th>
                     <th class="px-4 py-3">Tipe File</th>
                     <th class="px-4 py-3">Akses</th>
-                    <th class="px-4 py-3">Staff Autofill</th>
+                    <th class="px-4 py-3">Autofill</th>
                     <th class="px-4 py-3 text-center">Fields</th>
-                    <th class="px-4 py-3 text-center">Total Dibuat</th>
+                    <th class="px-4 py-3 text-center">Dibuat</th>
                     <th class="px-4 py-3 text-center">Status</th>
                     <th class="px-4 py-3 text-center">Aksi</th>
                 </tr>
@@ -48,7 +48,7 @@
                         <td class="px-4 py-3 text-center">
                             <a href="{{ route('admin.document-types.fields', $type) }}"
                                 class="text-blue-600 hover:underline text-xs font-medium">
-                                {{ $type->fields_count ?? $type->fields()->count() }} field(s)
+                                {{ $type->fields()->count() }} field(s)
                             </a>
                         </td>
                         <td class="px-4 py-3 text-center">{{ $type->document_logs_count }}</td>
@@ -59,19 +59,28 @@
                                 <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-semibold">Nonaktif</span>
                             @endif
                         </td>
-                        <td class="px-4 py-3 text-center">
-                            <div class="flex gap-2 justify-center">
+                        <td class="px-4 py-3">
+                            <div class="flex flex-col gap-1 items-stretch min-w-[100px]">
                                 <a href="{{ route('admin.document-types.fields', $type) }}"
-                                    class="text-xs px-3 py-1 rounded border border-blue-400 text-blue-600 hover:bg-blue-50">
+                                    class="text-xs px-2 py-1 rounded border border-blue-400 text-blue-600 hover:bg-blue-50 text-center">
                                     Kelola Field
                                 </a>
                                 <form method="POST" action="{{ route('admin.document-types.toggle', $type) }}">
                                     @csrf
                                     @method('PATCH')
                                     <button type="submit"
-                                        class="text-xs px-3 py-1 rounded border
-                                                {{ $type->is_active ? 'border-red-400 text-red-500 hover:bg-red-50' : 'border-green-500 text-green-600 hover:bg-green-50' }}">
+                                        class="w-full text-xs px-2 py-1 rounded border
+                                                {{ $type->is_active ? 'border-yellow-400 text-yellow-600 hover:bg-yellow-50' : 'border-green-500 text-green-600 hover:bg-green-50' }}">
                                         {{ $type->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.document-types.destroy', $type) }}"
+                                    onsubmit="return confirm('Hapus template {{ addslashes($type->name) }}? Semua field dan file template akan ikut terhapus.')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="w-full text-xs px-2 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50">
+                                        Hapus
                                     </button>
                                 </form>
                             </div>
