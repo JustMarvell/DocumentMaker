@@ -314,4 +314,27 @@ class AdminController extends Controller
 
         return view('admin.staff-data', compact('staffList', 'workUnits', 'ranks', 'positions'));
     }
+
+    public function officialData()
+    {
+        $officialList = \App\Models\OfficialData::orderBy('staff_name')->paginate(20);
+        return view('admin.official-data', compact('officialList'));
+    }
+
+    public function destroyDocumentType(DocumentType $documentType)
+    {
+        // Delete the template file
+        $templatePath = base_path('document_templates/' . $documentType->template_filename);
+        if (file_exists($templatePath)) {
+            unlink($templatePath);
+        }
+
+        // Fields cascade delete from the migration
+        $name = $documentType->name;
+        $documentType->delete();
+
+        return redirect()
+            ->route('admin.document-types')
+            ->with('success', "Template '{$name}' berhasil dihapus.");
+    }
 }
