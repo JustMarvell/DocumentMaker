@@ -35,6 +35,10 @@
                 class="text-sm {{ request()->routeIs('admin.staff-data') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' }}">
                 Data Staff
             </a>
+            <a href="{{ route('admin.official-data') }}"
+                class="text-sm {{ request()->routeIs('admin.official-data') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' }}">
+                Data Pejabat
+            </a>
         </div>
         <div class="flex items-center gap-4">
             <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>
