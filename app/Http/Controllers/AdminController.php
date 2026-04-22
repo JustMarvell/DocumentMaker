@@ -132,6 +132,44 @@ class AdminController extends Controller
             ->with('success', "Template '{$documentType->name}' berhasil ditambahkan. Sekarang tambahkan field untuk template ini.");
     }
 
+    // Show re-upload form
+    public function reuploadTemplateForm(DocumentType $documentType)
+    {
+        return view('admin.document-type-reupload', compact('documentType'));
+    }
+
+    // Handle re-upload
+    public function reuploadTemplate(Request $request, DocumentType $documentType)
+    {
+        $request->validate([
+            'template_file' => 'required|file|mimes:docx,xlsx,vnd.openxmlformats-officedocument.wordprocessingml.document,vnd.openxmlformats-officedocument.spreadsheetml.sheet|max:10240',
+        ]);
+
+        $file = $request->file('template_file');
+        $extension = $file->getClientOriginalExtension();
+
+        // Delete the old template file if it exists
+        $oldPath = base_path('document_templates/' . $documentType->template_filename);
+        if (file_exists($oldPath)) {
+            unlink($oldPath);
+        }
+
+        // Save the new file using the same base key so the filename stays consistent
+        $newFilename = Str::slug($documentType->key) . '.' . $extension;
+        $file->move(base_path('document_templates'), $newFilename);
+
+        // Update the document type record
+        $documentType->update([
+            'template_filename' => $newFilename,
+            'file_type' => $extension === 'xlsx' ? 'xlsx' : 'docx',
+            'script_name' => $extension === 'xlsx' ? 'xlsx_generator.py' : 'docx_generator.py',
+        ]);
+
+        return redirect()
+            ->route('admin.document-types.fields', $documentType)
+            ->with('success', "Template '{$documentType->name}' berhasil diperbarui. Field yang ada tetap tersimpan.");
+    }
+
     public function manageFields(DocumentType $documentType)
     {
         $fields       = $documentType->fields()->get();

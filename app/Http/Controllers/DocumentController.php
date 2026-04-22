@@ -78,6 +78,17 @@ class DocumentController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        // $validator = Validator::make($request->all(), $rules);
+        // if ($validator->fails()) {
+        //     dd([
+        //         'errors' => $validator->errors()->toArray(),
+        //         'rules' => $rules,
+        //         'request_data' => $request->all(),
+        //         'role' => $role,
+        //         'doctype' => $documentType->key,
+        //     ]);
+        // }
+
         $context = [];
 
         foreach ($documentType->fields as $field) {

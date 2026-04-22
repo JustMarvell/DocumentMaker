@@ -16,8 +16,8 @@
                     {{ auth()->user()->name }}
                     <span class="ml-1 px-2 py-0.5 rounded text-xs font-semibold
                         {{ auth()->user()->role === 'admin' ? 'bg-purple-100 text-purple-700' : '' }}
-                        {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700'   : '' }}
-                        {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600'   : '' }}">
+                        {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700' : '' }}
+                        {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600' : '' }}">
                         {{ ucfirst(auth()->user()->role) }}
                     </span>
                 </span>
@@ -90,215 +90,215 @@
             </div>
         @else
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <form action="{{ route('document.generate') }}" method="POST" id="main-form">
-                @csrf
+            <div class="bg-white rounded-lg shadow p-6">
+                <form action="{{ route('document.generate') }}" method="POST" id="main-form">
+                    @csrf
 
-                {{-- Document type selector --}}
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Jenis Surat / Dokumen
-                    </label>
-                    <select name="letter-type" id="letter-type-select"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        onchange="showForm(this.value)">
-                        @foreach ($documentTypes as $type)
-                            <option value="{{ $type->key }}"
-                                data-autofill-role="{{ $type->staff_autofill_role }}">
-                                {{ $type->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                    {{-- Document type selector --}}
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Jenis Surat / Dokumen
+                        </label>
+                        <select name="letter-type" id="letter-type-select"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onchange="showForm(this.value)">
+                            @foreach ($documentTypes as $type)
+                                <option value="{{ $type->key }}"
+                                    data-autofill-role="{{ $type->staff_autofill_role }}">
+                                    {{ $type->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                @foreach ($documentTypes as $docType)
-                    @php
-                        $fields      = $allFields[$docType->id] ?? collect();
-                        $topFields   = $fields->where('is_group_child', false);
-                        $autofillRole = $docType->staff_autofill_role;
-                    @endphp
+                    @foreach ($documentTypes as $docType)
+                        @php
+            $fields = $allFields[$docType->id] ?? collect();
+            $topFields = $fields->where('is_group_child', false);
+            $autofillRole = $docType->staff_autofill_role;
+                        @endphp
 
-                    <div id="form-{{ $docType->key }}"
-                         class="{{ !$loop->first ? 'hidden' : '' }}">
+                        <div id="form-{{ $docType->key }}"
+                             class="{{ !$loop->first ? 'hidden' : '' }}">
 
-                        @if (in_array($autofillRole, ['employee', 'both']))
-                            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                <label class="block text-sm font-medium text-blue-700 mb-1">
-                                    Pilih Pegawai (opsional — mengisi otomatis)
-                                </label>
-                                <select onchange="fillFromStaff('{{ $docType->key }}', 'employee', this.value)"
-                                    class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
-                                    <option value="">— Pilih staff untuk mengisi otomatis —</option>
-                                </select>
-                            </div>
-                        @endif
-
-                        @if (in_array($autofillRole, ['appraiser', 'both']))
-                            <div class="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
-                                <label class="block text-sm font-medium text-indigo-700 mb-1">
-                                    Pilih Penilai (opsional — mengisi otomatis)
-                                </label>
-                                <select onchange="fillFromStaff('{{ $docType->key }}', 'appraiser', this.value)"
-                                    class="w-full border border-indigo-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 staff-dropdown">
-                                    <option value="">— Pilih staff untuk mengisi otomatis —</option>
-                                </select>
-                            </div>
-                        @endif
-
-                        @php $currentSection = null; @endphp
-
-                        @foreach ($topFields as $field)
-
-                            {{-- Section heading --}}
-                            @if ($field->section_label && $field->section_label !== $currentSection)
-                                @php $currentSection = $field->section_label; @endphp
-                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
-                                    {{ $field->section_label }}
-                                </h3>
+                            @if (in_array($autofillRole, ['employee', 'both']))
+                                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <label class="block text-sm font-medium text-blue-700 mb-1">
+                                        Pilih Pegawai (opsional — mengisi otomatis)
+                                    </label>
+                                    <select onchange="fillFromStaff('{{ $docType->key }}', 'employee', this.value)"
+                                        class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
+                                        <option value="">— Pilih staff untuk mengisi otomatis —</option>
+                                    </select>
+                                </div>
                             @endif
 
-                            @if ($field->field_type === 'repeating_group')
-                                @php
-                                    $children = $fields
-                                        ->where('is_group_child', true)
-                                        ->where('group_key', $field->field_key);
-                                @endphp
+                            @if (in_array($autofillRole, ['appraiser', 'both']))
+                                <div class="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+                                    <label class="block text-sm font-medium text-indigo-700 mb-1">
+                                        Pilih Penilai (opsional — mengisi otomatis)
+                                    </label>
+                                    <select onchange="fillFromStaff('{{ $docType->key }}', 'appraiser', this.value)"
+                                        class="w-full border border-indigo-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 staff-dropdown">
+                                        <option value="">— Pilih staff untuk mengisi otomatis —</option>
+                                    </select>
+                                </div>
+                            @endif
 
-                                <div class="mb-4">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <label class="block text-sm font-medium text-gray-700">
+                            @php $currentSection = null; @endphp
+
+                            @foreach ($topFields as $field)
+
+                                {{-- Section heading --}}
+                                @if ($field->section_label && $field->section_label !== $currentSection)
+                                    @php $currentSection = $field->section_label; @endphp
+                                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
+                                        {{ $field->section_label }}
+                                    </h3>
+                                @endif
+
+                                @if ($field->field_type === 'repeating_group')
+                                    @php
+                    $children = $fields
+                        ->where('is_group_child', true)
+                        ->where('group_key', $field->field_key);
+                                    @endphp
+
+                                    <div class="mb-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <label class="block text-sm font-medium text-gray-700">
+                                                {{ $field->label }}
+                                                @if ($field->is_required)
+                                                    <span class="text-red-500">*</span>
+                                                @endif
+                                            </label>
+                                            <button type="button"
+                                                onclick="addRow('{{ $docType->key }}', '{{ $field->field_key }}')"
+                                                class="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                                + Tambah Baris
+                                            </button>
+                                        </div>
+
+                                        {{-- Column headers --}}
+                                        <div class="grid gap-2 mb-1"
+                                             style="grid-template-columns: repeat({{ $children->count() }}, 1fr) auto">
+                                            @foreach ($children as $child)
+                                                <span class="text-xs font-medium text-gray-500">{{ $child->label }}</span>
+                                            @endforeach
+                                            <span></span>
+                                        </div>
+
+                                        {{-- Rows container --}}
+                                        <div id="rows-{{ $docType->key }}-{{ $field->field_key }}">
+                                            {{-- Rows added by JS --}}
+                                        </div>
+
+                                        {{-- Hidden template for JS cloning --}}
+                                        <template id="row-template-{{ $docType->key }}-{{ $field->field_key }}">
+                                            <div class="grid gap-2 mb-2 row-item"
+                                                 style="grid-template-columns: repeat({{ $children->count() }}, 1fr) auto">
+                                                @foreach ($children as $child)
+                                                    <input type="text"
+                                                        name="field_{{ $field->field_key }}[__INDEX__][{{ $child->field_key }}]"
+                                                        placeholder="{{ $child->label }}"
+                                                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        {{ $child->is_required ? 'required' : '' }} />
+                                                @endforeach
+                                                <button type="button" onclick="removeRow(this)"
+                                                    class="text-red-400 hover:text-red-600 text-lg font-bold px-2">×</button>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                @else
+                                    <div class="mb-4"
+                                         data-doctype="{{ $docType->key }}"
+                                         data-field-key="{{ $field->field_key }}"
+                                         data-autofill-col="{{ $field->staff_autofill_column ?? '' }}">
+
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">
                                             {{ $field->label }}
                                             @if ($field->is_required)
                                                 <span class="text-red-500">*</span>
                                             @endif
                                         </label>
-                                        <button type="button"
-                                            onclick="addRow('{{ $docType->key }}', '{{ $field->field_key }}')"
-                                            class="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
-                                            + Tambah Baris
-                                        </button>
-                                    </div>
 
-                                    {{-- Column headers --}}
-                                    <div class="grid gap-2 mb-1"
-                                         style="grid-template-columns: repeat({{ $children->count() }}, 1fr) auto">
-                                        @foreach ($children as $child)
-                                            <span class="text-xs font-medium text-gray-500">{{ $child->label }}</span>
-                                        @endforeach
-                                        <span></span>
-                                    </div>
+                                        @php
+                    $inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+                    $inputName = "field_{$field->field_key}";
+                    $oldValue = old($inputName, '');
+                    $required = $field->is_required ? 'required' : '';
+                                        @endphp
 
-                                    {{-- Rows container --}}
-                                    <div id="rows-{{ $docType->key }}-{{ $field->field_key }}">
-                                        {{-- Rows added by JS --}}
-                                    </div>
+                                        @if ($field->field_type === 'textarea')
+                                            <textarea name="{{ $inputName }}" rows="3"
+                                                class="{{ $inputClass }}" {{ $required }}>{{ $oldValue }}</textarea>
 
-                                    {{-- Hidden template for JS cloning --}}
-                                    <template id="row-template-{{ $docType->key }}-{{ $field->field_key }}">
-                                        <div class="grid gap-2 mb-2 row-item"
-                                             style="grid-template-columns: repeat({{ $children->count() }}, 1fr) auto">
-                                            @foreach ($children as $child)
-                                                <input type="text"
-                                                    name="field_{{ $field->field_key }}[__INDEX__][{{ $child->field_key }}]"
-                                                    placeholder="{{ $child->label }}"
-                                                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    {{ $child->is_required ? 'required' : '' }} />
-                                            @endforeach
-                                            <button type="button" onclick="removeRow(this)"
-                                                class="text-red-400 hover:text-red-600 text-lg font-bold px-2">×</button>
-                                        </div>
-                                    </template>
-                                </div>
+                                        @elseif ($field->field_type === 'date')
+                                            <input type="date" name="{{ $inputName }}"
+                                                value="{{ $oldValue }}"
+                                                class="{{ $inputClass }}" {{ $required }} />
 
-                            @else
-                                <div class="mb-4"
-                                     data-doctype="{{ $docType->key }}"
-                                     data-field-key="{{ $field->field_key }}"
-                                     data-autofill-col="{{ $field->staff_autofill_column ?? '' }}">
+                                        @elseif ($field->field_type === 'number')
+                                            <input type="number" name="{{ $inputName }}"
+                                                value="{{ $oldValue }}"
+                                                class="{{ $inputClass }}" {{ $required }} />
 
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                                        {{ $field->label }}
-                                        @if ($field->is_required)
-                                            <span class="text-red-500">*</span>
+                                        @elseif ($field->field_type === 'select')
+                                            <select name="{{ $inputName }}"
+                                                class="{{ $inputClass }}" {{ $required }}>
+                                                <option value="">— Pilih —</option>
+                                                @foreach ($field->field_options ?? [] as $option)
+                                                    <option value="{{ $option }}"
+                                                        {{ $oldValue === $option ? 'selected' : '' }}>
+                                                        {{ $option }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+
+                                        @elseif ($field->field_type === 'checkbox')
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <input type="checkbox" name="{{ $inputName }}"
+                                                    value="1" id="field-{{ $field->field_key }}-{{ $docType->key }}"
+                                                    {{ $oldValue ? 'checked' : '' }}
+                                                    class="rounded border-gray-300 text-blue-600" />
+                                                <label for="field-{{ $field->field_key }}-{{ $docType->key }}"
+                                                    class="text-sm text-gray-600">
+                                                    {{ $field->label }}
+                                                </label>
+                                            </div>
+
+                                        @else
+                                            {{-- Default: text --}}
+                                            <input type="text" name="{{ $inputName }}"
+                                                value="{{ $oldValue }}"
+                                                class="{{ $inputClass }}" {{ $required }}
+                                                placeholder="{{ $field->label }}..." />
                                         @endif
-                                    </label>
 
-                                    @php
-                                        $inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
-                                        $inputName  = "field_{$field->field_key}";
-                                        $oldValue   = old($inputName, '');
-                                        $required   = $field->is_required ? 'required' : '';
-                                    @endphp
+                                    </div>
+                                @endif
 
-                                    @if ($field->field_type === 'textarea')
-                                        <textarea name="{{ $inputName }}" rows="3"
-                                            class="{{ $inputClass }}" {{ $required }}>{{ $oldValue }}</textarea>
+                            @endforeach
+                        </div>
+                    @endforeach
 
-                                    @elseif ($field->field_type === 'date')
-                                        <input type="date" name="{{ $inputName }}"
-                                            value="{{ $oldValue }}"
-                                            class="{{ $inputClass }}" {{ $required }} />
-
-                                    @elseif ($field->field_type === 'number')
-                                        <input type="number" name="{{ $inputName }}"
-                                            value="{{ $oldValue }}"
-                                            class="{{ $inputClass }}" {{ $required }} />
-
-                                    @elseif ($field->field_type === 'select')
-                                        <select name="{{ $inputName }}"
-                                            class="{{ $inputClass }}" {{ $required }}>
-                                            <option value="">— Pilih —</option>
-                                            @foreach ($field->field_options ?? [] as $option)
-                                                <option value="{{ $option }}"
-                                                    {{ $oldValue === $option ? 'selected' : '' }}>
-                                                    {{ $option }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-
-                                    @elseif ($field->field_type === 'checkbox')
-                                        <div class="flex items-center gap-2 mt-1">
-                                            <input type="checkbox" name="{{ $inputName }}"
-                                                value="1" id="field-{{ $field->field_key }}-{{ $docType->key }}"
-                                                {{ $oldValue ? 'checked' : '' }}
-                                                class="rounded border-gray-300 text-blue-600" />
-                                            <label for="field-{{ $field->field_key }}-{{ $docType->key }}"
-                                                class="text-sm text-gray-600">
-                                                {{ $field->label }}
-                                            </label>
-                                        </div>
-
-                                    @else
-                                        {{-- Default: text --}}
-                                        <input type="text" name="{{ $inputName }}"
-                                            value="{{ $oldValue }}"
-                                            class="{{ $inputClass }}" {{ $required }}
-                                            placeholder="{{ $field->label }}..." />
-                                    @endif
-
-                                </div>
-                            @endif
-
-                        @endforeach
+                    {{-- Consent + Submit --}}
+                    <div class="mt-6 pt-4 border-t flex items-center gap-3">
+                    <input type="checkbox" name="consent" id="consent"
+                        class="rounded border-gray-300 text-blue-600" />
+                        <label for="consent" class="text-sm text-gray-600">
+                            Saya menyatakan bahwa informasi yang saya berikan adalah benar adanya.
+                        </label>
                     </div>
-                @endforeach
 
-                {{-- Consent + Submit --}}
-                <div class="mt-6 pt-4 border-t flex items-center gap-3">
-                    <input type="checkbox" id="consent"
-                        class="rounded border-gray-300 text-blue-600" required />
-                    <label for="consent" class="text-sm text-gray-600">
-                        Saya menyatakan bahwa informasi yang saya berikan adalah benar adanya.
-                    </label>
-                </div>
+                    <button type="button" onclick="submitIfConsented()"
+                        class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+                        Buat Dokumen
+                    </button>
 
-                <button type="submit"
-                    class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                    Buat Dokumen
-                </button>
-
-            </form>
-        </div>
+                </form>
+            </div>
 
         @endif
     </main>
@@ -372,7 +372,13 @@
             el.classList.add('hidden');
         });
         const target = document.getElementById('form-' + selectedKey);
-        if (target) target.classList.remove('hidden');
+        if (target) {
+            target.classList.remove('hidden');
+            // Re-enable inputs in the visible section
+            target.querySelectorAll('input, select, textarea').forEach(function(input) {
+                input.disabled = false;
+            });
+        }
     }
 
     const rowCounters = {};
@@ -397,6 +403,23 @@
 
     function removeRow(btn) {
         btn.closest('.row-item').remove();
+    }
+
+    function submitIfConsented() {
+        if (!document.getElementById('consent').checked) {
+            alert('Mohon centang pernyataan persetujuan terlebih dahulu.');
+            return;
+        }
+
+        // Disable all inputs in hidden form sections so they don't submit
+        document.querySelectorAll('[id^="form-"]').forEach(function(section) {
+            const isHidden = section.classList.contains('hidden');
+            section.querySelectorAll('input, select, textarea').forEach(function(input) {
+                input.disabled = isHidden;
+            });
+        });
+
+        document.getElementById('main-form').submit();
     }
 
     document.addEventListener('DOMContentLoaded', function() {

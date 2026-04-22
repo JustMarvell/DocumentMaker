@@ -30,7 +30,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email <span
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email<span
                             class="text-red-500">*</span></label>
                     <input type="email" name="email"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -46,14 +46,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan / Gol. Pangkat</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat / Gol. Bidang</label>
                     <input type="text" name="rank"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Pembina Tkd. I..." value="{{ old('rank') }}" />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Posisi</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
                     <input type="text" name="position"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Staff..." value="{{ old('position') }}" />
@@ -107,10 +107,10 @@
 
             <!-- Filter: Jabatan / Gol. Pangkat -->
             <div class="min-w-[180px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan / Gol. Pangkat</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat / Gol. Bidang</label>
                 <select name="rank"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Semua Jabatan / Pangkat</option>
+                    <option value="">Semua Pangkat / Golongan</option>
                     @foreach ($ranks ?? [] as $rank)
                         <option value="{{ $rank }}" {{ request('rank') == $rank ? 'selected' : '' }}>
                             {{ $rank }}
@@ -121,10 +121,10 @@
 
             <!-- Filter: Posisi -->
             <div class="min-w-[180px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Posisi</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
                 <select name="position"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Semua Posisi</option>
+                    <option value="">Semua Jabatan</option>
                     @foreach ($positions ?? [] as $position)
                         <option value="{{ $position }}" {{ request('position') == $position ? 'selected' : '' }}>
                             {{ $position }}
@@ -163,8 +163,8 @@
                     <th class="px-4 py-3">NIP</th>
                     <th class="px-4 py-3">Email</th>
                     <th class="px-4 py-3">Unit Kerja</th>
-                    <th class="px-4 py-3">Jabatan / Gol. Pangkat</th>
-                    <th class="px-4 py-3">Posisi</th>
+                    <th class="px-4 py-3">Pangkat / Gol. Bidang</th>
+                    <th class="px-4 py-3">Jabatan</th>
                     <th class="px-4 py-3">No. HP</th>
                     <th class="px-4 py-3 text-center">Aksi</th>
                 </tr>
