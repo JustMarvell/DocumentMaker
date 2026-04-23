@@ -194,7 +194,7 @@ class AdminController extends Controller
             'group_key'             => 'nullable|string|max:100',
             'is_group_child'        => 'boolean',
             'staff_autofill_column' => 'nullable|string',
-            'autofill_role'         => 'nullable|in:none,employee,appraiser',
+            'autofill_role'         => 'nullable|string|max:100',
         ]);
  
         $fieldOptions = null;
@@ -232,7 +232,7 @@ class AdminController extends Controller
             'is_required'           => 'boolean',
             'section_label'         => 'nullable|string|max:255',
             'staff_autofill_column' => 'nullable|string',
-            'autofill_role'         => 'nullable|in:none,employee,appraiser',
+            'autofill_role'         => 'nullable|string|max:100',
         ]);
  
         $fieldOptions = $field->field_options;
