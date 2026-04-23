@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use URL;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,13 +12,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Source - https://stackoverflow.com/a/75049850
-        // Posted by Murtaza Noori, modified by community. See post 'Timeline' for change history
-        // Retrieved 2026-04-21, License - CC BY-SA 4.0
-
-        if (env(key: 'APP_ENV') !== 'local') {
-            URL::forceScheme(scheme: 'https');
-        }
 
     }
 
@@ -27,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if (request()->getHost() !== '127.0.0.1' && request()->getHost() !== 'localhost') {
+            URL::forceScheme('https');
+        }
     }
 }

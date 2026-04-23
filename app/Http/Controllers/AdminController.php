@@ -100,7 +100,8 @@ class AdminController extends Controller
         return view('admin.document-type-create');
     }
 
-    public function storeDocumentType(Request $request) {
+    public function storeDocumentType(Request $request)
+    {
         $request->validate([
             'name' => 'required|string|max:255',
             'key' => 'required|string|unique:document_types,key|regex:/^[a-z0-9\-]+$/',
@@ -118,7 +119,7 @@ class AdminController extends Controller
         $documentType = DocumentType::create([
             'name' => $request->name,
             'key' => $request->key,
-            'script_name' => $request->file_type === 'docx' ? 'docx_generator.py' : 'xlsx_generator.py',
+            'script_name' => $extension === 'xlsx' ? 'xlsx_generator.py' : 'docx_generator.py',
             'template_filename' => $filename,
             'output_filename' => Str::slug($request->key),
             'access_level' => $request->access_level,
@@ -129,8 +130,9 @@ class AdminController extends Controller
 
         return redirect()
             ->route('admin.document-types.fields', $documentType)
-            ->with('success', "Template '{$documentType->name}' berhasil ditambahkan. Sekarang tambahkan field untuk template ini.");
+            ->with('success', "Template '{$documentType->name}' berhasil ditambahkan. Sekarang tambahkan field.");
     }
+
 
     // Show re-upload form
     public function reuploadTemplateForm(DocumentType $documentType)
@@ -181,16 +183,17 @@ class AdminController extends Controller
     public function storeField(Request $request, DocumentType $documentType)
     {
         $request->validate([
-            'field_key'            => ['required', 'string', 'regex:/^[a-z0-9_]+$/', 'max:100',
-                                       \Illuminate\Validation\Rule::unique('document_fields')->where('document_type_id', $documentType->id)],
-            'label'                => 'required|string|max:255',
-            'field_type'           => 'required|in:text,textarea,date,number,select,checkbox,repeating_group',
-            'field_options'        => 'nullable|string',
-            'is_required'          => 'boolean',
-            'section_label'        => 'nullable|string|max:255',
-            'group_key'            => 'nullable|string|max:100',
-            'is_group_child'       => 'boolean',
-            'staff_autofill_column'=> 'nullable|string',
+            'field_key'             => ['required', 'string', 'regex:/^[a-z0-9_]+$/', 'max:100',
+                                        \Illuminate\Validation\Rule::unique('document_fields')->where('document_type_id', $documentType->id)],
+            'label'                 => 'required|string|max:255',
+            'field_type'            => 'required|in:text,textarea,date,number,select,checkbox,repeating_group',
+            'field_options'         => 'nullable|string',
+            'is_required'           => 'boolean',
+            'section_label'         => 'nullable|string|max:255',
+            'group_key'             => 'nullable|string|max:100',
+            'is_group_child'        => 'boolean',
+            'staff_autofill_column' => 'nullable|string',
+            'autofill_role'         => 'nullable|in:none,employee,appraiser',
         ]);
  
         $fieldOptions = null;
@@ -212,38 +215,43 @@ class AdminController extends Controller
             'group_key'             => $request->group_key,
             'is_group_child'        => $request->boolean('is_group_child'),
             'staff_autofill_column' => $request->staff_autofill_column ?: null,
+            'autofill_role'         => $request->autofill_role ?? 'none',
         ]);
  
         return back()->with('success', "Field '{$request->label}' berhasil ditambahkan.");
     }
 
+
     public function updateField(Request $request, DocumentType $documentType, DocumentField $field)
     {
         $request->validate([
-            'label' => 'required|string|max:255',
-            'field_type' => 'required|in:text,textarea,date,number,select,checkbox,repeating_group',
-            'field_options' => 'nullable|string',
-            'is_required' => 'boolean',
-            'section_label' => 'nullable|string|max:255',
+            'label'                 => 'required|string|max:255',
+            'field_type'            => 'required|in:text,textarea,date,number,select,checkbox,repeating_group',
+            'field_options'         => 'nullable|string',
+            'is_required'           => 'boolean',
+            'section_label'         => 'nullable|string|max:255',
             'staff_autofill_column' => 'nullable|string',
+            'autofill_role'         => 'nullable|in:none,employee,appraiser',
         ]);
-
+ 
         $fieldOptions = $field->field_options;
         if ($request->field_type === 'select' && $request->filled('field_options')) {
             $fieldOptions = array_map('trim', explode(',', $request->field_options));
         }
-
+ 
         $field->update([
-            'label' => $request->label,
-            'field_type' => $request->field_type,
-            'field_options' => $fieldOptions,
-            'is_required' => $request->boolean('is_required'),
-            'section_label' => $request->section_label,
+            'label'                 => $request->label,
+            'field_type'            => $request->field_type,
+            'field_options'         => $fieldOptions,
+            'is_required'           => $request->boolean('is_required'),
+            'section_label'         => $request->section_label,
             'staff_autofill_column' => $request->staff_autofill_column ?: null,
+            'autofill_role'         => $request->autofill_role ?? 'none',
         ]);
-
+ 
         return back()->with('success', "Field '{$field->label}' berhasil diperbarui.");
     }
+
 
     public function destroyField(DocumentType $documentType, DocumentField $field)
     {
@@ -313,5 +321,28 @@ class AdminController extends Controller
             ->values();
 
         return view('admin.staff-data', compact('staffList', 'workUnits', 'ranks', 'positions'));
+    }
+
+    public function officialData()
+    {
+        $officialList = \App\Models\OfficialData::orderBy('staff_name')->paginate(20);
+        return view('admin.official-data', compact('officialList'));
+    }
+
+    public function destroyDocumentType(DocumentType $documentType)
+    {
+        // Delete the template file
+        $templatePath = base_path('document_templates/' . $documentType->template_filename);
+        if (file_exists($templatePath)) {
+            unlink($templatePath);
+        }
+
+        // Fields cascade delete from the migration
+        $name = $documentType->name;
+        $documentType->delete();
+
+        return redirect()
+            ->route('admin.document-types')
+            ->with('success', "Template '{$name}' berhasil dihapus.");
     }
 }
