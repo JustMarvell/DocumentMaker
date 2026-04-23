@@ -69,6 +69,9 @@ Route::middleware('auth')->group(function() {
         Route::get('/document-types/{documentType}/reupload', [AdminController::class, 'reuploadTemplateForm'])->name('document-types.reupload');
         Route::post('/document-types/{documentType}/reupload', [AdminController::class, 'reuploadTemplate'])->name('document-types.reupload.store');
         Route::delete('/document-types/{documentType}', [AdminController::class, 'destroyDocumentType'])->name('document-types.destroy');
+        Route::get('/document-types/{documentType}/slots', [AdminController::class, 'manageSlots'])->name('document-types.slots');
+        Route::post('/document-types/{documentType}/slots', [AdminController::class, 'storeSlot'])->name('document-types.slots.store');
+        Route::delete('/document-types/{documentType}/slots/{slot}', [AdminController::class, 'destroySlot'])->name('document-types.slots.destroy');
 
         Route::get('/staff-data', [AdminController::class,'staffData'])->name('staff-data');
         Route::post('/staff-data', [StaffDataController::class, 'store'])->name('staff-data.store');
