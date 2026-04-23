@@ -174,10 +174,11 @@ class AdminController extends Controller
 
     public function manageFields(DocumentType $documentType)
     {
-        $fields       = $documentType->fields()->get();
+        $fields = $documentType->fields()->get();
+        $slots = $documentType->slots()->orderBy('sort_order')->get();
         $staffColumns = DocumentField::staffColumns();
- 
-        return view('admin.document-type-fields', compact('documentType', 'fields', 'staffColumns'));
+
+        return view('admin.document-type-fields', compact('documentType', 'fields', 'slots', 'staffColumns'));
     }
 
     public function storeField(Request $request, DocumentType $documentType)
