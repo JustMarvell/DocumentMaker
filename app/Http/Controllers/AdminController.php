@@ -345,4 +345,43 @@ class AdminController extends Controller
             ->route('admin.document-types')
             ->with('success', "Template '{$name}' berhasil dihapus.");
     }
+
+    public function manageSlots(DocumentType $documentType)
+    {
+        $slots = $documentType->slots()->orderBy('sort_order')->get();
+        return view('admin.document-type-slots', compact('documentType', 'slots'));
+    }
+
+    public function storeSlot(Request $request, DocumentType $documentType)
+    {
+        $request->validate([
+            'slot_key' => [
+                'required',
+                'string',
+                'regex:/^[a-z0-9_]+$/',
+                'max:100',
+                \Illuminate\Validation\Rule::unique('document_autofill_slots')
+                    ->where('document_type_id', $documentType->id)
+            ],
+            'slot_label' => 'required|string|max:255',
+        ]);
+
+        $maxOrder = $documentType->slots()->max('sort_order') ?? 0;
+
+        \App\Models\DocumentAutofillSlot::create([
+            'document_type_id' => $documentType->id,
+            'slot_key' => $request->slot_key,
+            'slot_label' => $request->slot_label,
+            'sort_order' => $maxOrder + 1,
+        ]);
+
+        return back()->with('success', "Slot '{$request->slot_label}' berhasil ditambahkan.");
+    }
+
+    public function destroySlot(DocumentType $documentType, \App\Models\DocumentAutofillSlot $slot)
+    {
+        $label = $slot->slot_label;
+        $slot->delete();
+        return back()->with('success', "Slot '{$label}' berhasil dihapus.");
+    }
 }
