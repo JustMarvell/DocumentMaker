@@ -193,6 +193,11 @@ class DocumentController extends Controller
  
         if (!$process->isSuccessful()) {
             Log::error("Document generation failed [{$documentType->script_name}]: " . $process->getErrorOutput());
+            dd([
+                 'doctype' => $documentType->key,
+                 'process' => $process->getOutput(),
+                 'msg' => $process->getErrorOutput(),
+             ]);
             return back()->with('error', 'Gagal membuat dokumen. Silakan coba lagi atau hubungi administrator.');
         }
  
