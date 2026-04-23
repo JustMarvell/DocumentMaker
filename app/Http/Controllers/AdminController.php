@@ -187,7 +187,7 @@ class AdminController extends Controller
             'field_key'             => ['required', 'string', 'regex:/^[a-z0-9_]+$/', 'max:100',
                                         \Illuminate\Validation\Rule::unique('document_fields')->where('document_type_id', $documentType->id)],
             'label'                 => 'required|string|max:255',
-            'field_type'            => 'required|in:text,textarea,date,number,select,checkbox,repeating_group',
+            'field_type'            => 'required|in:text,textarea,date,number,select,checkbox,repeating_group,staff_loop,official_loop',
             'field_options'         => 'nullable|string',
             'is_required'           => 'boolean',
             'section_label'         => 'nullable|string|max:255',
@@ -227,7 +227,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'label'                 => 'required|string|max:255',
-            'field_type'            => 'required|in:text,textarea,date,number,select,checkbox,repeating_group',
+            'field_type'            => 'required|in:text,textarea,date,number,select,checkbox,repeating_group,staff_loop,official_loop',
             'field_options'         => 'nullable|string',
             'is_required'           => 'boolean',
             'section_label'         => 'nullable|string|max:255',
