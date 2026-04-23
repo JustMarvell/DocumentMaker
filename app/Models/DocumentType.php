@@ -10,7 +10,7 @@ class DocumentType extends Model
     protected $fillable = [
         'name', 'key', 'script_name', 'template_filename', 
         'output_filename', 'access_level', 'is_active',
-        'file_type', 'staff_autofill_role',
+        'file_type',
     ];
 
     protected function casts() : array
@@ -49,5 +49,9 @@ class DocumentType extends Model
             return $query;
         }
         return $query->where('access_level', 'guest');
+    }
+
+    public function slots() : HasMany {
+        return $this->hasMany(DocumentAutofillSlot::class)->orderBy('sort_order');  
     }
 }
