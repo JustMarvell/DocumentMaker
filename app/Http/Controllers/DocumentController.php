@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
+use App\Services\PdfConverter;
 
 
 class DocumentController extends Controller
@@ -169,50 +170,90 @@ class DocumentController extends Controller
         return response()->download($path)->deleteFileAfterSend(false);
     }
 
+    public function preview(string $filename)
+    {
+        $filename = basename($filename);
+        $sourcePath = public_path("cached_result/{$filename}");
+
+        abort_unless(file_exists($sourcePath), 404);
+
+        // PDF filename: same UUID base, .pdf extension
+        $pdfFilename = pathinfo($filename, PATHINFO_FILENAME) . '.pdf';
+        $pdfPath = public_path("cached_result/{$pdfFilename}");
+
+        // Generate PDF if it doesn't exist yet
+        if (!file_exists($pdfPath)) {
+            $converter = new PdfConverter();
+            $pdfFilename = $converter->convert($filename);
+
+            if (!$pdfFilename) {
+                abort(500, 'Gagal membuat preview. Pastikan LibreOffice terinstall di server.');
+            }
+        }
+
+        // Stream the PDF directly to the browser for iframe display
+        return response()->file($pdfPath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="preview.pdf"',
+        ]);
+    }
+
+
     private function runScript(DocumentType $documentType, array $context)
     {
-        $pythonBin  = base_path('venv/bin/python');
+        $pythonBin = base_path('venv/bin/python');
         $scriptPath = base_path("scripts/{$documentType->script_name}");
- 
-        $extension      = pathinfo($documentType->template_filename, PATHINFO_EXTENSION);
+        $extension = pathinfo($documentType->template_filename, PATHINFO_EXTENSION);
         $uniqueFilename = Str::slug($documentType->output_filename) . '_' . Str::uuid() . '.' . $extension;
- 
+
         $cmd = [
             $pythonBin,
             $scriptPath,
-            '--template',        $documentType->template_filename,
-            '--output-filename', $uniqueFilename,
-            '--context',         json_encode($context, JSON_UNESCAPED_UNICODE),
+            '--template',
+            $documentType->template_filename,
+            '--output-filename',
+            $uniqueFilename,
+            '--context',
+            json_encode($context, JSON_UNESCAPED_UNICODE),
         ];
- 
+
         $process = new Process($cmd);
         $process->setTimeout(60);
         $process->run();
- 
+
         $status = $process->isSuccessful() ? 'success' : 'failed';
- 
+
         DocumentLog::create([
-            'user_id'          => auth()->id(),
+            'user_id' => auth()->id(),
             'document_type_id' => $documentType->id,
-            'output_filename'  => $uniqueFilename,
-            'status'           => $status,
-            'generated_at'     => now(),
+            'output_filename' => $uniqueFilename,
+            'status' => $status,
+            'generated_at' => now(),
         ]);
- 
+
         if (!$process->isSuccessful()) {
-            Log::error("Document generation failed [{$documentType->script_name}]: " . $process->getErrorOutput());
-            dd([
-                 'doctype' => $documentType->key,
-                 'process' => $process->getOutput(),
-                 'msg' => $process->getErrorOutput(),
-             ]);
+            Log::error("Generation failed [{$documentType->script_name}]: " . $process->getErrorOutput());
             return back()->with('error', 'Gagal membuat dokumen. Silakan coba lagi atau hubungi administrator.');
         }
- 
+
+        $downloadUrl = route('document.download', ['filename' => $uniqueFilename]);
+        $previewUrl = null;
+
+        // Generate PDF preview immediately if preview is enabled for this type
+        if ($documentType->preview_enabled) {
+            $converter = new PdfConverter();
+            $pdfFilename = $converter->convert($uniqueFilename);
+            if ($pdfFilename) {
+                $previewUrl = route('document.preview', ['filename' => $uniqueFilename]);
+            }
+        }
+
         return back()
             ->with('success', 'Dokumen berhasil dibuat!')
-            ->with('download_url', route('document.download', ['filename' => $uniqueFilename]));
+            ->with('download_url', $downloadUrl)
+            ->with('preview_url', $previewUrl);
     }
+
 
     // // letter of assignment
     // private function generateLetterOfAssignment(Request $request, DocumentType $documentType) {
