@@ -1,26 +1,25 @@
 """
 xlsx_generator.py
-Generic Excel document generator.
+Generic Excel document generator using pure zip/XML manipulation.
 
-Approach: pure zip/XML manipulation — never uses openpyxl to save.
+Approach:
+  - Never uses openpyxl.save() — which destroys drawings and text boxes
+  - Works directly on the xlsx zip file contents:
+      * xl/sharedStrings.xml  → render {{ }} using <t>...</t> pattern
+      * xl/drawings/*.xml     → render {{ }} using <a:t>...</a:t> pattern
+      * Everything else       → copied verbatim (sheet, styles, images,
+                                relationships, drawings all preserved)
+  - For-loop row expansion uses openpyxl in memory, then only the
+    expanded worksheet XML is taken — everything else from template
 
-Why: openpyxl.save() converts shared strings to inline strings, which
-destroys table structure, removes drawings, and strips text boxes.
-Instead we work directly on the xlsx zip contents:
-  - sharedStrings.xml  → render {{ }} Jinja2 placeholders (cell text)
-  - xl/drawings/*.xml  → render {{ }} Jinja2 placeholders (text boxes)
-  - Everything else    → copied verbatim (sheet1.xml, styles, images,
-                         relationships, drawings, media all preserved)
-
-For-loop row expansion ({% for item in list %}):
-  Uses openpyxl to expand rows in memory, then saves to a temp buffer,
-  then the CELL XML from that buffer replaces sheet*.xml — while
-  sharedStrings and everything else still come from the template.
+Key fix: sharedStrings uses <t> tags, drawings use <a:t> tags.
+These require SEPARATE regex patterns — using the wrong one silently
+skips all rendering in that file.
 
 Supports:
-  - {{ variable }} in cells, text boxes, and drawing shapes
+  - {{ variable }} in cells (via sharedStrings) and text boxes (via drawings)
   - {% for item in list %} ... {% endfor %} row expansion in cells
-  - All images, drawings, text boxes, merged cells, styles preserved
+  - All images, drawings, text boxes, merged cells, styles fully preserved
 """
 
 import argparse
@@ -48,14 +47,14 @@ def parse_args() -> argparse.Namespace:
 
 
 # ----------------------------------------------------------------
-# Jinja2 environment
+# Jinja2
 # ----------------------------------------------------------------
 def make_env() -> Environment:
     return Environment(undefined=Undefined)
 
 
 def try_render(env: Environment, text: str, context: dict) -> str:
-    """Render a Jinja2 string, returning the original on any error."""
+    """Render Jinja2, returning original text on any error."""
     if "{{" not in text and "{%" not in text:
         return text
     try:
@@ -65,56 +64,74 @@ def try_render(env: Environment, text: str, context: dict) -> str:
 
 
 # ----------------------------------------------------------------
-# XML text rendering
-# Renders {{ }} inside <t>...</t> tags in sharedStrings and drawings
+# XML rendering — two separate functions for two different tag styles
 # ----------------------------------------------------------------
-def render_xml_file(xml_bytes: bytes, context: dict, env: Environment) -> bytes:
+
+def render_shared_strings(xml_bytes: bytes, context: dict, env: Environment) -> bytes:
     """
-    Find all <t ...>content</t> elements and render any Jinja2
-    expressions inside them. Preserves all XML attributes.
+    Render {{ }} inside <t>...</t> tags in sharedStrings.xml.
+    sharedStrings uses plain <t> (no namespace prefix).
     """
     try:
         xml = xml_bytes.decode("utf-8")
     except UnicodeDecodeError:
-        return xml_bytes  # binary file, skip
+        return xml_bytes
 
-    def replace_t(m):
-        attrs   = m.group(1)  # e.g. ' xml:space="preserve"'
+    def replace(m):
+        attrs   = m.group(1)
         content = m.group(2)
-        rendered = try_render(env, content, context)
-        return f"<t{attrs}>{rendered}</t>"
+        return f"<t{attrs}>{try_render(env, content, context)}</t>"
 
-    xml = re.sub(r"<t([^>]*)>(.*?)</t>", replace_t, xml, flags=re.DOTALL)
+    xml = re.sub(r"<t([^>]*)>(.*?)</t>", replace, xml, flags=re.DOTALL)
+    return xml.encode("utf-8")
+
+
+def render_drawing_xml(xml_bytes: bytes, context: dict, env: Environment) -> bytes:
+    """
+    Render {{ }} inside <a:t>...</a:t> tags in drawing XML files.
+    Drawing XML uses the 'a:' namespace prefix on text run elements.
+    Using the wrong pattern (<t> instead of <a:t>) causes silent failure.
+    """
+    try:
+        xml = xml_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        return xml_bytes
+
+    def replace(m):
+        attrs   = m.group(1)
+        content = m.group(2)
+        return f"<a:t{attrs}>{try_render(env, content, context)}</a:t>"
+
+    xml = re.sub(r"<a:t([^>]*)>(.*?)</a:t>", replace, xml, flags=re.DOTALL)
     return xml.encode("utf-8")
 
 
 # ----------------------------------------------------------------
-# Loop expansion via openpyxl (only used when template has {% for %})
+# Loop expansion — openpyxl processes rows, we only take cell XML
 # ----------------------------------------------------------------
+
 def has_loops(template_path: str) -> bool:
-    """Check if the template contains any {% for %} markers."""
+    """Check if the template contains {% for %} markers in cells."""
     with zipfile.ZipFile(template_path, "r") as z:
-        for name in z.namelist():
-            if name.startswith("xl/worksheets/") and name.endswith(".xml"):
-                try:
-                    content = z.read(name).decode("utf-8")
-                    if "{%" in content:
-                        return True
-                except Exception:
-                    pass
-        # Also check sharedStrings
+        # Check sharedStrings (where cell text lives)
         if "xl/sharedStrings.xml" in z.namelist():
             try:
-                ss = z.read("xl/sharedStrings.xml").decode("utf-8")
-                if "{%" in ss:
+                if "{%" in z.read("xl/sharedStrings.xml").decode("utf-8"):
                     return True
             except Exception:
                 pass
+        # Check worksheet XML for inline strings
+        for name in z.namelist():
+            if re.match(r"xl/worksheets/sheet\d+\.xml$", name):
+                try:
+                    if "{%" in z.read(name).decode("utf-8"):
+                        return True
+                except Exception:
+                    pass
     return False
 
 
 def render_cell_value(env: Environment, value, context: dict):
-    """Render a cell value, converting pure-numeric results to numbers."""
     if not isinstance(value, str):
         return value
     if "{{" not in value and "{%" not in value:
@@ -144,12 +161,8 @@ def find_loop_blocks(ws) -> list:
             em = end_re.search(cell.value)
             if em and pending:
                 for_row, var, list_key = pending.pop()
-                blocks.append({
-                    "for_row":  for_row,
-                    "end_row":  cell.row,
-                    "var":      var,
-                    "list_key": list_key,
-                })
+                blocks.append({"for_row": for_row, "end_row": cell.row,
+                                "var": var, "list_key": list_key})
 
     blocks.sort(key=lambda b: b["for_row"], reverse=True)
     return blocks
@@ -208,18 +221,16 @@ def expand_loop(ws, block: dict, context: dict, env: Environment):
                     tgt.number_format = cd["number_format"]
 
 
-def expand_loops_openpyxl(template_path: str, context: dict, env: Environment) -> dict:
+def expand_loops_to_xml(template_path: str, context: dict, env: Environment) -> dict:
     """
-    Use openpyxl to expand for-loops in cells.
-    Returns a dict of { "xl/worksheets/sheetN.xml": bytes } with
-    the expanded worksheet XML only — we take nothing else from openpyxl.
+    Expand for-loops using openpyxl.
+    Returns only the expanded worksheet XML files — nothing else.
     """
     wb = load_workbook(template_path)
     for sheet_name in wb.sheetnames:
         ws = wb[sheet_name]
         for block in find_loop_blocks(ws):
             expand_loop(ws, block, context, env)
-        # Also render any remaining simple {{ }} in cells
         for row in ws.iter_rows():
             for cell in row:
                 if not isinstance(cell.value, str):
@@ -244,18 +255,22 @@ def expand_loops_openpyxl(template_path: str, context: dict, env: Environment) -
 # ----------------------------------------------------------------
 # Main assembly
 # ----------------------------------------------------------------
+
+DRAWING_XML_RE = re.compile(r"xl/drawings/.*\.xml$", re.IGNORECASE)
+
+
 def build_output(template_path: str, context: dict, env: Environment) -> bytes:
     """
-    Assemble the final xlsx entirely from the template zip,
-    rendering Jinja2 in sharedStrings and drawing XML files.
-    If loops are present, worksheet cell XML comes from openpyxl expansion.
+    Assemble the final xlsx:
+    - sharedStrings.xml  → rendered with <t> pattern
+    - xl/drawings/*.xml  → rendered with <a:t> pattern
+    - worksheet XML      → from openpyxl if loops present, else from template
+    - Everything else    → verbatim from template
     """
-    drawing_re = re.compile(r"xl/drawings/.*\.xml$", re.I)
-
-    # Only run openpyxl if the template has for-loops
+    # Only invoke openpyxl if the template has for-loops
     expanded_sheets = {}
     if has_loops(template_path):
-        expanded_sheets = expand_loops_openpyxl(template_path, context, env)
+        expanded_sheets = expand_loops_to_xml(template_path, context, env)
 
     output_buf = io.BytesIO()
 
@@ -263,22 +278,20 @@ def build_output(template_path: str, context: dict, env: Environment) -> bytes:
          zipfile.ZipFile(output_buf, "w", zipfile.ZIP_DEFLATED) as out:
 
         for name in tz.namelist():
-            # Worksheet with expanded loops — use openpyxl's version
+
+            # Worksheet with expanded loops — use openpyxl version
             if name in expanded_sheets:
                 out.writestr(name, expanded_sheets[name])
 
-            # Shared strings — render {{ }} Jinja2 in cell text
+            # sharedStrings — render {{ }} with <t> pattern
             elif name == "xl/sharedStrings.xml":
-                data = render_xml_file(tz.read(name), context, env)
-                out.writestr(name, data)
+                out.writestr(name, render_shared_strings(tz.read(name), context, env))
 
-            # Drawing XML — render {{ }} Jinja2 in text boxes
-            elif drawing_re.match(name):
-                data = render_xml_file(tz.read(name), context, env)
-                out.writestr(name, data)
+            # Drawing XML — render {{ }} with <a:t> pattern
+            elif DRAWING_XML_RE.match(name):
+                out.writestr(name, render_drawing_xml(tz.read(name), context, env))
 
-            # Everything else — verbatim copy
-            # (sheet1.xml when no loops, styles, images, relationships, etc.)
+            # Everything else — verbatim
             else:
                 out.writestr(name, tz.read(name))
 
