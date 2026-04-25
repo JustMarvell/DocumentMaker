@@ -141,6 +141,14 @@ class DocumentController extends Controller
                 continue;
             }
 
+            if ($field->field_type === 'date') {
+                $raw = $request->input("field_{$field->field_key}", '');
+                $context[$field->field_key] = $raw
+                    ? \Carbon\Carbon::parse($raw)->locale('id')->translatedFormat('d F Y')
+                    : '';
+                continue;
+            }
+
             $context[$field->field_key] = $request->input("field_{$field->field_key}", '');
         }
 
