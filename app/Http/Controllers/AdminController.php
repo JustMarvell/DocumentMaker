@@ -174,10 +174,11 @@ class AdminController extends Controller
 
     public function manageFields(DocumentType $documentType)
     {
-        $fields       = $documentType->fields()->get();
+        $fields = $documentType->fields()->get();
+        $slots = $documentType->slots()->orderBy('sort_order')->get();
         $staffColumns = DocumentField::staffColumns();
- 
-        return view('admin.document-type-fields', compact('documentType', 'fields', 'staffColumns'));
+
+        return view('admin.document-type-fields', compact('documentType', 'fields', 'slots', 'staffColumns'));
     }
 
     public function storeField(Request $request, DocumentType $documentType)
@@ -186,14 +187,14 @@ class AdminController extends Controller
             'field_key'             => ['required', 'string', 'regex:/^[a-z0-9_]+$/', 'max:100',
                                         \Illuminate\Validation\Rule::unique('document_fields')->where('document_type_id', $documentType->id)],
             'label'                 => 'required|string|max:255',
-            'field_type'            => 'required|in:text,textarea,date,number,select,checkbox,repeating_group',
+            'field_type'            => 'required|in:text,textarea,date,number,select,checkbox,repeating_group,staff_loop,official_loop',
             'field_options'         => 'nullable|string',
             'is_required'           => 'boolean',
             'section_label'         => 'nullable|string|max:255',
             'group_key'             => 'nullable|string|max:100',
             'is_group_child'        => 'boolean',
             'staff_autofill_column' => 'nullable|string',
-            'autofill_role'         => 'nullable|in:none,employee,appraiser',
+            'autofill_role'         => 'nullable|string|max:100',
         ]);
  
         $fieldOptions = null;
@@ -226,12 +227,12 @@ class AdminController extends Controller
     {
         $request->validate([
             'label'                 => 'required|string|max:255',
-            'field_type'            => 'required|in:text,textarea,date,number,select,checkbox,repeating_group',
+            'field_type'            => 'required|in:text,textarea,date,number,select,checkbox,repeating_group,staff_loop,official_loop',
             'field_options'         => 'nullable|string',
             'is_required'           => 'boolean',
             'section_label'         => 'nullable|string|max:255',
             'staff_autofill_column' => 'nullable|string',
-            'autofill_role'         => 'nullable|in:none,employee,appraiser',
+            'autofill_role'         => 'nullable|string|max:100',
         ]);
  
         $fieldOptions = $field->field_options;
@@ -344,5 +345,44 @@ class AdminController extends Controller
         return redirect()
             ->route('admin.document-types')
             ->with('success', "Template '{$name}' berhasil dihapus.");
+    }
+
+    public function manageSlots(DocumentType $documentType)
+    {
+        $slots = $documentType->slots()->orderBy('sort_order')->get();
+        return view('admin.document-type-slots', compact('documentType', 'slots'));
+    }
+
+    public function storeSlot(Request $request, DocumentType $documentType)
+    {
+        $request->validate([
+            'slot_key' => [
+                'required',
+                'string',
+                'regex:/^[a-z0-9_]+$/',
+                'max:100',
+                \Illuminate\Validation\Rule::unique('document_autofill_slots')
+                    ->where('document_type_id', $documentType->id)
+            ],
+            'slot_label' => 'required|string|max:255',
+        ]);
+
+        $maxOrder = $documentType->slots()->max('sort_order') ?? 0;
+
+        \App\Models\DocumentAutofillSlot::create([
+            'document_type_id' => $documentType->id,
+            'slot_key' => $request->slot_key,
+            'slot_label' => $request->slot_label,
+            'sort_order' => $maxOrder + 1,
+        ]);
+
+        return back()->with('success', "Slot '{$request->slot_label}' berhasil ditambahkan.");
+    }
+
+    public function destroySlot(DocumentType $documentType, \App\Models\DocumentAutofillSlot $slot)
+    {
+        $label = $slot->slot_label;
+        $slot->delete();
+        return back()->with('success', "Slot '{$label}' berhasil dihapus.");
     }
 }

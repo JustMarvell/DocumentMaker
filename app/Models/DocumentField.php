@@ -16,6 +16,7 @@ class DocumentField extends Model
         'field_options',
         'is_required',
         'sort_order',
+        'row_group',
         'section_label',
         'group_key',
         'is_group_child',
@@ -42,6 +43,21 @@ class DocumentField extends Model
             ->where('document_type_id', $this->document_type_id)
             ->where('is_group_child', true)
             ->orderBy('sort_order');
+    }
+
+    public static function fieldTypes(): array
+    {
+        return [
+            'text' => 'Text',
+            'textarea' => 'Textarea',
+            'date' => 'Date',
+            'number' => 'Number',
+            'select' => 'Select (Dropdown)',
+            'checkbox' => 'Checkbox',
+            'repeating_group' => 'Repeating Group (Loop)',
+            'staff_loop' => 'Staff Loop (pilih dari data staff)',
+            'official_loop' => 'Official Loop (pilih dari data pejabat)',
+        ];
     }
 
     public static function staffColumns() : array {

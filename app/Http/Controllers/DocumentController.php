@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\DocumentField;
 use App\Models\DocumentLog;
 use App\Models\DocumentType;
-use Illuminate\Support\Str;
+use App\Models\OfficialData;
+use App\Models\StaffData;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
+
 
 class DocumentController extends Controller
 {
@@ -49,9 +52,17 @@ class DocumentController extends Controller
             if ($field->is_group_child)
                 continue;
 
+            // Loop types — validate as array of IDs
+            if (in_array($field->field_type, ['staff_loop', 'official_loop'])) {
+                $rules["field_{$field->field_key}"] = $field->is_required
+                    ? 'required|array|min:1'
+                    : 'nullable|array';
+                $rules["field_{$field->field_key}.*"] = 'integer';
+                continue;
+            }
+
             if ($field->field_type === 'repeating_group') {
                 $rules["field_{$field->field_key}"] = 'nullable|array';
-                // Validate each child field inside every row
                 $children = $documentType->fields
                     ->where('is_group_child', true)
                     ->where('group_key', $field->field_key);
@@ -69,9 +80,9 @@ class DocumentController extends Controller
                 'checkbox' => 'boolean',
                 default => 'string',
             };
-
             $rules["field_{$field->field_key}"] = $rule;
         }
+
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
@@ -95,16 +106,54 @@ class DocumentController extends Controller
             if ($field->is_group_child)
                 continue;
 
+            if ($field->field_type === 'staff_loop') {
+                // Fetch selected staff records in the order the user chose
+                $selectedIds = $request->input("field_{$field->field_key}", []);
+                $staff = StaffData::whereIn('id', $selectedIds)->get()->keyBy('id');
+                $context[$field->field_key] = collect($selectedIds)
+                    ->map(fn($id) => $staff[$id] ?? null)
+                    ->filter()
+                    ->map(fn($s) => $s->toArray())
+                    ->values()
+                    ->toArray();
+                continue;
+            }
+
+            if ($field->field_type === 'official_loop') {
+                $selectedIds = $request->input("field_{$field->field_key}", []);
+                $officials = OfficialData::whereIn('id', $selectedIds)->get()->keyBy('id');
+                $context[$field->field_key] = collect($selectedIds)
+                    ->map(fn($id) => $officials[$id] ?? null)
+                    ->filter()
+                    ->map(fn($o) => $o->toArray())
+                    ->values()
+                    ->toArray();
+                continue;
+            }
+
             if ($field->field_type === 'repeating_group') {
                 $context[$field->field_key] = $request->input("field_{$field->field_key}", []);
-            } elseif ($field->field_type === 'checkbox') {
-                $context[$field->field_key] = (bool) $request->input("field_{$field->field_key}", false);
-            } else {
-                $context[$field->field_key] = $request->input("field_{$field->field_key}", '');
+                continue;
             }
+
+            if ($field->field_type === 'checkbox') {
+                $context[$field->field_key] = (bool) $request->input("field_{$field->field_key}", false);
+                continue;
+            }
+
+            if ($field->field_type === 'date') {
+                $raw = $request->input("field_{$field->field_key}", '');
+                $context[$field->field_key] = $raw
+                    ? \Carbon\Carbon::parse($raw)->locale('id')->translatedFormat('d F Y')
+                    : '';
+                continue;
+            }
+
+            $context[$field->field_key] = $request->input("field_{$field->field_key}", '');
         }
 
         return $this->runScript($documentType, $context);
+
     }
 
     public function download(string $filename) {
@@ -152,6 +201,11 @@ class DocumentController extends Controller
  
         if (!$process->isSuccessful()) {
             Log::error("Document generation failed [{$documentType->script_name}]: " . $process->getErrorOutput());
+            dd([
+                 'doctype' => $documentType->key,
+                 'process' => $process->getOutput(),
+                 'msg' => $process->getErrorOutput(),
+             ]);
             return back()->with('error', 'Gagal membuat dokumen. Silakan coba lagi atau hubungi administrator.');
         }
  
