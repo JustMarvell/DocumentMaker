@@ -385,4 +385,11 @@ class AdminController extends Controller
         $slot->delete();
         return back()->with('success', "Slot '{$label}' berhasil dihapus.");
     }
+
+    public function togglePreview(DocumentType $documentType)
+    {
+        $documentType->update(['preview_enabled' => !$documentType->preview_enabled]);
+        $status = $documentType->preview_enabled ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('success', "Preview untuk {$documentType->name} berhasil {$status}.");
+    }
 }
