@@ -392,4 +392,18 @@ class AdminController extends Controller
         $status = $documentType->preview_enabled ? 'diaktifkan' : 'dinonaktifkan';
         return back()->with('success', "Preview untuk {$documentType->name} berhasil {$status}.");
     }
+
+    public function guide()
+    {
+        return view('admin.guide');
+    }
+
+    public function guideDownload()
+    {
+        $path = base_path('resources/docs/SIPADU_Panduan_Penggunaan.docx');
+
+        abort_unless(file_exists($path), 404, 'File panduan tidak ditemukan.');
+
+        return response()->download($path, 'SIPADU_Panduan_Penggunaan.docx');
+    }
 }
