@@ -109,8 +109,9 @@
             <x-code>venv/bin/pip install docxtpl openpyxl jinja2</x-code>
 
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 mt-3">Instalasi LibreOffice (untuk Preview)</p>
-            <x-code>sudo apt update && sudo apt install libreoffice</x-code>
-            <x-code>libreoffice --version   # verifikasi instalasi</x-code>
+            <x-code>
+                sudo apt update && sudo apt install libreoffice<br>libreoffice --version   # verifikasi instalasi
+            </x-code>
         </section>
         <section id="panduan-admin" class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Panduan Administrator</h2>
@@ -122,9 +123,9 @@
                     Hanya akun dengan role <strong>Admin</strong> yang dapat mengakses halaman ini.
                     Akun admin pertama harus diatur langsung melalui database:
                 </p>
-                <x-code>php artisan db</x-code>
-                <x-code>UPDATE users SET role = 'admin' WHERE email = 'email_anda@gmail.com';</x-code>
-                <x-code>.quit</x-code>
+                <x-code>
+                    php artisan db<br>UPDATE users SET role = 'admin' WHERE email = 'email_anda@gmail.com';<br>.quit
+                </x-code>
             </div>
             <div id="dashboard" class="mb-6">
                 <h3 class="text-sm font-semibold text-gray-700 mb-2">Dashboard</h3>
@@ -455,7 +456,7 @@
             <div class="space-y-4">
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 1: Surat Tugas (Word)</p>
-                    <div class="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                         <pre>SURAT TUGAS
 Nomor: @verbatim{{ letter_number }}@endverbatim
 
@@ -480,7 +481,7 @@ NIP. @verbatim{{ head_of_office_nip }}@endverbatim</pre>
 
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 2: Daftar Hadir (Excel/Word dengan Loop)</p>
-                    <div class="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                         <pre>DAFTAR HADIR RAPAT
 Perihal : @verbatim{{ meeting_subject }}@endverbatim
 Tanggal : @verbatim{{ meeting_date }}@endverbatim
@@ -495,7 +496,7 @@ NO | NAMA              | NIP       | JABATAN    | TTD
 
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 3: Dengan Kondisional</p>
-                    <div class="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                         <pre>{% raw %}{% if employee_rank %}
 Pangkat/Gol. Ruang: @verbatim{{ employee_rank }}@endverbatim
 {% else %}
@@ -512,7 +513,7 @@ Status: MENUNGGU PERSETUJUAN
 
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Loop di Excel — Penempatan Sel</p>
-                    <div class="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                         <pre>Sel A1: {% raw %}{% for peserta in daftar_peserta %}{% endraw %}
 Sel A2: @verbatim{{ loop.index }}@endverbatim
 Sel B2: @verbatim{{ peserta.staff_name }}@endverbatim
@@ -570,8 +571,9 @@ Sel A3: {% raw %}{% endfor %}{% endraw %}</pre>
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Mengubah TTL (routes/console.php)</p>
             <x-code>Schedule::command('documents:purge --ttl=300')->everyMinute();  // 5 menit</x-code>
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 mt-3">Menjalankan Manual</p>
-            <x-code>php artisan documents:purge</x-code>
-            <x-code>php artisan documents:purge --ttl=60  # hapus file > 60 detik</x-code>
+            <x-code>
+                php artisan documents:purge<br>php artisan documents:purge --ttl=60  # hapus file > 60 detik
+            </x-code>
         </section>
 
         <section id="deployment" class="bg-white rounded-lg shadow p-6">
@@ -580,37 +582,45 @@ Sel A3: {% raw %}{% endfor %}{% endraw %}</pre>
             <div class="space-y-4">
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">1. Update server dan install dependensi</p>
-                    <x-code>sudo apt update && sudo apt upgrade -y</x-code>
-                    <x-code>sudo apt install php8.3 php8.3-fpm php8.3-sqlite3 php8.3-xml php8.3-curl</x-code>
-                    <x-code>sudo apt install python3 python3-venv python3-pip nodejs npm libreoffice nginx</x-code>
+                    <x-code>
+                        sudo apt update && sudo apt upgrade -y<br>sudo apt install php8.3 php8.3-fpm php8.3-sqlite3 php8.3-xml php8.3-curl<br>sudo apt install python3 python3-venv python3-pip nodejs npm libreoffice nginx
+                    </x-code>
                 </div>
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">2. Clone dan setup project</p>
-                    <x-code>git clone https://github.com/JustMarvell/DocumentMaker.git /var/www/sipadu</x-code>
-                    <x-code>cd /var/www/sipadu</x-code>
-                    <x-code>composer install --no-dev</x-code>
-                    <x-code>cp .env.example .env && php artisan key:generate</x-code>
-                    <x-code>python3 -m venv venv && venv/bin/pip install docxtpl openpyxl jinja2</x-code>
-                    <x-code>npm install && npm run build</x-code>
-                    <x-code>touch database/database.sqlite && php artisan migrate --seed</x-code>
+                    <x-code>
+git clone https://github.com/JustMarvell/DocumentMaker.git /var/www/sipadu
+cd /var/www/sipadu
+composer install --no-dev
+cp .env.example .env && php artisan key:generate
+python3 -m venv venv && venv/bin/pip install docxtpl openpyxl jinja2
+npm install && npm run build
+touch database/database.sqlite && php artisan migrate --seed
+                    </x-code>
                 </div>
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">3. Set permission</p>
-                    <x-code>sudo chown -R www-data:www-data /var/www/sipadu</x-code>
-                    <x-code>sudo chmod -R 775 /var/www/sipadu/storage</x-code>
-                    <x-code>sudo chmod -R 775 /var/www/sipadu/public/cached_result</x-code>
+                    <x-code>
+sudo chown -R www-data:www-data /var/www/SIPADU
+sudo chmod -R 775 /var/www/sipadu/storage
+sudo chmod -R 775 /var/www/sipadu/public/cached_result
+                    </x-code>
                 </div>
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">4. Setup crontab scheduler</p>
-                    <x-code>sudo crontab -u www-data -e</x-code>
-                    <x-code># Tambahkan baris berikut:</x-code>
-                    <x-code>* * * * * cd /var/www/sipadu && php artisan schedule:run >> /dev/null 2>&1</x-code>
+                    <x-code>
+                        sudo crontab -u www-data -e
+# Tambahkan baris berikut:
+* * * * * cd /var/www/sipadu && php artisan schedule:run >> /dev/null 2>&1
+</x-code>
                 </div>
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">5. Membuat admin pertama</p>
-                    <x-code>php artisan db</x-code>
-                    <x-code>UPDATE users SET role = 'admin' WHERE email = 'admin@dinas.go.id';</x-code>
-                    <x-code>.quit</x-code>
+                    <x-code>
+                        php artisan db
+UPDATE users SET role = 'admin' WHERE email = 'admin@dinas.go.id';
+.quit
+                    </x-code>
                 </div>
             </div>
         </section>
