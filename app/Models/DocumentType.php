@@ -10,13 +10,14 @@ class DocumentType extends Model
     protected $fillable = [
         'name', 'key', 'script_name', 'template_filename', 
         'output_filename', 'access_level', 'is_active',
-        'file_type',
+        'file_type', 'preview_enabled',
     ];
 
     protected function casts() : array
     {
         return [
             'is_active' => 'boolean',
+            'preview_enabled' => 'boolean',
         ];
     }
 

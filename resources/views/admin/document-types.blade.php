@@ -16,12 +16,12 @@
                 <tr>
                     <th class="px-4 py-3">Nama</th>
                     <th class="px-4 py-3">Key</th>
-                    <th class="px-4 py-3">Tipe File</th>
+                    <th class="px-4 py-3">Tipe</th>
                     <th class="px-4 py-3">Akses</th>
-                    <th class="px-4 py-3">Autofill</th>
                     <th class="px-4 py-3 text-center">Fields</th>
                     <th class="px-4 py-3 text-center">Dibuat</th>
                     <th class="px-4 py-3 text-center">Status</th>
+                    <th class="px-4 py-3 text-center">Preview</th>
                     <th class="px-4 py-3 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -44,14 +44,13 @@
                                 {{ ucfirst($type->access_level) }}
                             </span>
                         </td>
-                        <td class="px-4 py-3 text-gray-500 text-xs">{{ ucfirst($type->staff_autofill_role) }}</td>
                         <td class="px-4 py-3 text-center">
                             <a href="{{ route('admin.document-types.fields', $type) }}"
                                 class="text-blue-600 hover:underline text-xs font-medium">
                                 {{ $type->fields()->count() }} field(s)
                             </a>
                         </td>
-                        <td class="px-4 py-3 text-center">{{ $type->document_logs_count }}</td>
+                        <td class="px-4 py-3 text-center text-gray-500">{{ $type->document_logs_count }}</td>
                         <td class="px-4 py-3 text-center">
                             @if ($type->is_active)
                                 <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Aktif</span>
@@ -59,6 +58,22 @@
                                 <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-semibold">Nonaktif</span>
                             @endif
                         </td>
+
+                        {{-- Preview toggle --}}
+                        <td class="px-4 py-3 text-center">
+                            <form method="POST" action="{{ route('admin.document-types.toggle-preview', $type) }}">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
+                                            {{ $type->preview_enabled ? 'bg-blue-600' : 'bg-gray-300' }}"
+                                    title="{{ $type->preview_enabled ? 'Preview aktif — klik untuk menonaktifkan' : 'Preview nonaktif — klik untuk mengaktifkan' }}">
+                                    <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform
+                                            {{ $type->preview_enabled ? 'translate-x-6' : 'translate-x-1' }}">
+                                    </span>
+                                </button>
+                            </form>
+                        </td>
+
                         <td class="px-4 py-3">
                             <div class="flex flex-col gap-1 items-stretch min-w-[100px]">
                                 <a href="{{ route('admin.document-types.fields', $type) }}"

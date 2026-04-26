@@ -70,15 +70,22 @@
         @endif
 
         @if (session('success'))
-            <div
-                class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-4 flex items-center justify-between">
-                <span class="text-sm">{{ session('success') }}</span>
-                @if (session('download_url'))
-                    <a href="{{ session('download_url') }}"
-                        class="ml-4 bg-green-600 text-white text-sm px-4 py-1.5 rounded hover:bg-green-700 font-medium whitespace-nowrap">
-                        ⬇ Unduh Dokumen
-                    </a>
-                @endif
+            <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-4">
+                <p class="text-sm mb-2">{{ session('success') }}</p>
+                <div class="flex gap-3 flex-wrap">
+                    @if (session('download_url'))
+                        <a href="{{ session('download_url') }}"
+                            class="bg-green-600 text-white text-sm px-4 py-1.5 rounded hover:bg-green-700 font-medium">
+                            ⬇ Unduh Dokumen
+                        </a>
+                    @endif
+                    @if (session('preview_url'))
+                        <button type="button" onclick="openPreview('{{ session('preview_url') }}')"
+                            class="bg-blue-600 text-white text-sm px-4 py-1.5 rounded hover:bg-blue-700 font-medium">
+                            👁 Preview Dokumen
+                        </button>
+                    @endif
+                </div>
             </div>
         @endif
 
@@ -120,9 +127,9 @@
                     
                     @foreach ($documentTypes as $docType)
                         @php
-                            $fields = $allFields[$docType->id] ?? collect();
-                            $topFields = $fields->where('is_group_child', false);
-                            $slots = $docType->slots;
+        $fields = $allFields[$docType->id] ?? collect();
+        $topFields = $fields->where('is_group_child', false);
+        $slots = $docType->slots;
                         @endphp
 
                         <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
@@ -154,33 +161,33 @@
                             @endforeach
 
                             @php
-                                $currentSection = null;
-                                $currentRowGroup = null;
-                                $rowGroupBuffer = [];
+        $currentSection = null;
+        $currentRowGroup = null;
+        $rowGroupBuffer = [];
 
-                                // Group top-level fields into renderable chunks:
-                                // Each chunk is either a single field (row_group=null)
-                                // or a collection of fields sharing the same row_group
-                                $chunks = [];
-                                foreach ($topFields as $field) {
-                                    if (is_null($field->row_group)) {
-                                        $chunks[] = ['type' => 'single', 'field' => $field];
-                                    } else {
-                                        // Find or create a row group chunk
-                                        $found = false;
-                                        foreach ($chunks as &$chunk) {
-                                            if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
-                                                $chunk['fields'][] = $field;
-                                                $found = true;
-                                                break;
-                                            }
-                                        }
-                                        unset($chunk);
-                                        if (!$found) {
-                                            $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
-                                        }
-                                    }
-                                }
+        // Group top-level fields into renderable chunks:
+        // Each chunk is either a single field (row_group=null)
+        // or a collection of fields sharing the same row_group
+        $chunks = [];
+        foreach ($topFields as $field) {
+            if (is_null($field->row_group)) {
+                $chunks[] = ['type' => 'single', 'field' => $field];
+            } else {
+                // Find or create a row group chunk
+                $found = false;
+                foreach ($chunks as &$chunk) {
+                    if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
+                        $chunk['fields'][] = $field;
+                        $found = true;
+                        break;
+                    }
+                }
+                unset($chunk);
+                if (!$found) {
+                    $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
+                }
+            }
+        }
                             @endphp
 
                             @foreach ($chunks as $chunk)
@@ -448,6 +455,103 @@
             loadAllData();
             const select = document.getElementById('letter-type-select');
             if (select) showForm(select.value);
+        });
+    </script>
+
+    <div id="preview-modal"
+        class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden"
+        onclick="if(event.target===this) closePreview()">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl mx-4 flex flex-col"
+            style="height: 90vh;">
+
+            {{-- Modal header --}}
+            <div class="flex items-center justify-between px-5 py-3 border-b flex-shrink-0">
+                <h2 class="text-base font-semibold text-gray-800">Preview Dokumen</h2>
+                <div class="flex items-center gap-3">
+                    <a id="preview-download-btn" href="#"
+                    class="text-sm bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 font-medium hidden">
+                        ⬇ Unduh
+                    </a>
+                    <button onclick="closePreview()"
+                        class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            {{-- Loading state --}}
+            <div id="preview-loading"
+                class="flex-1 flex items-center justify-center text-gray-400 text-sm">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">⏳</div>
+                    <p>Memuat preview...</p>
+                    <p class="text-xs mt-1 text-gray-300">Proses konversi mungkin memerlukan beberapa detik</p>
+                </div>
+            </div>
+
+            {{-- Error state --}}
+            <div id="preview-error"
+                class="flex-1 flex items-center justify-center text-red-400 text-sm hidden">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">⚠️</div>
+                    <p class="font-medium">Gagal memuat preview</p>
+                    <p class="text-xs mt-1 text-gray-400" id="preview-error-msg"></p>
+                </div>
+            </div>
+
+            {{-- iframe --}}
+            <iframe id="preview-iframe"
+                    class="flex-1 w-full hidden rounded-b-lg"
+                    src=""
+                    title="Document Preview">
+            </iframe>
+
+        </div>
+    </div>
+
+    <script>
+        function openPreview(previewUrl) {
+            const modal   = document.getElementById('preview-modal');
+            const iframe  = document.getElementById('preview-iframe');
+            const loading = document.getElementById('preview-loading');
+            const error   = document.getElementById('preview-error');
+
+            // Reset state
+            iframe.classList.add('hidden');
+            loading.classList.remove('hidden');
+            error.classList.add('hidden');
+            iframe.src = '';
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            // Load the PDF
+            iframe.onload = function() {
+                loading.classList.add('hidden');
+                iframe.classList.remove('hidden');
+            };
+
+            iframe.onerror = function() {
+                loading.classList.add('hidden');
+                error.classList.remove('hidden');
+                document.getElementById('preview-error-msg').textContent =
+                    'Pastikan LibreOffice terinstall di server.';
+            };
+
+            iframe.src = previewUrl;
+        }
+
+        function closePreview() {
+            const modal  = document.getElementById('preview-modal');
+            const iframe = document.getElementById('preview-iframe');
+            modal.classList.add('hidden');
+            iframe.src = '';
+            document.body.style.overflow = '';
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closePreview();
         });
     </script>
 

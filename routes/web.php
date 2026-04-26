@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function() {
         Route::get('/home', [DocumentController::class,'index'])->name('home');
         Route::post('/generate', [DocumentController::class,'generate'])->name('document.generate');
         Route::get('/download/{filename}', [DocumentController::class, 'download'])->name('document.download');
+        Route::get('/preview/{filename}', [DocumentController::class, 'preview'])->name('document.preview');
     });
 
     Route::middleware('role:staff,admin')->group(function(){
@@ -72,6 +73,7 @@ Route::middleware('auth')->group(function() {
         Route::get('/document-types/{documentType}/slots', [AdminController::class, 'manageSlots'])->name('document-types.slots');
         Route::post('/document-types/{documentType}/slots', [AdminController::class, 'storeSlot'])->name('document-types.slots.store');
         Route::delete('/document-types/{documentType}/slots/{slot}', [AdminController::class, 'destroySlot'])->name('document-types.slots.destroy');
+        Route::patch('/document-types/{documentType}/toggle-preview', [AdminController::class, 'togglePreview'])->name('document-types.toggle-preview');
 
         Route::get('/staff-data', [AdminController::class,'staffData'])->name('staff-data');
         Route::post('/staff-data', [StaffDataController::class, 'store'])->name('staff-data.store');
@@ -82,6 +84,9 @@ Route::middleware('auth')->group(function() {
         Route::post('/official-data', [OfficialDataController::class, 'store'])->name('official-data.store');
         Route::patch('/official-data/{officialDatum}', [OfficialDataController::class, 'update'])->name('official-data.update');
         Route::delete('/official-data/{officialDatum}', [OfficialDataController::class, 'destroy'])->name('official-data.destroy');
+
+        Route::get('/guide', [AdminController::class, 'guide'])->name('guide');
+        Route::get('/guide/download', [AdminController::class, 'guideDownload'])->name('guide.download');
     });
 
     Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');
