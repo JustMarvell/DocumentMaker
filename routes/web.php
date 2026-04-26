@@ -84,6 +84,9 @@ Route::middleware('auth')->group(function() {
         Route::post('/official-data', [OfficialDataController::class, 'store'])->name('official-data.store');
         Route::patch('/official-data/{officialDatum}', [OfficialDataController::class, 'update'])->name('official-data.update');
         Route::delete('/official-data/{officialDatum}', [OfficialDataController::class, 'destroy'])->name('official-data.destroy');
+
+        Route::get('/guide', [AdminController::class, 'guide'])->name('guide');
+        Route::get('/guide/download', [AdminController::class, 'guideDownload'])->name('guide.download');
     });
 
     Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');
