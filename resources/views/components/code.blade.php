@@ -1,1 +1,1 @@
-<div class="bg-gray-900 text-green-400 font-mono text-xs rounded px-4 py-2 mb-1 overflow-x-auto whitespace-pre">{{ $slot }}</div>
+<div class="bg-gray-300 text-black-400 font-mono text-xs rounded px-4 py-2 mb-1 overflow-x-auto whitespace-pre">{{ $slot }}</div>
