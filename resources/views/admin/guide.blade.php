@@ -365,7 +365,7 @@
                     <ol class="text-xs text-gray-700 space-y-1 list-decimal list-inside mb-2">
                         <li>Buka Microsoft Word atau LibreOffice Writer</li>
                         <li>Buat dokumen dengan format yang diinginkan</li>
-                        <li>Ketik placeholder: <code class="bg-gray-100 px-1 rounded">{{ '{{ nama_variabel }}' }}</code></li>
+                        <li>Ketik placeholder: <code class="bg-gray-100 px-1 rounded">@verbatim{{ nama_variabel }}@endverbatim</code></li>
                         <li>Simpan sebagai <code class="bg-gray-100 px-1 rounded">.docx</code></li>
                         <li>Upload melalui Admin Panel</li>
                     </ol>
@@ -373,7 +373,7 @@
                     <ul class="text-xs text-gray-700 space-y-1">
                         <li>• Placeholder bisa di tabel, paragraf, header, footer, text box</li>
                         <li>• Loop dalam tabel: letakkan <code class="bg-gray-100 px-1 rounded">{% raw %}{% for %}{% endraw %}</code> di dalam sel tabel</li>
-                        <li>• Gunakan <code class="bg-gray-100 px-1 rounded">{{ '{{ loop.index }}' }}</code> untuk nomor urut otomatis</li>
+                        <li>• Gunakan <code class="bg-gray-100 px-1 rounded">@verbatim{{ loop.index }}@endverbatim</code> untuk nomor urut otomatis</li>
                         <li>• Format tanggal otomatis dikonversi ke format Indonesia</li>
                     </ul>
                 </div>
@@ -407,9 +407,9 @@
                         <table class="w-full text-xs">
                             <thead class="bg-blue-700 text-white"><tr><th class="px-2 py-1.5 text-left">Sintaks</th><th class="px-2 py-1.5 text-left">Kegunaan</th></tr></thead>
                             <tbody class="divide-y divide-gray-100">
-                                <tr><td class="px-2 py-1.5 font-mono text-blue-700">{{ '{{ field_key }}' }}</td><td class="px-2 py-1.5 text-gray-600">Menampilkan nilai variabel</td></tr>
-                                <tr class="bg-gray-50"><td class="px-2 py-1.5 font-mono text-blue-700">{{ '{{ val | upper }}' }}</td><td class="px-2 py-1.5 text-gray-600">HURUF BESAR</td></tr>
-                                <tr><td class="px-2 py-1.5 font-mono text-blue-700">{{ '{{ val | default("") }}' }}</td><td class="px-2 py-1.5 text-gray-600">Nilai default jika kosong</td></tr>
+                                <tr><td class="px-2 py-1.5 font-mono text-blue-700">@verbatim{{ field_key }}@endverbatim</td><td class="px-2 py-1.5 text-gray-600">Menampilkan nilai variabel</td></tr>
+                                <tr class="bg-gray-50"><td class="px-2 py-1.5 font-mono text-blue-700">@verbatim{{ val | upper }}@endverbatim</td><td class="px-2 py-1.5 text-gray-600">HURUF BESAR</td></tr>
+                                <tr><td class="px-2 py-1.5 font-mono text-blue-700">@verbatim{{ val | default("") }}@endverbatim</td><td class="px-2 py-1.5 text-gray-600">Nilai default jika kosong</td></tr>
                                 <tr class="bg-gray-50"><td class="px-2 py-1.5 font-mono text-blue-700">{% raw %}{% if kondisi %}{% endraw %}</td><td class="px-2 py-1.5 text-gray-600">Kondisional</td></tr>
                                 <tr><td class="px-2 py-1.5 font-mono text-blue-700">{% raw %}{% for x in list %}{% endraw %}</td><td class="px-2 py-1.5 text-gray-600">Pengulangan</td></tr>
                             </tbody>
@@ -457,24 +457,24 @@
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 1: Surat Tugas (Word)</p>
                     <div class="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                         <pre>SURAT TUGAS
-Nomor: {{ '{{ letter_number }}' }}
+Nomor: @verbatim{{ letter_number }}@endverbatim
 
 Yang bertanda tangan di bawah ini menerangkan bahwa:
-Nama     : {{ '{{ employee_name }}' }}
-NIP      : {{ '{{ employee_nip }}' }}
-Jabatan  : {{ '{{ employee_position }}' }}
-Unit     : {{ '{{ employee_work_unit }}' }}
+Nama     : @verbatim{{ employee_name }}@endverbatim
+NIP      : @verbatim{{ employee_nip }}@endverbatim
+Jabatan  : @verbatim{{ employee_position }}@endverbatim
+Unit     : @verbatim{{ employee_work_unit }}@endverbatim
 
 Ditugaskan melaksanakan perjalanan dinas ke:
-{{ '{{ destination_agency }}' }}
+@verbatim{{ destination_agency }}@endverbatim
 
-Pada tanggal {{ '{{ departure_date }}' }} s.d. {{ '{{ return_date }}' }}
+Pada tanggal @verbatim{{ departure_date }}@endverbatim s.d. @verbatim{{ return_date }}@endverbatim
 
-Tomohon, {{ '{{ letter_date }}' }}
+Tomohon, @verbatim{{ letter_date }}@endverbatim
 Kepala Dinas,
 
-{{ '{{ head_of_office_name }}' }}
-NIP. {{ '{{ head_of_office_nip }}' }}</pre>
+@verbatim{{ head_of_office_name }}@endverbatim
+NIP. @verbatim{{ head_of_office_nip }}@endverbatim</pre>
                     </div>
                 </div>
 
@@ -482,13 +482,13 @@ NIP. {{ '{{ head_of_office_nip }}' }}</pre>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 2: Daftar Hadir (Excel/Word dengan Loop)</p>
                     <div class="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                         <pre>DAFTAR HADIR RAPAT
-Perihal : {{ '{{ meeting_subject }}' }}
-Tanggal : {{ '{{ meeting_date }}' }}
-Tempat  : {{ '{{ meeting_location }}' }}
+Perihal : @verbatim{{ meeting_subject }}@endverbatim
+Tanggal : @verbatim{{ meeting_date }}@endverbatim
+Tempat  : @verbatim{{ meeting_location }}@endverbatim
 
 NO | NAMA              | NIP       | JABATAN    | TTD
 {% raw %}{% for peserta in participants %}{% endraw %}
-{{ '{{ loop.index }}' }}  | {{ '{{ peserta.staff_name }}' }} | {{ '{{ peserta.nip }}' }} | {{ '{{ peserta.position }}' }} |
+@verbatim{{ loop.index }}@endverbatim  | @verbatim{{ peserta.staff_name }}@endverbatim | @verbatim{{ peserta.nip }}@endverbatim | @verbatim{{ peserta.position }}@endverbatim |
 {% raw %}{% endfor %}{% endraw %}</pre>
                     </div>
                 </div>
@@ -497,7 +497,7 @@ NO | NAMA              | NIP       | JABATAN    | TTD
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 3: Dengan Kondisional</p>
                     <div class="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                         <pre>{% raw %}{% if employee_rank %}
-Pangkat/Gol. Ruang: {{ employee_rank }}
+Pangkat/Gol. Ruang: @verbatim{{ employee_rank }}@endverbatim
 {% else %}
 Pangkat/Gol. Ruang: -
 {% endif %}
@@ -514,10 +514,10 @@ Status: MENUNGGU PERSETUJUAN
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Loop di Excel — Penempatan Sel</p>
                     <div class="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                         <pre>Sel A1: {% raw %}{% for peserta in daftar_peserta %}{% endraw %}
-Sel A2: {{ '{{ loop.index }}' }}
-Sel B2: {{ '{{ peserta.staff_name }}' }}
-Sel C2: {{ '{{ peserta.nip }}' }}
-Sel D2: {{ '{{ peserta.position }}' }}
+Sel A2: @verbatim{{ loop.index }}@endverbatim
+Sel B2: @verbatim{{ peserta.staff_name }}@endverbatim
+Sel C2: @verbatim{{ peserta.nip }}@endverbatim
+Sel D2: @verbatim{{ peserta.position }}@endverbatim
 Sel A3: {% raw %}{% endfor %}{% endraw %}</pre>
                     </div>
                 </div>
@@ -639,12 +639,12 @@ Sel A3: {% raw %}{% endfor %}{% endraw %}</pre>
 
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <div class="bg-gray-50 px-4 py-2 font-medium text-sm text-gray-700 border-b border-gray-200">
-                        ❗ Variabel tidak tergantikan di dokumen (masih {{ '{{ nama_variabel }}' }})
+                        ❗ Variabel tidak tergantikan di dokumen (masih @verbatim{{ nama_variabel }}@endverbatim)
                     </div>
                     <div class="px-4 py-3 text-sm text-gray-700">
                         <ul class="text-xs space-y-1 text-gray-600">
                             <li>• Pastikan field_key di admin PERSIS sama dengan nama variabel di template (case-sensitive)</li>
-                            <li>• Periksa tidak ada spasi berlebih di dalam <code class="bg-gray-100 px-1 rounded">{{ '{{ }}' }}</code></li>
+                            <li>• Periksa tidak ada spasi berlebih di dalam <code class="bg-gray-100 px-1 rounded">@verbatim{{ }}@endverbatim</code></li>
                             <li>• Untuk Excel: pastikan variabel di sel, bukan di comment atau nama cell</li>
                             <li>• Untuk Word: jika variabel di text box, pastikan tidak terpotong oleh formatting berbeda</li>
                         </ul>
