@@ -195,6 +195,7 @@ class AdminController extends Controller
             'is_group_child'        => 'boolean',
             'staff_autofill_column' => 'nullable|string',
             'autofill_role'         => 'nullable|string|max:100',
+            'row_group'             => 'nullable|integer|min:1',
         ]);
  
         $fieldOptions = null;
@@ -203,7 +204,7 @@ class AdminController extends Controller
         }
  
         $maxOrder = $documentType->fields()->max('sort_order') ?? 0;
- 
+
         DocumentField::create([
             'document_type_id'      => $documentType->id,
             'field_key'             => $request->field_key,
@@ -212,6 +213,7 @@ class AdminController extends Controller
             'field_options'         => $fieldOptions,
             'is_required'           => $request->boolean('is_required'),
             'sort_order'            => $maxOrder + 1,
+            'row_group'             => $request->filled('row_group') ? (int) $request->row_group : null, 
             'section_label'         => $request->section_label,
             'group_key'             => $request->group_key,
             'is_group_child'        => $request->boolean('is_group_child'),
@@ -233,18 +235,21 @@ class AdminController extends Controller
             'section_label'         => 'nullable|string|max:255',
             'staff_autofill_column' => 'nullable|string',
             'autofill_role'         => 'nullable|string|max:100',
+            'row_group'             => 'nullable|integer|min:1',
         ]);
  
         $fieldOptions = $field->field_options;
         if ($request->field_type === 'select' && $request->filled('field_options')) {
             $fieldOptions = array_map('trim', explode(',', $request->field_options));
         }
- 
+
         $field->update([
             'label'                 => $request->label,
             'field_type'            => $request->field_type,
             'field_options'         => $fieldOptions,
             'is_required'           => $request->boolean('is_required'),
+            'sort_order'            => $field->sort_order,
+            'row_group'             => $request->filled('row_group') ? (int) $request->row_group : null,
             'section_label'         => $request->section_label,
             'staff_autofill_column' => $request->staff_autofill_column ?: null,
             'autofill_role'         => $request->autofill_role ?? 'none',
