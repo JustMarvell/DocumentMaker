@@ -40,20 +40,37 @@ Document Maker is a template-based document generation website that streamlines 
 - xlsxtpl python library `pip install xlsxtpl`
 - php, composer, artisan, & laravel
 
-### Installation
+### Installation On Linux
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/document-maker.git
+# On Linux (Ubuntu)
+sudo apt update && sudo apt upgrade -y
+sudo apt install php8.3 php8.3-fpm php8.3-sqlite3 php8.3-xml php8.3-curl
+sudo apt install python3 python3-venv python3-pip
+sudo apt install nodejs npm
+sudo apt install libreoffice
+sudo apt install nginx
 
-# Navigate to the project directory
-cd document-maker
+# Clone and setup project
+git clone https://github.com/JustMarvell/DocumentMaker.git /path/to/project
+cd /path/to/project
+composer install --no-dev
+cp .env.example .env && php artisan key:generate
+python3 -m venv venv && venv/bin/pip install docxtpl openpyxl jinja2
+npm install && npm run build
+touch database/database.sqlite
+php artisan migrate --seed
 
-# Install dependencies
-npm install
+# Setup permision
+sudo chown -R www-data:www-data /path/to/project
+sudo chmod -R 775 /path/to/project/storage
+sudo chmod -R 775 /path/to/project/public/cached_result
+```
 
-# Start the development server
-npm run dev
+### Setup Crontab for Scheduler
+```bash
+sudo crontab -u www-data -e
+* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 ### Usage
