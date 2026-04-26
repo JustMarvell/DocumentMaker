@@ -125,133 +125,116 @@
                         </select>
                     </div>
                     
-                    @foreach ($documentTypes as $docType)
-                        @php
+        @foreach ($documentTypes as $docType)
+        @php
         $fields = $allFields[$docType->id] ?? collect();
         $topFields = $fields->where('is_group_child', false);
         $slots = $docType->slots;
-                        @endphp
+        @endphp
 
-                        <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
+        <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
 
-                            @foreach ($slots as $slot)
-                                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                    <p class="text-sm font-medium text-blue-700 mb-2">
-                                        Pilih {{ $slot->slot_label }} (opsional — mengisi otomatis)
-                                    </p>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label class="block text-xs text-blue-600 mb-1">Dari Data Staff</label>
-                                            <select
-                                                onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
-                                                class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
-                                                <option value="">— Pilih Staff —</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs text-blue-600 mb-1">Dari Data Pejabat</label>
-                                            <select
-                                                onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
-                                                class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 official-dropdown">
-                                                <option value="">— Pilih Pejabat —</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
+            @foreach ($slots as $slot)
+                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p class="text-sm font-medium text-blue-700 mb-2">
+                        Pilih {{ $slot->slot_label }} (opsional — mengisi otomatis)
+                    </p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-blue-600 mb-1">Dari Data Staff</label>
+                            <select
+                                onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
+                                class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
+                                <option value="">— Pilih Staff —</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-blue-600 mb-1">Dari Data Pejabat</label>
+                            <select
+                                onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
+                                class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 official-dropdown">
+                                <option value="">— Pilih Pejabat —</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
 
-                            @php
-        $currentSection = null;
-        $currentRowGroup = null;
-        $rowGroupBuffer = [];
+            @php
+                $currentSection = null;
+                $chunks = [];
+                $rowGroupMap = [];
 
-        // Group top-level fields into renderable chunks:
-        // Each chunk is either a single field (row_group=null)
-        // or a collection of fields sharing the same row_group
-        $chunks = [];
-        foreach ($topFields as $field) {
-            if (is_null($field->row_group)) {
-                $chunks[] = ['type' => 'single', 'field' => $field];
-            } else {
-                // Find or create a row group chunk
-                $found = false;
-                foreach ($chunks as &$chunk) {
-                    if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
-                        $chunk['fields'][] = $field;
-                        $found = true;
-                        break;
+                foreach ($topFields as $field) {
+                    if (is_null($field->row_group)) {
+                        $chunks[] = ['type' => 'single', 'field' => $field];
+                    } else {
+                        $key = 'rg_' . $field->row_group;
+                        if (!isset($rowGroupMap[$key])) {
+                            $rowGroupMap[$key] = count($chunks);
+                            $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => []];
+                        }
+                        $chunks[$rowGroupMap[$key]]['fields'][] = $field;
                     }
                 }
-                unset($chunk);
-                if (!$found) {
-                    $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
-                }
-            }
-        }
-                            @endphp
+            @endphp
+        @foreach ($chunks as $chunk)
+            @if ($chunk['type'] === 'single')
+                @php $field = $chunk['field']; @endphp
 
-                            @foreach ($chunks as $chunk)
-                                @if ($chunk['type'] === 'single')
-                                    @php $field = $chunk['field']; @endphp
+                {{-- Section heading --}}
+                @if ($field->section_label && $field->section_label !== $currentSection)
+                    @php $currentSection = $field->section_label; @endphp
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
+                        {{ $field->section_label }}
+                    </h3>
+                @endif
 
-                                    {{-- Section heading --}}
-                                    @if ($field->section_label && $field->section_label !== $currentSection)
-                                        @php $currentSection = $field->section_label; @endphp
-                                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
-                                            {{ $field->section_label }}
-                                        </h3>
-                                    @endif
+                <div class="mb-4">
+                    @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                </div>
 
-                                    <div class="mb-4">
-                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
-                                    </div>
+            @else
+                {{-- Row group: render fields side by side --}}
+                @php $firstField = $chunk['fields'][0]; @endphp
 
-                                @else
-                                    {{-- Row group: render fields side by side --}}
-                                    @php $firstField = $chunk['fields'][0]; @endphp
+                {{-- Section heading from first field in group --}}
+                @if ($firstField->section_label && $firstField->section_label !== $currentSection)
+                    @php $currentSection = $firstField->section_label; @endphp
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
+                        {{ $firstField->section_label }}
+                    </h3>
+                @endif
 
-                                    {{-- Section heading from first field in group --}}
-                                    @if ($firstField->section_label && $firstField->section_label !== $currentSection)
-                                        @php $currentSection = $firstField->section_label; @endphp
-                                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
-                                            {{ $firstField->section_label }}
-                                        </h3>
-                                    @endif
-
-                                    <div class="grid gap-4 mb-4"
-                                        style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
-                                        @foreach ($chunk['fields'] as $field)
-                                            <div>
-                                                @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endif
-                            @endforeach
-
+                <div class="grid gap-4 mb-4"
+                    style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
+                    @foreach ($chunk['fields'] as $field)
+                        <div>
+                            @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
                         </div>
                     @endforeach
+                </div>
+            @endif
+        @endforeach
 
-                    {{-- Consent + Submit --}}
-                    <div class="mt-6 pt-4 border-t flex items-center gap-3">
-                        <input type="checkbox" name="consent" id="consent" class="rounded border-gray-300 text-blue-600" />
-                        <label for="consent" class="text-sm text-gray-600">
-                            Saya menyatakan bahwa informasi yang saya berikan adalah benar adanya.
-                        </label>
-                    </div>
-                    <button type="button" onclick="submitIfConsented()"
-                        class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                        Buat Dokumen
-                    </button>
-
-                </form>
+        </div>
+        @endforeach
+            {{-- Consent + Submit --}}
+            <div class="mt-6 pt-4 border-t flex items-center gap-3">
+                <input type="checkbox" name="consent" id="consent" class="rounded border-gray-300 text-blue-600" />
+                <label for="consent" class="text-sm text-gray-600">
+                    Saya menyatakan bahwa informasi yang saya berikan adalah benar adanya.
+                </label>
             </div>
+            <button type="button" onclick="submitIfConsented()"
+                class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+                Buat Dokumen
+            </button>
+
+        </form>
+    </div>
         @endif
     </main>
-
-    {{-- ============================================================ --}}
-    {{-- Autofill map: { docKey: { fieldKey: { col, role } } } --}}
-    {{-- ============================================================ --}}
     <script>
         const autofillMap = {
             @foreach ($documentTypes as $docType)
