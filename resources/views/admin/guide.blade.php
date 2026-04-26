@@ -94,6 +94,9 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
+                        <!-- Vell note : Storage probly fine if just 512 MB -->
+                         <!-- project file is abt 200+ MB -->
+                          <!-- RAM is also probly fine with just 500 MB but further testing is still needed. -->
                         @foreach ([['PHP','8.2','8.3+'],['Laravel','11.x','11.x'],['Python','3.10','3.12'],['Node.js','18.x','20.x'],['Database','SQLite','SQLite/MySQL'],['LibreOffice','7.x (preview)','24.x'],['RAM','1 GB','2 GB+'],['Storage','1 GB','2 GB+']] as $row)
                         <tr class="hover:bg-gray-50">
                             <td class="px-3 py-2 font-medium text-gray-700">{{ $row[0] }}</td>
@@ -373,7 +376,7 @@
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Catatan Penting:</p>
                     <ul class="text-xs text-gray-700 space-y-1">
                         <li>• Placeholder bisa di tabel, paragraf, header, footer, text box</li>
-                        <li>• Loop dalam tabel: letakkan <code class="bg-gray-100 px-1 rounded">{% raw %}{% for %}{% endraw %}</code> di dalam sel tabel</li>
+                        <li>• Loop dalam tabel: letakkan <code class="bg-gray-100 px-1 rounded">{% for %}</code> di dalam sel tabel</li>
                         <li>• Gunakan <code class="bg-gray-100 px-1 rounded">@verbatim{{ loop.index }}@endverbatim</code> untuk nomor urut otomatis</li>
                         <li>• Format tanggal otomatis dikonversi ke format Indonesia</li>
                     </ul>
@@ -385,7 +388,7 @@
                     <ol class="text-xs text-gray-700 space-y-1 list-decimal list-inside mb-2">
                         <li>Buat file Excel dengan format yang diinginkan</li>
                         <li>Ketik placeholder di dalam sel yang ingin diisi</li>
-                        <li>Untuk loop: gunakan <code class="bg-gray-100 px-1 rounded">{% raw %}{% for %}{% endraw %}</code> di sel terpisah</li>
+                        <li>Untuk loop: gunakan <code class="bg-gray-100 px-1 rounded">{% for %}</code> di sel terpisah</li>
                         <li>Text box: Insert Text Box, ketik placeholder di dalamnya</li>
                         <li>Simpan sebagai <code class="bg-gray-100 px-1 rounded">.xlsx</code> dan upload</li>
                     </ol>
@@ -410,9 +413,11 @@
                             <tbody class="divide-y divide-gray-100">
                                 <tr><td class="px-2 py-1.5 font-mono text-blue-700">@verbatim{{ field_key }}@endverbatim</td><td class="px-2 py-1.5 text-gray-600">Menampilkan nilai variabel</td></tr>
                                 <tr class="bg-gray-50"><td class="px-2 py-1.5 font-mono text-blue-700">@verbatim{{ val | upper }}@endverbatim</td><td class="px-2 py-1.5 text-gray-600">HURUF BESAR</td></tr>
+                                <!-- WTFFFF WHYYY IS THISS SHOWS UP AS AN ERRORRRRRRRRRRRRR -->
+                                 <!-- AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa -->
                                 <tr><td class="px-2 py-1.5 font-mono text-blue-700">@verbatim{{ val | default("") }}@endverbatim</td><td class="px-2 py-1.5 text-gray-600">Nilai default jika kosong</td></tr>
-                                <tr class="bg-gray-50"><td class="px-2 py-1.5 font-mono text-blue-700">{% raw %}{% if kondisi %}{% endraw %}</td><td class="px-2 py-1.5 text-gray-600">Kondisional</td></tr>
-                                <tr><td class="px-2 py-1.5 font-mono text-blue-700">{% raw %}{% for x in list %}{% endraw %}</td><td class="px-2 py-1.5 text-gray-600">Pengulangan</td></tr>
+                                <tr class="bg-gray-50"><td class="px-2 py-1.5 font-mono text-blue-700">{% if kondisi %}</td><td class="px-2 py-1.5 text-gray-600">Kondisional</td></tr>
+                                <tr><td class="px-2 py-1.5 font-mono text-blue-700">{% for x in list %}</td><td class="px-2 py-1.5 text-gray-600">Pengulangan</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -440,7 +445,7 @@
                 <table class="w-full text-sm">
                     <thead class="bg-blue-700 text-white"><tr><th class="px-3 py-2 text-left font-medium">Filter</th><th class="px-3 py-2 text-left font-medium">Contoh</th><th class="px-3 py-2 text-left font-medium">Hasil</th></tr></thead>
                     <tbody class="divide-y divide-gray-100 text-sm">
-                        @foreach([['upper','{{ nama | upper }}','JOHN DOE'],['lower','{{ nama | lower }}','john doe'],['title','{{ nama | title }}','John Doe'],['default','{{ nilai | default("N/A") }}','N/A jika kosong'],['length','{{ daftar | length }}','Jumlah item dalam list'],['first','{{ daftar | first }}','Item pertama'],['last','{{ daftar | last }}','Item terakhir'],['join','{{ list | join(", ") }}','A, B, C']] as $row)
+                        @foreach([['upper', '@{{ nama | upper }}','JOHN DOE'],['lower','@{{ nama | lower }}','john doe'],['title','@{{ nama | title }}','John Doe'],['default','@{{ nilai | default("N/A") }}','N/A jika kosong'],['length','@{{ daftar | length }}','Jumlah item dalam list'],['first','@{{ daftar | first }}','Item pertama'],['last','@{{ daftar | last }}','Item terakhir'],['join','@{{ list | join(", ") }}','A, B, C']] as $row)
                         <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}">
                             <td class="px-3 py-2 font-mono text-xs text-blue-700">{{ $row[0] }}</td>
                             <td class="px-3 py-2 font-mono text-xs">{{ $row[1] }}</td>
@@ -488,16 +493,16 @@ Tanggal : @verbatim{{ meeting_date }}@endverbatim
 Tempat  : @verbatim{{ meeting_location }}@endverbatim
 
 NO | NAMA              | NIP       | JABATAN    | TTD
-{% raw %}{% for peserta in participants %}{% endraw %}
+{% for peserta in participants %}
 @verbatim{{ loop.index }}@endverbatim  | @verbatim{{ peserta.staff_name }}@endverbatim | @verbatim{{ peserta.nip }}@endverbatim | @verbatim{{ peserta.position }}@endverbatim |
-{% raw %}{% endfor %}{% endraw %}</pre>
+{% endfor %}</pre>
                     </div>
                 </div>
 
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 3: Dengan Kondisional</p>
                     <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
-                        <pre>{% raw %}{% if employee_rank %}
+                        <pre>{% if employee_rank %}
 Pangkat/Gol. Ruang: @verbatim{{ employee_rank }}@endverbatim
 {% else %}
 Pangkat/Gol. Ruang: -
@@ -507,19 +512,19 @@ Pangkat/Gol. Ruang: -
 Status: DISETUJUI
 {% else %}
 Status: MENUNGGU PERSETUJUAN
-{% endif %}{% endraw %}</pre>
+{% endif %}</pre>
                     </div>
                 </div>
 
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Loop di Excel — Penempatan Sel</p>
                     <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
-                        <pre>Sel A1: {% raw %}{% for peserta in daftar_peserta %}{% endraw %}
+                        <pre>Sel A1: {% for peserta in daftar_peserta %}
 Sel A2: @verbatim{{ loop.index }}@endverbatim
 Sel B2: @verbatim{{ peserta.staff_name }}@endverbatim
 Sel C2: @verbatim{{ peserta.nip }}@endverbatim
 Sel D2: @verbatim{{ peserta.position }}@endverbatim
-Sel A3: {% raw %}{% endfor %}{% endraw %}</pre>
+Sel A3: {% endfor %}</pre>
                     </div>
                 </div>
             </div>
@@ -707,7 +712,7 @@ UPDATE users SET role = 'admin' WHERE email = 'admin@dinas.go.id';
                     </div>
                     <div class="px-4 py-3 text-sm text-gray-700">
                         <ul class="text-xs space-y-1 text-gray-600">
-                            <li>• Pastikan <code class="bg-gray-100 px-1 rounded">{% raw %}{% for %}{% endraw %}</code> dan <code class="bg-gray-100 px-1 rounded">{% raw %}{% endfor %}{% endraw %}</code> ada di sel yang BERBEDA (bukan satu sel)</li>
+                            <li>• Pastikan <code class="bg-gray-100 px-1 rounded">{% for %}</code> dan <code class="bg-gray-100 px-1 rounded">{% endfor %}</code> ada di sel yang BERBEDA (bukan satu sel)</li>
                             <li>• Pastikan baris template (antara for dan endfor) tidak kosong</li>
                             <li>• Periksa field_key di admin sesuai dengan nama list di template (setelah kata "in")</li>
                         </ul>
