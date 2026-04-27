@@ -7,17 +7,85 @@
     <title>Sistem Automatisasi Surat — DINAS PUPRD</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        .loop-item {
-            cursor: grab;
+        /* ── Loop items ────────────────────────────────── */
+        .loop-item { cursor: grab; transition: background 0.15s, box-shadow 0.15s; }
+        .loop-item.dragging { opacity: 0.4; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .loop-item:active { cursor: grabbing; }
+        .loop-item.checked-item { background: #EFF6FF; border-color: #BFDBFE !important; }
+
+        /* ── Form section transitions ───────────────────── */
+        .form-section {
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .form-section.entering {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        .form-section.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .loop-item.dragging {
-            opacity: 0.5;
+        /* ── Autofill highlight flash ───────────────────── */
+        @keyframes autofillFlash {
+            0%   { background-color: #FEF9C3; }
+            100% { background-color: transparent; }
+        }
+        .autofill-highlight {
+            animation: autofillFlash 1.2s ease-out forwards;
+            border-color: #FCD34D !important;
         }
 
-        .loop-item:active {
-            cursor: grabbing;
+        /* ── Loading overlay ────────────────────────────── */
+        #submit-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(2px);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
         }
+        #submit-overlay.active { display: flex; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            width: 44px; height: 44px;
+            border: 4px solid #E5E7EB;
+            border-top-color: #2563EB;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* ── Page entrance ──────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.4s ease-out both; }
+        .fade-up-delay-1 { animation-delay: 0.05s; }
+        .fade-up-delay-2 { animation-delay: 0.10s; }
+        .fade-up-delay-3 { animation-delay: 0.15s; }
+
+        /* ── Smooth scroll ──────────────────────────────── */
+        html { scroll-behavior: smooth; }
+
+        /* ── Submit button states ───────────────────────── */
+        #submit-btn { transition: background 0.2s, transform 0.1s; }
+        #submit-btn:active { transform: scale(0.98); }
+        #submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* ── Input focus ring enhancement ───────────────── */
+        input:focus, select:focus, textarea:focus {
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        /* ── Guide panel cards ──────────────────────────── */
+        .guide-card { transition: box-shadow 0.2s; }
+        .guide-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     </style>
 </head>
 
@@ -55,12 +123,20 @@
 
     <main class="max-w-6xl mx-auto px-6 py-8">
 
+        {{--Loading overlay --}}
+        <div id="submit-overlay">
+            <div class="spinner"></div>
+            <p class="text-sm font-medium text-gray-600">Sedang membuat dokumen...</p>
+            <p class="text-xs text-gray-400">Mohon tunggu, jangan tutup halaman ini.</p>
+        </div>
+
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Sistem Automatisasi Surat</h1>
             <p class="text-sm text-gray-500 mt-1">Pilih jenis dokumen dan isi form yang tersedia.</p>
         </div>
 
         {{-- Flash messages --}}
+        <div class="fade-up fade-up-delay-1">
         @if ($errors->any())
             <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-4">
                 <ul class="list-disc list-inside text-sm space-y-1">
@@ -70,7 +146,7 @@
         @endif
 
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-4">
+            <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-4 flex items-center justify-between">
                 <p class="text-sm mb-2">{{ session('success') }}</p>
                 <div class="flex gap-3 flex-wrap">
                     @if (session('download_url'))
@@ -109,218 +185,252 @@
             </div>
         @else
                 <!-- Left Column -->
-        <div class="flex gap-6 items-start">
+                <div class="flex gap-6 items-start fade-up fade-up-delay-2">
+
+                    {{-- Left column: form --}}
                     <div class="flex-1 min-w-0">
-                            <div class="bg-white rounded-lg shadow p-6">
-                                <form action="{{ route('document.generate') }}" method="POST" id="main-form">
-                                    @csrf
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <form action="{{ route('document.generate') }}" method="POST" id="main-form">
+                            @csrf
 
-                                    {{-- Document type selector --}}
-                                    <div class="mb-6">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Surat / Dokumen</label>
-                                        <select name="letter-type" id="letter-type-select"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            onchange="showForm(this.value)">
-                                            @foreach ($documentTypes as $type)
-                                                <option value="{{ $type->key }}">{{ $type->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                            {{-- Document type selector --}}
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Surat / Dokumen</label>
+                                <select name="letter-type" id="letter-type-select"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer"
+                                    onchange="showForm(this.value)">
+                                    @foreach ($documentTypes as $type)
+                                        <option value="{{ $type->key }}">{{ $type->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        @foreach ($documentTypes as $docType)
-                        @php
-                $fields = $allFields[$docType->id] ?? collect();
-                $topFields = $fields->where('is_group_child', false);
-                $slots = $docType->slots;
-                        @endphp
+                            {{-- ============================================================ --}}
+                            {{-- Dynamic form sections — one per document type                --}}
+                            {{-- ============================================================ --}}
+                            @foreach ($documentTypes as $docType)
+                                @php
+        $fields = $allFields[$docType->id] ?? collect();
+        $topFields = $fields->where('is_group_child', false);
+        $slots = $docType->slots;
+                                @endphp
 
-                        <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
+                                <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
 
-                            @foreach ($slots as $slot)
-                                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                    <p class="text-sm font-medium text-blue-700 mb-2">
-                                        Pilih {{ $slot->slot_label }} (opsional — mengisi otomatis)
-                                    </p>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label class="block text-xs text-blue-600 mb-1">Dari Data Staff</label>
-                                            <select
-                                                onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
-                                                class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
-                                                <option value="">— Pilih Staff —</option>
-                                            </select>
+                                    {{-- -------------------------------------------------- --}}
+                                    {{-- Autofill selectors — one pair per slot              --}}
+                                    {{-- -------------------------------------------------- --}}
+                                    @foreach ($slots as $slot)
+                                        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <p class="text-sm font-medium text-blue-700 mb-2">
+                                                Pilih {{ $slot->slot_label }} (opsional — mengisi otomatis)
+                                            </p>
+                                            <div class="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label class="block text-xs text-blue-600 mb-1">Dari Data Staff</label>
+                                                    <select
+                                                        onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
+                                                        class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
+                                                        <option value="">— Pilih Staff —</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs text-blue-600 mb-1">Dari Data Pejabat</label>
+                                                    <select
+                                                        onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
+                                                        class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 official-dropdown">
+                                                        <option value="">— Pilih Pejabat —</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label class="block text-xs text-blue-600 mb-1">Dari Data Pejabat</label>
-                                            <select
-                                                onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
-                                                class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 official-dropdown">
-                                                <option value="">— Pilih Pejabat —</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                    @endforeach
+
+                                    {{-- -------------------------------------------------- --}}
+                                    {{-- Render fields — grouped by row_group                --}}
+                                    {{-- -------------------------------------------------- --}}
+                                    @php
+        $currentSection = null;
+        $currentRowGroup = null;
+        $rowGroupBuffer = [];
+
+        // Group top-level fields into renderable chunks:
+        // Each chunk is either a single field (row_group=null)
+        // or a collection of fields sharing the same row_group
+        $chunks = [];
+        foreach ($topFields as $field) {
+            if (is_null($field->row_group)) {
+                $chunks[] = ['type' => 'single', 'field' => $field];
+            } else {
+                // Find or create a row group chunk
+                $found = false;
+                foreach ($chunks as &$chunk) {
+                    if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
+                        $chunk['fields'][] = $field;
+                        $found = true;
+                        break;
+                    }
+                }
+                unset($chunk);
+                if (!$found) {
+                    $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
+                }
+            }
+        }
+                                    @endphp
+
+                                    @foreach ($chunks as $chunk)
+                                        @if ($chunk['type'] === 'single')
+                                            @php $field = $chunk['field']; @endphp
+
+                                            {{-- Section heading --}}
+                                            @if ($field->section_label && $field->section_label !== $currentSection)
+                                                @php $currentSection = $field->section_label; @endphp
+                                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
+                                                    {{ $field->section_label }}
+                                                </h3>
+                                            @endif
+
+                                            <div class="mb-4">
+                                                @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                            </div>
+
+                                        @else
+                                            {{-- Row group: render fields side by side --}}
+                                            @php $firstField = $chunk['fields'][0]; @endphp
+
+                                            {{-- Section heading from first field in group --}}
+                                            @if ($firstField->section_label && $firstField->section_label !== $currentSection)
+                                                @php $currentSection = $firstField->section_label; @endphp
+                                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
+                                                    {{ $firstField->section_label }}
+                                                </h3>
+                                            @endif
+
+                                            <div class="grid gap-4 mb-4" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
+                                                @foreach ($chunk['fields'] as $field)
+                                                    <div>
+                                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    @endforeach
+
                                 </div>
                             @endforeach
 
-                            @php
-                $currentSection = null;
-                $chunks = [];
-                $rowGroupMap = [];
-
-                foreach ($topFields as $field) {
-                    if (is_null($field->row_group)) {
-                        $chunks[] = ['type' => 'single', 'field' => $field];
-                    } else {
-                        $key = 'rg_' . $field->row_group;
-                        if (!isset($rowGroupMap[$key])) {
-                            $rowGroupMap[$key] = count($chunks);
-                            $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => []];
-                        }
-                        $chunks[$rowGroupMap[$key]]['fields'][] = $field;
-                    }
-                }
-                            @endphp
-                        @foreach ($chunks as $chunk)
-                            @if ($chunk['type'] === 'single')
-                                @php $field = $chunk['field']; @endphp
-
-                                {{-- Section heading --}}
-                                @if ($field->section_label && $field->section_label !== $currentSection)
-                                    @php $currentSection = $field->section_label; @endphp
-                                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
-                                        {{ $field->section_label }}
-                                    </h3>
-                                @endif
-
-                                <div class="mb-4">
-                                    @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
-                                </div>
-
-                            @else
-                                {{-- Row group: render fields side by side --}}
-                                @php $firstField = $chunk['fields'][0]; @endphp
-
-                                {{-- Section heading from first field in group --}}
-                                @if ($firstField->section_label && $firstField->section_label !== $currentSection)
-                                    @php $currentSection = $firstField->section_label; @endphp
-                                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
-                                        {{ $firstField->section_label }}
-                                    </h3>
-                                @endif
-
-                                <div class="grid gap-4 mb-4"
-                                    style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
-                                    @foreach ($chunk['fields'] as $field)
-                                        <div>
-                                            @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        @endforeach
-
-                        </div>
-                        @endforeach
                             {{-- Consent + Submit --}}
                             <div class="mt-6 pt-4 border-t flex items-center gap-3">
-                                <input type="checkbox" name="consent" id="consent" class="rounded border-gray-300 text-blue-600" />
+                                <input type="checkbox" name="consent" id="consent"
+                                    class="rounded border-gray-300 text-blue-600" />
                                 <label for="consent" class="text-sm text-gray-600">
                                     Saya menyatakan bahwa informasi yang saya berikan adalah benar adanya.
                                 </label>
                             </div>
-                            <button type="button" onclick="submitIfConsented()"
+                            <button type="button" id="submit-btn" onclick="submitIfConsented()"
                                 class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
                                 Buat Dokumen
                             </button>
 
-                            </form>
-                        </div>
+                        </form>
                     </div>
-
-                <!-- Right Column -->
-                <div class="w-72 flex-shrink-0 sticky top-6 space-y-3">
-                    {{-- Quick start card --}}
-                    <div class="bg-white rounded-lg shadow p-4">
-                        <div class="flex items-center gap-2 mb-3">
-                            <h2 class="text-sm font-bold text-gray-800">Cara Membuat Dokumen</h2>
-                        </div>
-                        <ol class="space-y-2">
-                            @foreach ([
-                ['1', 'bg-blue-600', 'Pilih Jenis Dokumen', 'Gunakan dropdown "Jenis Surat / Dokumen" untuk memilih template yang diinginkan.'],
-                ['2', 'bg-blue-600', 'Gunakan Autofill (Opsional)', 'Jika tersedia, pilih nama pegawai dari dropdown autofill berwarna biru/ungu untuk mengisi otomatis field seperti nama, NIP, dan jabatan.'],
-                ['3', 'bg-blue-600', 'Isi Form', 'Lengkapi semua field yang tersedia. Field bertanda * wajib diisi. Field tanggal otomatis diformat ke format Indonesia.'],
-                ['4', 'bg-blue-600', 'Centang Persetujuan', 'Centang pernyataan persetujuan di bagian bawah form sebelum melanjutkan.'],
-                ['5', 'bg-blue-600', 'Klik Buat Dokumen', 'Tekan tombol "Buat Dokumen". Sistem akan memproses dan menghasilkan file dokumen.'],
-                ['6', 'bg-green-600', 'Unduh / Preview', 'Setelah berhasil, tombol Unduh akan muncul. Tombol Preview muncul jika diaktifkan admin.'],
-            ] as [$num, $color, $title, $desc])
-                            <li class="flex gap-3">
-                                <span class="flex-shrink-0 w-5 h-5 {{ $color }} text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">{{ $num }}</span>
-                                <div>
-                                    <p class="text-xs font-semibold text-gray-700">{{ $title }}</p>
-                                    <p class="text-xs text-gray-500 leading-relaxed mt-0.5">{{ $desc }}</p>
-                                </div>
-                            </li>
-                            @endforeach
-                        </ol>
                     </div>
+                    {{-- End left column --}}
 
-                    {{-- Field types card --}}
-                    <div class="bg-white rounded-lg shadow p-4">
-                        <div class="flex items-center gap-2 mb-3">
-                            <h2 class="text-sm font-bold text-gray-800">Jenis Field di Form</h2>
-                        </div>
-                        <div class="space-y-2 text-xs text-gray-600">
-                            @foreach ([
-                ['📝', 'Text / Textarea', 'Ketik teks bebas. Textarea untuk keterangan panjang.'],
-                ['📅', 'Date', 'Pilih tanggal dari kalender. Otomatis diformat ke "01 Januari 2025".'],
-                ['🔢', 'Number', 'Ketik angka (jumlah hari, nomor urut, dsb.)'],
-                ['▼', 'Select (Dropdown)', 'Pilih satu opsi dari daftar yang tersedia.'],
-                ['☑', 'Checkbox', 'Centang untuk nilai Ya/Benar.'],
-                ['➕', 'Repeating Group', 'Klik "+ Tambah Baris" untuk menambah baris data. Klik × untuk menghapus.'],
-                ['👥', 'Staff / Pejabat Loop', 'Centang nama yang ingin dimasukkan. Drag ⠿ untuk mengubah urutan dalam dokumen.'],
-            ] as [$icon, $type, $desc])
-                            <div class="flex gap-2">
-                                <span class="flex-shrink-0 w-5 text-center">{{ $icon }}</span>
-                                <div>
-                                    <span class="font-medium text-gray-700">{{ $type }}</span>
-                                    <span class="text-gray-400"> — </span>
-                                    <span>{{ $desc }}</span>
-                                </div>
+                    {{-- ======================================================== --}}
+                    {{-- Right column — guide panel                               --}}
+                    {{-- ======================================================== --}}
+                    <div class="w-72 flex-shrink-0 sticky top-6 space-y-3">
+
+                        {{-- Quick start card --}}
+                        <div class="bg-white rounded-lg shadow p-4 guide-card fade-up fade-up-delay-2">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-blue-600 text-lg">📋</span>
+                                <h2 class="text-sm font-bold text-gray-800">Cara Membuat Dokumen</h2>
                             </div>
-                            @endforeach
+                            <ol class="space-y-2">
+                                @foreach ([
+        ['1', 'bg-blue-600', 'Pilih Jenis Dokumen', 'Gunakan dropdown "Jenis Surat / Dokumen" untuk memilih template yang diinginkan.'],
+        ['2', 'bg-blue-600', 'Gunakan Autofill (Opsional)', 'Jika tersedia, pilih nama pegawai dari dropdown autofill berwarna biru/ungu untuk mengisi otomatis field seperti nama, NIP, dan jabatan.'],
+        ['3', 'bg-blue-600', 'Isi Form', 'Lengkapi semua field yang tersedia. Field bertanda * wajib diisi. Field tanggal otomatis diformat ke format Indonesia.'],
+        ['4', 'bg-blue-600', 'Centang Persetujuan', 'Centang pernyataan persetujuan di bagian bawah form sebelum melanjutkan.'],
+        ['5', 'bg-blue-600', 'Klik Buat Dokumen', 'Tekan tombol "Buat Dokumen". Sistem akan memproses dan menghasilkan file dokumen.'],
+        ['6', 'bg-green-600', 'Unduh / Preview', 'Setelah berhasil, tombol Unduh akan muncul. Tombol Preview muncul jika diaktifkan admin.'],
+    ] as [$num, $color, $title, $desc])
+                                <li class="flex gap-3">
+                                    <span class="flex-shrink-0 w-5 h-5 {{ $color }} text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">{{ $num }}</span>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-700">{{ $title }}</p>
+                                        <p class="text-xs text-gray-500 leading-relaxed mt-0.5">{{ $desc }}</p>
+                                    </div>
+                                </li>
+                                @endforeach
+                            </ol>
                         </div>
-                    </div>
 
-                    {{-- Autofill tip card --}}
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-blue-600 text-lg">💡</span>
-                            <h2 class="text-sm font-bold text-blue-800">Tips Autofill</h2>
+                        {{-- Field types card --}}
+                        <div class="bg-white rounded-lg shadow p-4 guide-card fade-up fade-up-delay-3">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-blue-600 text-lg">🗂</span>
+                                <h2 class="text-sm font-bold text-gray-800">Jenis Field di Form</h2>
+                            </div>
+                            <div class="space-y-2 text-xs text-gray-600">
+                                @foreach ([
+        ['📝', 'Text / Textarea', 'Ketik teks bebas. Textarea untuk keterangan panjang.'],
+        ['📅', 'Date', 'Pilih tanggal dari kalender. Otomatis diformat ke "01 Januari 2025".'],
+        ['🔢', 'Number', 'Ketik angka (jumlah hari, nomor urut, dsb.)'],
+        ['▼', 'Select (Dropdown)', 'Pilih satu opsi dari daftar yang tersedia.'],
+        ['☑', 'Checkbox', 'Centang untuk nilai Ya/Benar.'],
+        ['➕', 'Repeating Group', 'Klik "+ Tambah Baris" untuk menambah baris data. Klik × untuk menghapus.'],
+        ['👥', 'Staff / Pejabat Loop', 'Centang nama yang ingin dimasukkan. Drag ⠿ untuk mengubah urutan dalam dokumen.'],
+    ] as [$icon, $type, $desc])
+                                <div class="flex gap-2">
+                                    <span class="flex-shrink-0 w-5 text-center">{{ $icon }}</span>
+                                    <div>
+                                        <span class="font-medium text-gray-700">{{ $type }}</span>
+                                        <span class="text-gray-400"> — </span>
+                                        <span>{{ $desc }}</span>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
                         </div>
-                        <ul class="space-y-1.5 text-xs text-blue-700">
-                            <li>• Setiap slot autofill (biru/ungu) memiliki <strong>dua dropdown</strong>: satu dari Data Staff dan satu dari Data Pejabat.</li>
-                            <li>• Memilih dari salah satu dropdown akan otomatis mengisi nama, NIP, jabatan, dan unit kerja.</li>
-                            <li>• Field yang terisi otomatis masih <strong>bisa diedit manual</strong> jika perlu.</li>
-                            <li>• Untuk daftar peserta (Staff/Pejabat Loop), centang beberapa nama lalu <strong>drag untuk mengubah urutan</strong> dalam dokumen.</li>
-                        </ul>
-                    </div>
 
-                    {{-- Warning card --}}
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-lg">⚠️</span>
-                            <h2 class="text-sm font-bold text-yellow-800">Perhatian</h2>
+                        {{-- Autofill tip card --}}
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-blue-600 text-lg">💡</span>
+                                <h2 class="text-sm font-bold text-blue-800">Tips Autofill</h2>
+                            </div>
+                            <ul class="space-y-1.5 text-xs text-blue-700">
+                                <li>• Setiap slot autofill (biru/ungu) memiliki <strong>dua dropdown</strong>: satu dari Data Staff dan satu dari Data Pejabat.</li>
+                                <li>• Memilih dari salah satu dropdown akan otomatis mengisi nama, NIP, jabatan, dan unit kerja.</li>
+                                <li>• Field yang terisi otomatis masih <strong>bisa diedit manual</strong> jika perlu.</li>
+                                <li>• Untuk daftar peserta (Staff/Pejabat Loop), centang beberapa nama lalu <strong>drag untuk mengubah urutan</strong> dalam dokumen.</li>
+                            </ul>
                         </div>
-                        <ul class="space-y-1.5 text-xs text-yellow-700">
-                            <li>• File dokumen akan <strong>otomatis terhapus</strong> dari server setelah beberapa menit. Segera unduh setelah dibuat.</li>
-                            <li>• Pastikan semua field wajib (*) terisi sebelum menekan "Buat Dokumen".</li>
-                            <li>• Jika ada field yang kurang atau tidak sesuai, hubungi administrator.</li>
-                        </ul>
-                    </div>
 
-                 </div>
-        </div>
-        @endif
+                        {{-- Warning card --}}
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-lg">⚠️</span>
+                                <h2 class="text-sm font-bold text-yellow-800">Perhatian</h2>
+                            </div>
+                            <ul class="space-y-1.5 text-xs text-yellow-700">
+                                <li>• File dokumen akan <strong>otomatis terhapus</strong> dari server setelah beberapa menit. Segera unduh setelah dibuat.</li>
+                                <li>• Pastikan semua field wajib (*) terisi sebelum menekan "Buat Dokumen".</li>
+                                <li>• Jika ada field yang kurang atau tidak sesuai, hubungi administrator.</li>
+                            </ul>
+                        </div>
+
+                    </div>
+                    {{-- End right column --}}
+
+                    </div>
+                    {{-- End two-column grid --}}
+
+                    @endif
     </main>
     <script>
         const autofillMap = {
@@ -404,25 +514,38 @@
             });
         }
 
-        function makeLoopItem(person, fieldKey) {
+        function makeLoopItem(person, fieldKey, countEl) {
             const div = document.createElement('div');
-            div.className = 'loop-item flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-200';
-            div.dataset.id = person.id;
+            div.className = 'loop-item flex items-center gap-2 px-3 py-2 rounded border border-transparent';
+            div.dataset.id   = person.id;
             div.dataset.name = person.staff_name;
             div.setAttribute('draggable', true);
 
             const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.name = `field_${fieldKey}[]`;
-            cb.value = person.id;
-            cb.className = 'rounded border-gray-300 text-blue-600 flex-shrink-0';
+            cb.type      = 'checkbox';
+            cb.name      = `field_${fieldKey}[]`;
+            cb.value     = person.id;
+            cb.className = 'rounded border-gray-300 text-blue-600 flex-shrink-0 cursor-pointer';
+
+            // Toggle checked-item highlight and update counter
+            cb.addEventListener('change', function() {
+                if (this.checked) {
+                    div.classList.add('checked-item');
+                } else {
+                    div.classList.remove('checked-item');
+                }
+                updateLoopCount(div.closest('[data-loop-type]'));
+            });
 
             const label = document.createElement('span');
-            label.className = 'text-sm text-gray-700 flex-1';
-            label.textContent = person.staff_name + (person.nip ? ' — ' + person.nip : '') + (person.position ? ' (' + person.position + ')' : '');
+            label.className = 'text-sm text-gray-700 flex-1 cursor-pointer select-none';
+            label.textContent = person.staff_name
+                + (person.nip      ? ' — ' + person.nip      : '')
+                + (person.position ? ' (' + person.position + ')' : '');
+            label.addEventListener('click', function() { cb.click(); });
 
             const handle = document.createElement('span');
-            handle.className = 'text-gray-300 text-base select-none cursor-grab';
+            handle.className = 'text-gray-300 text-base select-none cursor-grab flex-shrink-0';
             handle.textContent = '⠿';
 
             div.appendChild(cb);
@@ -430,6 +553,20 @@
             div.appendChild(handle);
             return div;
         }
+
+        function updateLoopCount(container) {
+            if (!container) return;
+            const countEl  = container.querySelector('.loop-count');
+            const checked  = container.querySelectorAll('.loop-item input[type="checkbox"]:checked').length;
+            if (!countEl) return;
+            if (checked === 0) {
+                countEl.textContent = '';
+                countEl.classList.add('hidden');
+            } else {
+                countEl.textContent = checked + ' dipilih';
+                countEl.classList.remove('hidden');
+            }
+        }       
 
         function initLoopDrag(listEl) {
             let dragging = null;
@@ -456,47 +593,130 @@
         function fillFromSource(docTypeKey, slotKey, source, personId) {
             if (!personId) return;
             const dataset = source === 'staff' ? staffData : officialData;
-            const person = dataset.find(p => p.id == personId);
+            const person  = dataset.find(p => p.id == personId);
             if (!person) return;
 
             const map = autofillMap[docTypeKey] || {};
+            let filledCount = 0;
 
-            document.querySelectorAll(`#form-${docTypeKey} [data-field-key]`).forEach(function (wrapper) {
-                const fieldKey = wrapper.dataset.fieldKey;
+            document.querySelectorAll(`#form-${docTypeKey} [data-field-key]`).forEach(function(wrapper) {
+                const fieldKey    = wrapper.dataset.fieldKey;
                 const fieldConfig = map[fieldKey];
                 if (!fieldConfig) return;
                 if (fieldConfig.role !== slotKey) return;
 
-                const col = fieldConfig.col;
+                const col   = fieldConfig.col;
                 const input = wrapper.querySelector('input, select, textarea');
                 if (input && person[col] !== undefined && person[col] !== null) {
                     input.value = person[col];
+                    // Flash highlight
+                    input.classList.remove('autofill-highlight');
+                    void input.offsetWidth; // force reflow to restart animation
+                    input.classList.add('autofill-highlight');
+                    setTimeout(() => input.classList.remove('autofill-highlight'), 1300);
+                    filledCount++;
                 }
             });
+
+            // Brief toast feedback
+            if (filledCount > 0) {
+                showToast(`${filledCount} field terisi otomatis dari data ${source === 'staff' ? 'staff' : 'pejabat'}.`);
+            }
+        }
+
+        let toastTimer = null;
+        function showToast(message, type = 'success') {
+            let toast = document.getElementById('toast-notification');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-notification';
+                toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium text-white z-50 transition-all duration-300 opacity-0 translate-y-2';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.style.background = type === 'success' ? '#2563EB' : '#DC2626';
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.classList.remove('opacity-0', 'translate-y-2');
+                toast.classList.add('opacity-100', 'translate-y-0');
+            });
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 2500);
         }
         
         function showForm(selectedKey) {
-            document.querySelectorAll('[id^="form-"]').forEach(function (el) {
-                el.classList.add('hidden');
-                el.querySelectorAll('input, select, textarea').forEach(function (i) { i.disabled = true; });
+            document.querySelectorAll('[id^="form-"]').forEach(function(el) {
+                if (!el.classList.contains('hidden')) {
+                    // Fade out current
+                    el.style.opacity    = '0';
+                    el.style.transform  = 'translateY(4px)';
+                    el.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+                    setTimeout(() => {
+                        el.classList.add('hidden');
+                        el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
+                        el.style.opacity   = '';
+                        el.style.transform = '';
+                    }, 150);
+                } else {
+                    el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
+                }
             });
-            const target = document.getElementById('form-' + selectedKey);
-            if (target) {
-                target.classList.remove('hidden');
-                target.querySelectorAll('input, select, textarea').forEach(function (i) { i.disabled = false; });
-            }
+
+            setTimeout(() => {
+                const target = document.getElementById('form-' + selectedKey);
+                if (target) {
+                    target.classList.remove('hidden');
+                    target.querySelectorAll('input, select, textarea').forEach(i => i.disabled = false);
+                    // Fade in
+                    target.style.opacity   = '0';
+                    target.style.transform = 'translateY(8px)';
+                    target.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                    requestAnimationFrame(() => {
+                        target.style.opacity   = '1';
+                        target.style.transform = 'translateY(0)';
+                    });
+                    setTimeout(() => {
+                        target.style.transition = '';
+                        target.style.opacity    = '';
+                        target.style.transform  = '';
+                    }, 220);
+                }
+            }, 160);
         }
         
         function submitIfConsented() {
             if (!document.getElementById('consent').checked) {
-                alert('Mohon centang pernyataan persetujuan terlebih dahulu.');
+                showToast('Mohon centang pernyataan persetujuan terlebih dahulu.', 'error');
+                // Shake the consent area
+                const consentArea = document.getElementById('consent').closest('div');
+                consentArea.style.animation = 'none';
+                consentArea.style.transition = 'transform 0.1s';
+                const shakes = [4, -4, 3, -3, 2, -2, 0];
+                shakes.forEach((x, i) => {
+                    setTimeout(() => consentArea.style.transform = `translateX(${x}px)`, i * 50);
+                });
+                setTimeout(() => consentArea.style.transform = '', shakes.length * 50);
                 return;
             }
-            document.querySelectorAll('[id^="form-"]').forEach(function (section) {
+
+            // Disable hidden sections
+            document.querySelectorAll('[id^="form-"]').forEach(function(section) {
                 if (section.classList.contains('hidden')) {
-                    section.querySelectorAll('input, select, textarea').forEach(function (i) { i.disabled = true; });
+                    section.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
                 }
             });
+
+            // Show loading overlay and disable button
+            const btn = document.getElementById('submit-btn');
+            if (btn) {
+                btn.disabled    = true;
+                btn.textContent = 'Membuat dokumen...';
+            }
+            document.getElementById('submit-overlay').classList.add('active');
+
             document.getElementById('main-form').submit();
         }
 
@@ -504,27 +724,67 @@
 
         function addRow(docTypeKey, groupKey) {
             const container = document.getElementById(`rows-${docTypeKey}-${groupKey}`);
-            const template = document.getElementById(`row-template-${docTypeKey}-${groupKey}`);
+            const template  = document.getElementById(`row-template-${docTypeKey}-${groupKey}`);
             if (!container || !template) return;
 
-            const key = `${docTypeKey}-${groupKey}`;
+            const key   = `${docTypeKey}-${groupKey}`;
             const index = rowCounters[key] = (rowCounters[key] || 0) + 1;
 
             const clone = template.content.cloneNode(true);
-            clone.querySelectorAll('[name]').forEach(function (el) {
-                el.name = el.name.replace('__INDEX__', index);
-            });
+            clone.querySelectorAll('[name]').forEach(el => el.name = el.name.replace('__INDEX__', index));
+
+            // Animate new row in
+            const rowDiv = clone.querySelector('.row-item');
+            if (rowDiv) {
+                rowDiv.style.opacity   = '0';
+                rowDiv.style.transform = 'translateY(-6px)';
+                rowDiv.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+            }
             container.appendChild(clone);
+            // Trigger animation after append
+            const newRow = container.lastElementChild;
+            if (newRow) {
+                requestAnimationFrame(() => {
+                    newRow.style.opacity   = '1';
+                    newRow.style.transform = 'translateY(0)';
+                    setTimeout(() => {
+                        newRow.style.transition = '';
+                        newRow.style.opacity    = '';
+                        newRow.style.transform  = '';
+                    }, 220);
+                });
+            }
         }
 
         function removeRow(btn) {
-            btn.closest('.row-item').remove();
+            const row = btn.closest('.row-item');
+            if (!row) return;
+            row.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+            row.style.opacity    = '0';
+            row.style.transform  = 'translateX(8px)';
+            setTimeout(() => row.remove(), 160);
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             loadAllData();
             const select = document.getElementById('letter-type-select');
-            if (select) showForm(select.value);
+            if (select) {
+                // Show initial form without transition
+                const initial = document.getElementById('form-' + select.value);
+                if (initial) {
+                    document.querySelectorAll('[id^="form-"]').forEach(el => {
+                        el.classList.add('hidden');
+                        el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
+                    });
+                    initial.classList.remove('hidden');
+                    initial.querySelectorAll('input, select, textarea').forEach(i => i.disabled = false);
+                }
+            }
+
+            // Hide overlay if page loaded from back/forward cache
+            document.getElementById('submit-overlay').classList.remove('active');
+            const btn = document.getElementById('submit-btn');
+            if (btn) { btn.disabled = false; btn.textContent = 'Buat Dokumen'; }
         });
     </script>
 
