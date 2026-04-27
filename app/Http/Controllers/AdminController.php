@@ -38,6 +38,8 @@ class AdminController extends Controller
 
     }
 
+    // comment
+
     public function logs(Request $request) { 
 
         $query = DocumentLog::with('user', 'documentType', 'status')
