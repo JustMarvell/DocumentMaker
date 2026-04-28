@@ -169,6 +169,7 @@
         @else
             {{-- All other types: optional icon overlaid on the left of the input --}}
             <div class="{{ $icon ? 'relative' : '' }}">
+            <!-- <div class="{{ '' }}"> -->
                 @if ($icon)
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <i class="{{ $icon }} text-sm"></i>
