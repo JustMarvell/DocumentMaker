@@ -1,113 +1,100 @@
 @extends('admin.layout')
+@section('page-title', 'Jenis Dokumen')
 
 @section('content')
+<div class="space-y-4 fade-up">
 
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Jenis Dokumen</h1>
-        <a href="{{ route('admin.document-types.create') }}"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium">
-            + Tambah Template Baru
+    <div class="flex items-center justify-between">
+        <div>
+            <div class="section-label mb-1">Admin Panel</div>
+            <h1 class="display-heading" style="font-size:1.35rem;">Jenis Dokumen</h1>
+        </div>
+        <a href="{{ route('admin.document-types.create') }}" class="btn-primary">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            Tambah Dokumen
         </a>
     </div>
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="w-full text-sm">
-            <thead class="bg-gray-50 text-gray-500 text-left">
-                <tr>
-                    <th class="px-4 py-3">Nama</th>
-                    <th class="px-4 py-3">Key</th>
-                    <th class="px-4 py-3">Tipe</th>
-                    <th class="px-4 py-3">Akses</th>
-                    <th class="px-4 py-3 text-center">Fields</th>
-                    <th class="px-4 py-3 text-center">Dibuat</th>
-                    <th class="px-4 py-3 text-center">Status</th>
-                    <th class="px-4 py-3 text-center">Preview</th>
-                    <th class="px-4 py-3 text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse ($documentTypes as $type)
+    <div class="glass-card rounded-2xl overflow-hidden fade-up fade-up-1">
+        <div class="overflow-x-auto">
+            <table class="sipadu-table">
+                <thead>
                     <tr>
-                        <td class="px-4 py-3 font-medium">{{ $type->name }}</td>
-                        <td class="px-4 py-3 font-mono text-xs text-gray-400">{{ $type->key }}</td>
-                        <td class="px-4 py-3">
-                            <span
-                                class="px-2 py-1 rounded text-xs font-semibold
-                                    {{ $type->file_type === 'docx' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700' }}">
-                                {{ strtoupper($type->file_type) }}
+                        <th style="width:40px;">#</th>
+                        <th>Nama Dokumen</th>
+                        <th>Key</th>
+                        <th>Format</th>
+                        <th>Akses</th>
+                        <th>Fields</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($documentTypes as $type)
+                    <tr>
+                        <td style="color:var(--slate-300);font-size:0.75rem;font-family:var(--font-mono);">{{ $loop->iteration }}</td>
+                        <td>
+                            <span style="font-weight:600;color:var(--slate-800);font-size:0.82rem;">{{ $type->name }}</span>
+                        </td>
+                        <td>
+                            <code style="font-family:var(--font-mono);font-size:0.72rem;background:var(--slate-100);padding:0.15rem 0.45rem;border-radius:4px;color:var(--navy-600);">
+                                {{ $type->key }}
+                            </code>
+                        </td>
+                        <td>
+                            @php $fmt = strtolower($type->file_type ?? 'docx'); @endphp
+                            <span class="badge {{ ['docx'=>'badge-navy','xlsx'=>'badge-green'][$fmt] ?? 'badge-gray' }}" style="font-size:0.65rem;text-transform:uppercase;">
+                                {{ strtoupper($fmt) }}
                             </span>
                         </td>
-                        <td class="px-4 py-3">
-                            <span
-                                class="px-2 py-1 rounded text-xs font-semibold
-                                    {{ $type->access_level === 'staff' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600' }}">
-                                {{ ucfirst($type->access_level) }}
+                        <td>
+                            @php $access = $type->access_level ?? 'staff'; @endphp
+                            <span class="badge {{ $access === 'guest' ? 'badge-gray' : 'badge-gold' }}" style="font-size:0.65rem;">
+                                {{ ucfirst($access) }}
                             </span>
                         </td>
-                        <td class="px-4 py-3 text-center">
-                            <a href="{{ route('admin.document-types.fields', $type) }}"
-                                class="text-blue-600 hover:underline text-xs font-medium">
-                                {{ $type->fields()->count() }} field(s)
-                            </a>
+                        <td style="color:var(--slate-500);font-size:0.8rem;">
+                            {{ $type->fields_count ?? $type->fields->count() }}
                         </td>
-                        <td class="px-4 py-3 text-center text-gray-500">{{ $type->document_logs_count }}</td>
-                        <td class="px-4 py-3 text-center">
-                            @if ($type->is_active)
-                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Aktif</span>
-                            @else
-                                <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-semibold">Nonaktif</span>
-                            @endif
-                        </td>
-
-                        {{-- Preview toggle --}}
-                        <td class="px-4 py-3 text-center">
-                            <form method="POST" action="{{ route('admin.document-types.toggle-preview', $type) }}">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
-                                            {{ $type->preview_enabled ? 'bg-blue-600' : 'bg-gray-300' }}"
-                                    title="{{ $type->preview_enabled ? 'Preview aktif — klik untuk menonaktifkan' : 'Preview nonaktif — klik untuk mengaktifkan' }}">
-                                    <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform
-                                            {{ $type->preview_enabled ? 'translate-x-6' : 'translate-x-1' }}">
-                                    </span>
-                                </button>
-                            </form>
-                        </td>
-
-                        <td class="px-4 py-3">
-                            <div class="flex flex-col gap-1 items-stretch min-w-[100px]">
-                                <a href="{{ route('admin.document-types.fields', $type) }}"
-                                    class="text-xs px-2 py-1 rounded border border-blue-400 text-blue-600 hover:bg-blue-50 text-center">
-                                    Kelola Field
+                        <td>
+                            <div style="display:flex;align-items:center;gap:0.4rem;">
+                                <a href="{{ route('admin.document-types.edit', $type) }}"
+                                   class="btn-outline-navy" style="padding:0.25rem 0.65rem;font-size:0.72rem;">
+                                    Edit
                                 </a>
-                                <form method="POST" action="{{ route('admin.document-types.toggle', $type) }}">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit"
-                                        class="w-full text-xs px-2 py-1 rounded border
-                                                {{ $type->is_active ? 'border-yellow-400 text-yellow-600 hover:bg-yellow-50' : 'border-green-500 text-green-600 hover:bg-green-50' }}">
-                                        {{ $type->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
-                                    </button>
-                                </form>
+                                <a href="{{ route('admin.document-types.fields', $type) }}"
+                                   class="btn-primary" style="padding:0.25rem 0.65rem;font-size:0.72rem;">
+                                    Fields
+                                </a>
                                 <form method="POST" action="{{ route('admin.document-types.destroy', $type) }}"
-                                    onsubmit="return confirm('Hapus template {{ addslashes($type->name) }}? Semua field dan file template akan ikut terhapus.')">
-                                    @csrf
-                                    @method('DELETE')
+                                      onsubmit="return confirm('Hapus dokumen {{ addslashes($type->name) }}?')">
+                                    @csrf @method('DELETE')
                                     <button type="submit"
-                                        class="w-full text-xs px-2 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50">
-                                        Hapus
+                                        style="width:26px;height:26px;border:1px solid rgba(239,68,68,0.25);border-radius:6px;background:rgba(239,68,68,0.06);color:rgba(239,68,68,0.7);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-size:0.8rem;"
+                                        onmouseover="this.style.background='rgba(239,68,68,0.15)';this.style.color='rgb(239,68,68)'"
+                                        onmouseout="this.style.background='rgba(239,68,68,0.06)';this.style.color='rgba(239,68,68,0.7)'">
+                                        <svg style="width:11px;height:11px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
                                     </button>
                                 </form>
                             </div>
                         </td>
                     </tr>
-                @empty
+                    @empty
                     <tr>
-                        <td colspan="9" class="px-4 py-6 text-center text-gray-400">Belum ada jenis dokumen.</td>
+                        <td colspan="7" class="text-center py-10" style="color:var(--slate-300);">
+                            Belum ada jenis dokumen. <a href="{{ route('admin.document-types.create') }}" style="color:var(--navy-500);">Tambahkan sekarang →</a>
+                        </td>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
+</div>
 @endsection

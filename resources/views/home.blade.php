@@ -6,242 +6,413 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Automatisasi Surat — DINAS PUPRD</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    {{-- FontAwesome 6 Free (CDN) — covers fa-solid, fa-regular, fa-brands --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
     <style>
-        /* ── Loop items ────────────────────────────────── */
-        .loop-item { cursor: grab; transition: background 0.15s, box-shadow 0.15s; }
-        .loop-item.dragging { opacity: 0.4; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .loop-item:active { cursor: grabbing; }
-        .loop-item.checked-item { background: #EFF6FF; border-color: #BFDBFE !important; }
+        body { background: linear-gradient(155deg, #eef2f8 0%, #f5f7fc 55%, #edf1f7 100%); }
 
-        /* ── Form section transitions ───────────────────── */
-        .form-section {
-            transition: opacity 0.25s ease, transform 0.25s ease;
-        }
-        .form-section.entering {
-            opacity: 0;
-            transform: translateY(8px);
-        }
-        .form-section.visible {
-            opacity: 1;
-            transform: translateY(0);
+        /* ── Page Header ──────────────────────────────────── */
+        .page-hero {
+            background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-800) 60%, #1a2a50 100%);
+            border-bottom: 1px solid rgba(201,168,76,0.2);
+            padding: 1.5rem 0;
         }
 
-        /* ── Autofill highlight flash ───────────────────── */
-        @keyframes autofillFlash {
-            0%   { background-color: #FEF9C3; }
-            100% { background-color: transparent; }
-        }
-        .autofill-highlight {
-            animation: autofillFlash 1.2s ease-out forwards;
-            border-color: #FCD34D !important;
+        /* ── Form Card ────────────────────────────────────── */
+        .form-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.7);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(13,21,38,0.1);
         }
 
-        /* ── Loading overlay ────────────────────────────── */
-        #submit-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(255,255,255,0.75);
-            backdrop-filter: blur(2px);
-            z-index: 9999;
-            flex-direction: column;
+        /* ── Document type tab strip ──────────────────────── */
+        .doc-type-select-wrap {
+            background: linear-gradient(135deg, rgba(13,21,38,0.03), rgba(42,82,152,0.05));
+            border: 1.5px solid var(--navy-100);
+            border-radius: 10px;
+            padding: 0.85rem;
+        }
+
+        /* ── Autofill slot panel ──────────────────────────── */
+        .autofill-panel {
+            background: linear-gradient(135deg, rgba(42,82,152,0.04), rgba(201,168,76,0.04));
+            border: 1.5px solid rgba(42,82,152,0.12);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .autofill-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--navy-500), var(--gold-400));
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* ── Loop checklist container ─────────────────────── */
+        .loop-container {
+            border: 1.5px solid var(--slate-200);
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.6);
+        }
+        .loop-header {
+            background: linear-gradient(90deg, var(--navy-800), var(--navy-700));
+            padding: 0.6rem 0.9rem;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 16px;
+            justify-content: space-between;
         }
-        #submit-overlay.active { display: flex; }
+        .loop-search-wrap {
+            padding: 0.5rem 0.65rem;
+            border-bottom: 1px solid var(--slate-200);
+            background: rgba(255,255,255,0.5);
+        }
+        .loop-search {
+            width: 100%;
+            border: 1px solid var(--slate-200);
+            border-radius: 6px;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.78rem;
+            font-family: var(--font-body);
+            background: #fff;
+            color: var(--slate-700);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .loop-search:focus { border-color: var(--navy-300); }
+        .loop-checklist {
+            overflow-y: auto;
+            max-height: 220px;
+            padding: 0.35rem;
+        }
+        .loop-footer {
+            padding: 0.45rem 0.85rem;
+            background: rgba(42,82,152,0.04);
+            border-top: 1px solid rgba(42,82,152,0.08);
+        }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .spinner {
-            width: 44px; height: 44px;
-            border: 4px solid #E5E7EB;
-            border-top-color: #2563EB;
+        /* ── Form section heading ─────────────────────────── */
+        .form-section-heading {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--navy-500);
+            border-bottom: 1px solid var(--navy-100);
+            padding-bottom: 0.4rem;
+            margin: 1.25rem 0 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-section-heading::before {
+            content: '';
+            width: 16px; height: 2px;
+            background: linear-gradient(90deg, var(--gold-500), var(--gold-300));
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        /* ── Submit button ────────────────────────────────── */
+        #submit-btn {
+            background: linear-gradient(135deg, var(--navy-700), var(--navy-600));
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            letter-spacing: 0.03em;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 16px rgba(31,64,104,0.3);
+            font-family: var(--font-body);
+        }
+        #submit-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--navy-600), var(--navy-500));
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(31,64,104,0.4);
+        }
+        #submit-btn:active:not(:disabled) { transform: translateY(0); }
+        #submit-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+        /* ── Consent area ─────────────────────────────────── */
+        .consent-area {
+            background: rgba(42,82,152,0.04);
+            border: 1px solid rgba(42,82,152,0.1);
+            border-radius: 8px;
+            padding: 0.75rem 0.9rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        /* ── Row item (repeating group) ───────────────────── */
+        .row-item {
+            background: rgba(255,255,255,0.6);
+            border: 1px solid var(--slate-200);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.15s ease;
+        }
+        .row-item:hover { border-color: var(--navy-200); }
+
+        /* ── Guide panel adjustments ──────────────────────── */
+        .guide-section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--navy-700);
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .guide-section-title::before {
+            content: '';
+            width: 12px; height: 2px;
+            background: var(--gold-400);
+            border-radius: 2px;
+        }
+
+        .guide-step {
+            display: flex;
+            gap: 0.65rem;
+            align-items: flex-start;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(42,82,152,0.06);
+        }
+        .guide-step:last-child { border-bottom: none; }
+        .guide-step-num {
+            width: 20px; height: 20px;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            background: var(--navy-700);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+        .guide-step-num.done { background: #15803d; }
+        .guide-step-title { font-size: 0.78rem; font-weight: 600; color: var(--slate-700); }
+        .guide-step-desc  { font-size: 0.72rem; color: var(--slate-500); line-height: 1.45; margin-top: 0.1rem; }
+
+        /* ── Warning / tip box ────────────────────────────── */
+        .tip-box {
+            border-radius: 8px;
+            padding: 0.75rem 0.9rem;
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+        .tip-box-gold {
+            background: rgba(201,168,76,0.08);
+            border: 1px solid rgba(201,168,76,0.2);
+            color: #7a5f1a;
+        }
+        .tip-box-navy {
+            background: rgba(42,82,152,0.06);
+            border: 1px solid rgba(42,82,152,0.15);
+            color: var(--navy-700);
         }
 
-        /* ── Page entrance ──────────────────────────────── */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: translateY(0); }
+        /* ── Download success banner ──────────────────────── */
+        .success-banner {
+            background: linear-gradient(135deg, rgba(21,128,61,0.08), rgba(42,82,152,0.06));
+            border: 1px solid rgba(21,128,61,0.2);
+            border-radius: 10px;
+            padding: 0.9rem 1.1rem;
         }
-        .fade-up { animation: fadeUp 0.4s ease-out both; }
-        .fade-up-delay-1 { animation-delay: 0.05s; }
-        .fade-up-delay-2 { animation-delay: 0.10s; }
-        .fade-up-delay-3 { animation-delay: 0.15s; }
+        .download-btn {
+            background: linear-gradient(135deg, #15803d, #16a34a);
+            color: #fff;
+            padding: 0.5rem 1.1rem;
+            border-radius: 7px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 10px rgba(21,128,61,0.2);
+        }
+        .download-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(21,128,61,0.3); }
+        .preview-btn {
+            background: linear-gradient(135deg, var(--navy-600), var(--navy-500));
+            color: #fff;
+            padding: 0.5rem 1.1rem;
+            border-radius: 7px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 10px rgba(31,64,104,0.2);
+            font-family: var(--font-body);
+        }
+        .preview-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(31,64,104,0.3); }
 
-        /* ── Smooth scroll ──────────────────────────────── */
-        html { scroll-behavior: smooth; }
+        /* ── Autofill flash ───────────────────────────────── */
+        @keyframes autofillFlash {
+            0%   { background-color: rgba(201,168,76,0.15); border-color: var(--gold-400) !important; }
+            100% { background-color: transparent; border-color: var(--slate-200) !important; }
+        }
+        .autofill-highlight { animation: autofillFlash 1.3s ease-out forwards; }
 
-        /* ── Submit button states ───────────────────────── */
-        #submit-btn { transition: background 0.2s, transform 0.1s; }
-        #submit-btn:active { transform: scale(0.98); }
-        #submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
-        /* ── Input focus ring enhancement ───────────────── */
-        input:focus, select:focus, textarea:focus {
-            transition: border-color 0.15s, box-shadow 0.15s;
+        /* ── Loop item ────────────────────────────────────── */
+        .loop-item { border: 1px solid transparent; }
+        .loop-item.checked-item {
+            background: rgba(42,82,152,0.06);
+            border-color: rgba(42,82,152,0.15) !important;
         }
 
-        /* ── Guide panel cards ──────────────────────────── */
-        .guide-card { transition: box-shadow 0.2s; }
-        .guide-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-
-        /* ── Mobile: row group grid collapses to single column ── */
+        /* ── Mobile ───────────────────────────────────────── */
         @media (max-width: 640px) {
-            .row-group-grid {
-                grid-template-columns: 1fr !important;
-            }
+            .row-group-grid { grid-template-columns: 1fr !important; }
+            .loop-checklist { max-height: 180px; }
         }
-
-        /* ── Mobile: page header smaller ───────────────────── */
-        @media (max-width: 640px) {
-            .page-title { font-size: 1.25rem; }
-        }
-
-        /* ── Mobile: loop checklist taller for touch ────────── */
-        @media (max-width: 640px) {
-            .loop-checklist { max-height: 200px; }
-            .loop-item { padding: 10px 12px; }
-        }
-
-        /* ── Mobile: submit button larger touch target ──────── */
-        @media (max-width: 640px) {
-            #submit-btn { padding-top: 0.875rem; padding-bottom: 0.875rem; font-size: 1rem; }
-        }
-
-        /* ── Mobile: consent area wraps nicely ──────────────── */
-        @media (max-width: 400px) {
-            .consent-wrap { align-items: flex-start; }
-        }
-
-        /* ── Prevent horizontal scroll ──────────────────────── */
-        body { overflow-x: hidden; }
     </style>
 </head>
 
-<body class="bg-gray-100 font-sans">
+<body>
 
-    {{-- Navbar --}}
-    <nav class="bg-white shadow px-4 sm:px-6 py-3 sm:py-4" x-data="{ menuOpen: false }">
-        <div class="flex items-center justify-between">
-            <span class="font-bold text-gray-800 text-sm sm:text-base leading-tight">
-                DINAS PUPRD<br class="sm:hidden"> <span class="hidden sm:inline">Kota Tomohon</span>
-                <span class="sm:hidden text-xs font-normal text-gray-500">Kota Tomohon</span>
-            </span>
+    {{-- Loading overlay --}}
+    <div id="submit-overlay">
+        <div class="sipadu-spinner"></div>
+        <p>Sedang membuat dokumen...</p>
+        <small>Mohon tunggu, jangan tutup halaman ini.</small>
+    </div>
+
+    {{-- ── Navbar ──────────────────────────────────────────── --}}
+    <nav class="sipadu-nav" x-data="{ menuOpen: false }">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+
+            <div class="flex items-center gap-3">
+                <div style="width:30px;height:30px;background:linear-gradient(135deg,var(--gold-500),var(--gold-300));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg style="width:14px;height:14px;color:#0d1526;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div class="hidden sm:block">
+                    <div class="nav-brand-title">SIPADU</div>
+                    <div class="nav-brand-sub">DINAS PUPRD · Kota Tomohon</div>
+                </div>
+                <div class="sm:hidden nav-brand-title" style="font-size:0.9rem;">SIPADU</div>
+            </div>
 
             {{-- Desktop nav --}}
-            <div class="hidden sm:flex items-center gap-4">
+            <div class="hidden sm:flex items-center gap-1">
                 @auth
-                    <span class="text-sm text-gray-600">
+                    <span class="sipadu-nav-link">
                         {{ auth()->user()->name }}
-                        <span class="ml-1 px-2 py-0.5 rounded text-xs font-semibold
-                            {{ auth()->user()->role === 'admin' ? 'bg-purple-100 text-purple-700' : '' }}
-                            {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700' : '' }}
-                            {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600' : '' }}">
-                            {{ ucfirst(auth()->user()->role) }}
-                        </span>
+                        <span class="badge badge-gold ml-1.5" style="font-size:0.62rem;">{{ ucfirst(auth()->user()->role) }}</span>
                     </span>
                     @if (auth()->user()->isAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="text-sm text-purple-600 hover:underline font-medium">
-                            Admin Panel
-                        </a>
+                        <a href="{{ route('admin.dashboard') }}" class="sipadu-nav-link">Admin Panel</a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="text-sm text-red-500 hover:underline">Logout</button>
+                        <button type="submit" class="sipadu-nav-link" style="background:none;border:none;cursor:pointer;font-family:var(--font-body);color:rgba(239,68,68,0.65);transition:color 0.2s;" onmouseover="this.style.color='rgba(239,68,68,0.9)'" onmouseout="this.style.color='rgba(239,68,68,0.65)'">
+                            Keluar
+                        </button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}"    class="text-sm text-blue-600 hover:underline">Login</a>
-                    <a href="{{ route('register') }}" class="text-sm text-blue-600 hover:underline">Daftar</a>
+                    <a href="{{ route('login') }}" class="sipadu-nav-link">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn-gold" style="padding:0.35rem 0.9rem;font-size:0.78rem;">Daftar</a>
                 @endauth
             </div>
 
             {{-- Mobile hamburger --}}
-            <button class="sm:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100"
-                    @click="menuOpen = !menuOpen" aria-label="Menu">
-                <svg x-show="!menuOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button class="sm:hidden p-2 rounded-lg" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);"
+                    @click="menuOpen = !menuOpen">
+                <svg x-show="!menuOpen" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
-                <svg x-show="menuOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg x-show="menuOpen" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
 
-        {{-- Mobile dropdown menu --}}
-        <div x-show="menuOpen" x-transition class="sm:hidden mt-3 pt-3 border-t border-gray-100 space-y-2">
+        {{-- Mobile menu --}}
+        <div x-show="menuOpen" x-transition class="sm:hidden border-t px-4 py-3 space-y-1" style="border-color:rgba(255,255,255,0.08);background:rgba(13,21,38,0.98);">
             @auth
-                <div class="flex items-center gap-2 px-1 pb-2 border-b border-gray-100">
-                    <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
-                    <span class="px-2 py-0.5 rounded text-xs font-semibold
-                        {{ auth()->user()->role === 'admin' ? 'bg-purple-100 text-purple-700' : '' }}
-                        {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700' : '' }}
-                        {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600' : '' }}">
-                        {{ ucfirst(auth()->user()->role) }}
-                    </span>
+                <div class="flex items-center gap-2 pb-2 mb-2 border-b" style="border-color:rgba(255,255,255,0.08);">
+                    <span style="font-size:0.85rem;color:rgba(255,255,255,0.85);font-weight:500;">{{ auth()->user()->name }}</span>
+                    <span class="badge badge-gold">{{ ucfirst(auth()->user()->role) }}</span>
                 </div>
                 @if (auth()->user()->isAdmin())
-                    <a href="{{ route('admin.dashboard') }}"
-                       class="block px-1 py-1.5 text-sm text-purple-600 font-medium">
-                        Admin Panel
-                    </a>
+                    <a href="{{ route('admin.dashboard') }}" class="block sipadu-nav-link">Admin Panel</a>
                 @endif
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="block w-full text-left px-1 py-1.5 text-sm text-red-500">
-                        Logout
+                    <button type="submit" class="block w-full text-left sipadu-nav-link" style="background:none;border:none;cursor:pointer;font-family:var(--font-body);color:rgba(239,68,68,0.7);">
+                        Keluar
                     </button>
                 </form>
             @else
-                <a href="{{ route('login') }}"    class="block px-1 py-1.5 text-sm text-blue-600">Login</a>
-                <a href="{{ route('register') }}" class="block px-1 py-1.5 text-sm text-blue-600">Daftar</a>
+                <a href="{{ route('login') }}" class="block sipadu-nav-link">Masuk</a>
+                <a href="{{ route('register') }}" class="block sipadu-nav-link">Daftar</a>
             @endauth
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-
-        {{--Loading overlay --}}
-        <div id="submit-overlay">
-            <div class="spinner"></div>
-            <p class="text-sm font-medium text-gray-600">Sedang membuat dokumen...</p>
-            <p class="text-xs text-gray-400">Mohon tunggu, jangan tutup halaman ini.</p>
+    {{-- ── Page header strip ───────────────────────────────── --}}
+    <div class="page-hero">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center gap-3">
+                <div style="width:3px;height:32px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
+                <div>
+                    <h1 style="font-family:var(--font-display);color:#fff;font-size:1.2rem;line-height:1.1;" class="fade-up">
+                        Sistem Automatisasi Surat
+                    </h1>
+                    <p style="color:rgba(255,255,255,0.4);font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;margin-top:0.15rem;" class="fade-up fade-up-1">
+                        Pilih jenis dokumen dan isi form yang tersedia
+                    </p>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="mb-6">
-            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 page-title">Sistem Automatisasi Surat</h1>
-            <p class="text-sm text-gray-500 mt-1">Pilih jenis dokumen dan isi form yang tersedia.</p>
-        </div>
+    {{-- ── Main content ────────────────────────────────────── --}}
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
 
         {{-- Flash messages --}}
-        <div class="fade-up fade-up-delay-1">
         @if ($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-4">
-                <ul class="list-disc list-inside text-sm space-y-1">
-                    @foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+            <div class="alert alert-error mb-4 fade-up">
+                <ul class="space-y-0.5">
+                    @foreach ($errors->all() as $error)<li class="flex items-center gap-1.5"><span>•</span>{{ $error }}</li>@endforeach
                 </ul>
             </div>
         @endif
 
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-4">
-                <p class="text-sm mb-3">{{ session('success') }}</p>
-                <div class="flex flex-wrap gap-3">
+            <div class="success-banner mb-4 fade-up">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg style="width:16px;height:16px;color:#15803d;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    <span style="font-size:0.85rem;font-weight:600;color:#14532d;">{{ session('success') }}</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
                     @if (session('download_url'))
-                        <a href="{{ session('download_url') }}"
-                            class="bg-green-600 text-white text-sm px-4 py-1.5 rounded hover:bg-green-700 font-medium">
-                            <i class="fa-solid fa-file-arrow-down"></i>
+                        <a href="{{ session('download_url') }}" class="download-btn">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                             Unduh Dokumen
                         </a>
                     @endif
                     @if (session('preview_url'))
-                        <button type="button" onclick="openPreview('{{ session('preview_url') }}')"
-                            class="bg-blue-600 text-white text-sm px-4 py-1.5 rounded hover:bg-blue-700 font-medium">
-                            <i class="fa-solid fa-eye"></i>
+                        <button type="button" onclick="openPreview('{{ session('preview_url') }}')" class="preview-btn">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             Preview Dokumen
                         </button>
                     @endif
@@ -250,281 +421,275 @@
         @endif
 
         @if (session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-4 text-sm">
-                {{ session('error') }}
-            </div>
+            <div class="alert alert-error mb-4 fade-up">{{ session('error') }}</div>
         @endif
 
         @auth
             @if (auth()->user()->isGuest())
-                <div class="bg-yellow-50 border border-yellow-300 text-yellow-800 px-4 py-3 rounded mb-4 text-sm">
+                <div class="alert alert-warning mb-4 fade-up" style="font-size:0.82rem;">
                     Anda login sebagai <strong>Guest</strong>. Hanya dokumen publik yang tersedia.
+                    Hubungi admin untuk upgrade akses.
                 </div>
             @endif
         @endauth
 
         @if ($documentTypes->isEmpty())
-            <div class="bg-white rounded-lg shadow p-8 text-center text-gray-400">
-                Tidak ada dokumen yang tersedia saat ini.
+            <div class="form-card p-12 text-center fade-up" style="color:var(--slate-400);">
+                <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Tidak ada dokumen tersedia saat ini.
             </div>
         @else
-                                        <!-- Left Column -->
-                                        <div class="flex flex-col lg:flex-row gap-6 items-start fade-up fade-up-delay-2">
 
-                                            {{-- Left column: form --}}
-                                            <div class="flex-1 min-w-0 w-full">
-                                            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-                                                <form action="{{ route('document.generate') }}" method="POST" id="main-form">
-                                                    @csrf
+        <div class="flex flex-col lg:flex-row gap-5 items-start fade-up fade-up-2">
 
-                                                    {{-- Document type selector --}}
-                                                    <div class="mb-6">
-                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Surat / Dokumen</label>
-                                                        <select name="letter-type" id="letter-type-select"
-                                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer"
-                                                            onchange="showForm(this.value)">
-                                                            @foreach ($documentTypes as $type)
-                                                                <option value="{{ $type->key }}">{{ $type->name }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
+            {{-- ── Form Column ──────────────────────────────── --}}
+            <div class="flex-1 min-w-0 w-full">
+                <div class="form-card p-5 sm:p-6">
+                    <form action="{{ route('document.generate') }}" method="POST" id="main-form">
+                        @csrf
 
-                                                    {{-- ============================================================ --}}
-                                                    {{-- Dynamic form sections — one per document type                --}}
-                                                    {{-- ============================================================ --}}
-                                                    @foreach ($documentTypes as $docType)
-                                                        @php
-        $fields = $allFields[$docType->id] ?? collect();
-        $topFields = $fields->where('is_group_child', false);
-        $slots = $docType->slots;
-                                                        @endphp
+                        {{-- Document type selector --}}
+                        <div class="doc-type-select-wrap mb-5">
+                            <label class="form-label" style="font-size:0.72rem;margin-bottom:0.5rem;">
+                                <span style="color:var(--navy-500);">▸</span> Jenis Surat / Dokumen
+                            </label>
+                            <select name="letter-type" id="letter-type-select"
+                                onchange="showForm(this.value)" class="w-full">
+                                @foreach ($documentTypes as $type)
+                                    <option value="{{ $type->key }}">{{ $type->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                                                        <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
+                        {{-- ── Dynamic form sections ────────── --}}
+                        @foreach ($documentTypes as $docType)
+                            @php
+                                $fields = $allFields[$docType->id] ?? collect();
+                                $topFields = $fields->where('is_group_child', false);
+                                $slots = $docType->slots;
 
-                                                            {{-- -------------------------------------------------- --}}
-                                                            {{-- Autofill selectors — one pair per slot              --}}
-                                                            {{-- -------------------------------------------------- --}}
-                                                            @foreach ($slots as $slot)
-                                                                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                                                    <p class="text-sm font-medium text-blue-700 mb-2">
-                                                                        Pilih {{ $slot->slot_label }} (opsional — mengisi otomatis)
-                                                                    </p>
-                                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                                        <div>
-                                                                            <label class="block text-xs text-blue-600 mb-1">Dari Data Staff</label>
-                                                                            <select
-                                                                                onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
-                                                                                class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
-                                                                                <option value="">— Pilih Staff —</option>
-                                                                            </select>
-                                                                        </div>
-                                                                        <div>
-                                                                            <label class="block text-xs text-blue-600 mb-1">Dari Data Pejabat</label>
-                                                                            <select
-                                                                                onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
-                                                                                class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 official-dropdown">
-                                                                                <option value="">— Pilih Pejabat —</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            @endforeach
+                                $chunks = [];
+                                foreach ($topFields as $field) {
+                                    if (is_null($field->row_group)) {
+                                        $chunks[] = ['type' => 'single', 'field' => $field];
+                                    } else {
+                                        $found = false;
+                                        foreach ($chunks as &$chunk) {
+                                            if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
+                                                $chunk['fields'][] = $field;
+                                                $found = true;
+                                                break;
+                                            }
+                                        }
+                                        unset($chunk);
+                                        if (!$found) {
+                                            $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
+                                        }
+                                    }
+                                }
+                            @endphp
 
-                                                            {{-- -------------------------------------------------- --}}
-                                                            {{-- Render fields — grouped by row_group                --}}
-                                                            {{-- -------------------------------------------------- --}}
-                                                            @php
-        $currentSection = null;
-        $currentRowGroup = null;
-        $rowGroupBuffer = [];
+                            <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
 
-        // Group top-level fields into renderable chunks:
-        // Each chunk is either a single field (row_group=null)
-        // or a collection of fields sharing the same row_group
-        $chunks = [];
-        foreach ($topFields as $field) {
-            if (is_null($field->row_group)) {
-                $chunks[] = ['type' => 'single', 'field' => $field];
-            } else {
-                // Find or create a row group chunk
-                $found = false;
-                foreach ($chunks as &$chunk) {
-                    if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
-                        $chunk['fields'][] = $field;
-                        $found = true;
-                        break;
-                    }
-                }
-                unset($chunk);
-                if (!$found) {
-                    $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
-                }
-            }
-        }
-                                                            @endphp
-
-                                                            @foreach ($chunks as $chunk)
-                                                                @if ($chunk['type'] === 'single')
-                                                                    @php $field = $chunk['field']; @endphp
-
-                                                                    {{-- Section heading --}}
-                                                                    @if ($field->section_label && $field->section_label !== $currentSection)
-                                                                        @php $currentSection = $field->section_label; @endphp
-                                                                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
-                                                                            {{ $field->section_label }}
-                                                                        </h3>
-                                                                    @endif
-
-                                                                    <div class="mb-4">
-                                                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
-                                                                    </div>
-
-                                                                @else
-                                                                    {{-- Row group: render fields side by side --}}
-                                                                    @php $firstField = $chunk['fields'][0]; @endphp
-
-                                                                    {{-- Section heading from first field in group --}}
-                                                                    @if ($firstField->section_label && $firstField->section_label !== $currentSection)
-                                                                        @php $currentSection = $firstField->section_label; @endphp
-                                                                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
-                                                                            {{ $firstField->section_label }}
-                                                                        </h3>
-                                                                    @endif
-
-                                                                    <div class="grid gap-4 mb-4 row-group-grid" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
-                                                                        @foreach ($chunk['fields'] as $field)
-                                                                            <div>
-                                                                                @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
-                                                                            </div>
-                                                                        @endforeach
-                                                                    </div>
-                                                                @endif
-                                                            @endforeach
-
-                                                        </div>
-                                                    @endforeach
-
-                                                    {{-- Consent + Submit --}}
-                                                    <div class="mt-6 pt-4 border-t flex items-center gap-3 consent-wrap">
-                                                        <input type="checkbox" name="consent" id="consent"
-                                                            class="rounded border-gray-300 text-blue-600" />
-                                                        <label for="consent" class="text-sm text-gray-600">
-                                                            Saya menyatakan bahwa informasi yang saya berikan adalah benar adanya.
-                                                        </label>
-                                                    </div>
-                                                    <button type="button" id="submit-btn" onclick="submitIfConsented()"
-                                                        class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                                                        Buat Dokumen
-                                                    </button>
-
-                                                </form>
+                                {{-- Autofill slots --}}
+                                @foreach ($slots as $slot)
+                                    <div class="autofill-panel mb-4">
+                                        <p style="font-size:0.74rem;font-weight:700;color:var(--navy-600);margin-bottom:0.6rem;letter-spacing:0.02em;">
+                                            Autofill — {{ $slot->slot_label }}
+                                        </p>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="form-label" style="font-size:0.7rem;color:var(--navy-500);">Dari Data Staff</label>
+                                                <select onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
+                                                    class="staff-dropdown w-full" style="border:1.5px solid var(--navy-100);border-radius:7px;padding:0.5rem 0.75rem;font-size:0.8rem;background:#fff;color:var(--slate-700);outline:none;font-family:var(--font-body);">
+                                                    <option value="">— Pilih Staff —</option>
+                                                </select>
                                             </div>
+                                            <div>
+                                                <label class="form-label" style="font-size:0.7rem;color:var(--navy-500);">Dari Data Pejabat</label>
+                                                <select onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
+                                                    class="official-dropdown w-full" style="border:1.5px solid var(--navy-100);border-radius:7px;padding:0.5rem 0.75rem;font-size:0.8rem;background:#fff;color:var(--slate-700);outline:none;font-family:var(--font-body);">
+                                                    <option value="">— Pilih Pejabat —</option>
+                                                </select>
                                             </div>
-                                            {{-- End left column --}}
+                                        </div>
+                                    </div>
+                                @endforeach
 
-                                            {{-- ======================================================== --}}
-                                            {{-- Right column — guide panel                               --}}
-                                            {{-- ======================================================== --}}
-                                            <div class="w-full lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-6 space-y-3">
-
-                                                {{-- Quick start card --}}
-                                                <div class="bg-white rounded-lg shadow p-4 guide-card fade-up fade-up-delay-2">
-                                                    <div class="flex items-center gap-2 mb-3">
-                                                        <h2 class="text-sm font-bold text-gray-800"><i class="fa-solid fa-circle-question"></i> Cara Membuat Dokumen</h2>
-                                                    </div>
-                                                    <ol class="space-y-2">
-                                                        @foreach ([
-        ['1', 'bg-blue-600', 'Pilih Jenis Dokumen', 'Gunakan dropdown "Jenis Surat / Dokumen" untuk memilih template yang diinginkan.'],
-        ['2', 'bg-blue-600', 'Gunakan Autofill (Opsional)', 'Jika tersedia, pilih nama pegawai dari dropdown autofill berwarna biru/ungu untuk mengisi otomatis field seperti nama, NIP, dan jabatan.'],
-        ['3', 'bg-blue-600', 'Isi Form', 'Lengkapi semua field yang tersedia. Field bertanda * wajib diisi. Field tanggal otomatis diformat ke format Indonesia.'],
-        ['4', 'bg-blue-600', 'Centang Persetujuan', 'Centang pernyataan persetujuan di bagian bawah form sebelum melanjutkan.'],
-        ['5', 'bg-blue-600', 'Klik Buat Dokumen', 'Tekan tombol "Buat Dokumen". Sistem akan memproses dan menghasilkan file dokumen.'],
-        ['6', 'bg-green-600', 'Unduh / Preview', 'Setelah berhasil, tombol Unduh akan muncul. Tombol Preview muncul jika diaktifkan admin.'],
-    ] as [$num, $color, $title, $desc])
-                                                        <li class="flex gap-3">
-                                                            <span class="flex-shrink-0 w-5 h-5 {{ $color }} text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">{{ $num }}</span>
-                                                            <div>
-                                                                <p class="text-xs font-semibold text-gray-700">{{ $title }}</p>
-                                                                <p class="text-xs text-gray-500 leading-relaxed mt-0.5">{{ $desc }}</p>
-                                                            </div>
-                                                        </li>
-                                                        @endforeach
-                                                    </ol>
+                                {{-- Fields --}}
+                                @php $currentSection = null; @endphp
+                                @foreach ($chunks as $chunk)
+                                    @if ($chunk['type'] === 'single')
+                                        @php $field = $chunk['field']; @endphp
+                                        @if ($field->section_label && $field->section_label !== $currentSection)
+                                            @php $currentSection = $field->section_label; @endphp
+                                            <h3 class="form-section-heading">{{ $field->section_label }}</h3>
+                                        @endif
+                                        <div class="mb-3.5">
+                                            @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                        </div>
+                                    @else
+                                        @php $firstField = $chunk['fields'][0]; @endphp
+                                        @if ($firstField->section_label && $firstField->section_label !== $currentSection)
+                                            @php $currentSection = $firstField->section_label; @endphp
+                                            <h3 class="form-section-heading">{{ $firstField->section_label }}</h3>
+                                        @endif
+                                        <div class="grid gap-3.5 mb-3.5 row-group-grid" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
+                                            @foreach ($chunk['fields'] as $field)
+                                                <div>
+                                                    @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
                                                 </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                @endforeach
 
-                                                {{-- Field types card --}}
-                                                <div class="bg-white rounded-lg shadow p-4 guide-card fade-up fade-up-delay-3">
-                                                    <div class="flex items-center gap-2 mb-3">
-                                                        <h2 class="text-sm font-bold text-gray-800"><i class="fa-solid fa-square-pen"></i> Jenis Field di Form</h2>
-                                                    </div>
-                                                    <div class="space-y-2 text-xs text-gray-600">
-                                                        @foreach ([
-        ['•', 'Text / Textarea', 'Ketik teks bebas. Textarea untuk keterangan panjang.'],
-        ['•', 'Date', 'Pilih tanggal dari kalender. Otomatis diformat ke "01 Januari 2025".'],
-        ['•', 'Number', 'Ketik angka (jumlah hari, nomor urut, dsb.)'],
-        ['•', 'Select (Dropdown)', 'Pilih satu opsi dari daftar yang tersedia.'],
-        ['•', 'Checkbox', 'Centang untuk nilai Ya/Benar.'],
-        ['•', 'Repeating Group', 'Klik "+ Tambah Baris" untuk menambah baris data. Klik × untuk menghapus.'],
-        ['•', 'Staff / Pejabat Loop', 'Centang nama yang ingin dimasukkan. Drag ⠿ untuk mengubah urutan dalam dokumen.'],
-    ] as [$icon, $type, $desc])
-                                                                    <div class="flex gap-2">
-                                                                        <span class="flex-shrink-0 w-5 text-center">{{ $icon }}</span>
-                                                                        <div>
-                                                                            <span class="font-medium text-gray-700">{{ $type }}</span>
-                                                                            <span class="text-gray-400"> — </span>
-                                                                            <span>{{ $desc }}</span>
-                                                                        </div>
-                                                                    </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
+                            </div>
+                        @endforeach
 
-                                                {{-- Autofill tip card --}}
-                                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                                    <div class="flex items-center gap-2 mb-2">
-                                                        <h2 class="text-sm font-bold text-blue-800"><i class="fa-solid fa-lightbulb"></i> Tips Autofill</h2>
-                                                    </div>
-                                                    <ul class="space-y-1.5 text-xs text-blue-700">
-                                                        <li>• Setiap slot autofill (biru/ungu) memiliki <strong>dua dropdown</strong>: satu dari Data Staff dan satu dari Data Pejabat.</li>
-                                                        <li>• Memilih dari salah satu dropdown akan otomatis mengisi nama, NIP, jabatan, dan unit kerja.</li>
-                                                        <li>• Field yang terisi otomatis masih <strong>bisa diedit manual</strong> jika perlu.</li>
-                                                        <li>• Untuk daftar peserta (Staff/Pejabat Loop), centang beberapa nama lalu <strong>drag untuk mengubah urutan</strong> dalam dokumen.</li>
-                                                    </ul>
-                                                </div>
+                        {{-- Consent + Submit --}}
+                        <div class="mt-6 pt-4" style="border-top:1px solid var(--slate-200);">
+                            <div class="consent-area mb-4">
+                                <input type="checkbox" name="consent" id="consent"
+                                    style="width:16px;height:16px;border-radius:4px;accent-color:var(--navy-600);flex-shrink:0;margin-top:0.1rem;cursor:pointer;" />
+                                <label for="consent" style="font-size:0.8rem;color:var(--slate-600);cursor:pointer;line-height:1.45;">
+                                    Saya menyatakan bahwa informasi yang saya berikan adalah <strong>benar</strong> dan dapat dipertanggungjawabkan.
+                                </label>
+                            </div>
+                            <button type="button" id="submit-btn" onclick="submitIfConsented()">
+                                Buat Dokumen
+                            </button>
+                        </div>
 
-                                                {{-- Warning card --}}
-                                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                                    <div class="flex items-center gap-2 mb-2">
-                                                        <h2 class="text-sm font-bold text-yellow-800"><i class="fa-solid fa-triangle-exclamation"></i> Perhatian</h2>
-                                                    </div>
-                                                    <ul class="space-y-1.5 text-xs text-yellow-700">
-                                                        <li>• File dokumen akan <strong>otomatis terhapus</strong> dari server setelah beberapa menit. Segera unduh setelah dibuat.</li>
-                                                        <li>• Pastikan semua field wajib (*) terisi sebelum menekan "Buat Dokumen".</li>
-                                                        <li>• Jika ada field yang kurang atau tidak sesuai, hubungi administrator.</li>
-                                                    </ul>
-                                                </div>
+                    </form>
+                </div>
+            </div>
 
-                                            </div>
-                                            {{-- End right column --}}
+            {{-- ── Guide Column ─────────────────────────────── --}}
+            <div class="w-full lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-20 space-y-3">
 
-                                            </div>
-                                            {{-- End two-column grid --}}
+                {{-- Quick guide --}}
+                <div class="guide-card p-4 fade-up fade-up-2">
+                    <div class="guide-section-title">Cara Membuat Dokumen</div>
+                    <div class="space-y-0">
+                        @foreach([
+                            ['Pilih Jenis Dokumen','Gunakan dropdown untuk memilih template.'],
+                            ['Gunakan Autofill','Pilih nama dari panel biru untuk isi otomatis.'],
+                            ['Isi Form','Lengkapi semua field wajib (*).'],
+                            ['Centang Persetujuan','Konfirmasi kebenaran data.'],
+                            ['Klik Buat Dokumen','Sistem akan memproses dan menghasilkan file.'],
+                            ['Unduh / Preview','Tombol muncul setelah dokumen berhasil dibuat.'],
+                        ] as $i => [$t, $d])
+                        <div class="guide-step">
+                            <div class="guide-step-num {{ $i >= 4 ? 'done' : '' }}">{{ $i+1 }}</div>
+                            <div>
+                                <div class="guide-step-title">{{ $t }}</div>
+                                <div class="guide-step-desc">{{ $d }}</div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
 
+                {{-- Field types --}}
+                <div class="guide-card p-4 fade-up fade-up-3">
+                    <div class="guide-section-title">Jenis Field</div>
+                    <div class="space-y-1.5">
+                        @foreach([
+                            ['Text / Textarea','Ketik teks bebas.'],
+                            ['Date','Pilih dari kalender — format Indonesia.'],
+                            ['Number','Ketik angka.'],
+                            ['Select','Pilih satu dari daftar.'],
+                            ['Checkbox','Centang untuk Ya/Benar.'],
+                            ['Repeating Group','Tambah baris data dinamis.'],
+                            ['Staff / Pejabat Loop','Centang nama, drag ⠿ untuk urutkan.'],
+                        ] as [$t, $d])
+                        <div style="font-size:0.75rem;">
+                            <span style="font-weight:600;color:var(--slate-700);">{{ $t }}</span>
+                            <span style="color:var(--slate-400);"> — {{ $d }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Tips --}}
+                <div class="tip-box tip-box-navy fade-up fade-up-4">
+                    <div class="guide-section-title" style="color:var(--navy-600);margin-bottom:0.5rem;">Tips Autofill</div>
+                    <ul class="space-y-1" style="font-size:0.73rem;">
+                        <li>• Setiap slot memiliki <strong>dua sumber</strong>: Data Staff dan Data Pejabat.</li>
+                        <li>• Field yang terisi otomatis masih <strong>bisa diedit manual</strong>.</li>
+                        <li>• Drag <strong>⠿</strong> untuk mengubah urutan peserta dalam dokumen.</li>
+                    </ul>
+                </div>
+
+                {{-- Warning --}}
+                <div class="tip-box tip-box-gold fade-up fade-up-4">
+                    <div class="guide-section-title" style="color:#7a5f1a;margin-bottom:0.5rem;">Perhatian</div>
+                    <ul class="space-y-1" style="font-size:0.73rem;">
+                        <li>• File otomatis <strong>dihapus</strong> dari server setelah beberapa menit.</li>
+                        <li>• Segera unduh setelah dokumen berhasil dibuat.</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
         @endif
+
     </main>
+
+    {{-- ── Preview Modal ───────────────────────────────────── --}}
+    <div id="preview-modal"
+        class="sipadu-modal-bg hidden"
+        onclick="if(event.target===this) closePreview()">
+        <div class="sipadu-modal w-full max-w-4xl mx-4 flex flex-col" style="height:90vh;">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--slate-200);">
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <div style="width:3px;height:20px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
+                    <h2 style="font-size:0.95rem;font-weight:700;color:var(--navy-800);">Preview Dokumen</h2>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <a id="preview-download-btn" href="#" class="download-btn hidden" style="padding:0.4rem 0.9rem;">
+                        ⬇ Unduh
+                    </a>
+                    <button onclick="closePreview()"
+                        style="width:28px;height:28px;border-radius:6px;border:1px solid var(--slate-200);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--slate-400);font-size:1rem;transition:all 0.2s;"
+                        onmouseover="this.style.background='var(--slate-100)';this.style.color='var(--slate-700)'"
+                        onmouseout="this.style.background='transparent';this.style.color='var(--slate-400)'">✕</button>
+                </div>
+            </div>
+
+            <div id="preview-loading" class="flex-1 flex items-center justify-center" style="color:var(--slate-400);">
+                <div class="text-center">
+                    <div class="sipadu-spinner mx-auto mb-3"></div>
+                    <p style="font-size:0.85rem;font-weight:500;">Memuat preview...</p>
+                    <p style="font-size:0.72rem;color:var(--slate-300);margin-top:0.25rem;">Konversi PDF memerlukan beberapa detik</p>
+                </div>
+            </div>
+            <div id="preview-error" class="flex-1 items-center justify-center hidden" style="color:#b91c1c;">
+                <div class="text-center">
+                    <div style="font-size:2rem;margin-bottom:0.5rem;">⚠️</div>
+                    <p style="font-size:0.85rem;font-weight:600;">Gagal memuat preview</p>
+                    <p style="font-size:0.75rem;color:var(--slate-400);margin-top:0.25rem;" id="preview-error-msg"></p>
+                </div>
+            </div>
+            <iframe id="preview-iframe" class="flex-1 w-full hidden rounded-b-2xl" src="" title="Document Preview"></iframe>
+        </div>
+    </div>
+
     <script>
         const autofillMap = {
             @foreach ($documentTypes as $docType)
                 "{{ $docType->key }}": {
-                        @foreach (($allFields[$docType->id] ?? collect())->whereNotNull('staff_autofill_column')->where('autofill_role', '!=', 'none') as $f)
-                            "{{ $f->field_key }}": { col: "{{ $f->staff_autofill_column }}", role: "{{ $f->autofill_role }}" },
-                        @endforeach
+                    @foreach (($allFields[$docType->id] ?? collect())->whereNotNull('staff_autofill_column')->where('autofill_role', '!=', 'none') as $f)
+                        "{{ $f->field_key }}": { col: "{{ $f->staff_autofill_column }}", role: "{{ $f->autofill_role }}" },
+                    @endforeach
                 },
             @endforeach
-    };
+        };
 
-        let staffData = [];
-        let officialData = [];
+        let staffData = [], officialData = [];
 
         async function loadAllData() {
             try {
@@ -536,28 +701,26 @@
                 officialData = await oRes.json();
                 populateDropdowns();
                 populateLoopLists();
-            } catch (e) {
-                console.warn('Could not load autofill data:', e);
-            }
+            } catch (e) { console.warn('Could not load autofill data:', e); }
         }
 
         function populateDropdowns() {
-            document.querySelectorAll('.staff-dropdown').forEach(function (select) {
+            document.querySelectorAll('.staff-dropdown').forEach(function(select) {
                 const ph = select.options[0];
                 select.innerHTML = '';
                 select.appendChild(ph);
-                staffData.forEach(function (p) {
+                staffData.forEach(function(p) {
                     const opt = document.createElement('option');
                     opt.value = p.id;
                     opt.textContent = p.staff_name + (p.nip ? ' — ' + p.nip : '');
                     select.appendChild(opt);
                 });
             });
-            document.querySelectorAll('.official-dropdown').forEach(function (select) {
+            document.querySelectorAll('.official-dropdown').forEach(function(select) {
                 const ph = select.options[0];
                 select.innerHTML = '';
                 select.appendChild(ph);
-                officialData.forEach(function (p) {
+                officialData.forEach(function(p) {
                     const opt = document.createElement('option');
                     opt.value = p.id;
                     opt.textContent = p.staff_name + (p.nip ? ' — ' + p.nip : '');
@@ -565,38 +728,34 @@
                 });
             });
         }
-        
+
         function populateLoopLists() {
-            document.querySelectorAll('[data-loop-type]').forEach(function (container) {
-                const loopType = container.dataset.loopType;   // 'staff' or 'official'
+            document.querySelectorAll('[data-loop-type]').forEach(function(container) {
+                const loopType = container.dataset.loopType;
                 const fieldKey = container.dataset.fieldKey;
-                const docKey = container.dataset.docKey;
-                const dataset = loopType === 'staff' ? staffData : officialData;
-                const listEl = container.querySelector('.loop-checklist');
+                const dataset  = loopType === 'staff' ? staffData : officialData;
+                const listEl   = container.querySelector('.loop-checklist');
                 const searchEl = container.querySelector('.loop-search');
                 if (!listEl) return;
-
                 listEl.innerHTML = '';
-                dataset.forEach(function (person) {
+                dataset.forEach(function(person) {
                     listEl.appendChild(makeLoopItem(person, fieldKey));
                 });
-
                 if (searchEl) {
-                    searchEl.addEventListener('input', function () {
+                    searchEl.addEventListener('input', function() {
                         const q = this.value.toLowerCase();
-                        listEl.querySelectorAll('.loop-item').forEach(function (item) {
+                        listEl.querySelectorAll('.loop-item').forEach(function(item) {
                             item.style.display = item.dataset.name.toLowerCase().includes(q) ? '' : 'none';
                         });
                     });
                 }
-
                 initLoopDrag(listEl, fieldKey);
             });
         }
 
-        function makeLoopItem(person, fieldKey, countEl) {
+        function makeLoopItem(person, fieldKey) {
             const div = document.createElement('div');
-            div.className = 'loop-item flex items-center gap-2 px-3 py-2 rounded border border-transparent';
+            div.className = 'loop-item flex items-center gap-2 px-3 py-2 rounded';
             div.dataset.id   = person.id;
             div.dataset.name = person.staff_name;
             div.setAttribute('draggable', true);
@@ -605,27 +764,21 @@
             cb.type      = 'checkbox';
             cb.name      = `field_${fieldKey}[]`;
             cb.value     = person.id;
-            cb.className = 'rounded border-gray-300 text-blue-600 flex-shrink-0 cursor-pointer';
-
-            // Toggle checked-item highlight and update counter
+            cb.style.cssText = 'width:15px;height:15px;accent-color:var(--navy-600);flex-shrink:0;cursor:pointer;';
             cb.addEventListener('change', function() {
-                if (this.checked) {
-                    div.classList.add('checked-item');
-                } else {
-                    div.classList.remove('checked-item');
-                }
+                div.classList.toggle('checked-item', this.checked);
                 updateLoopCount(div.closest('[data-loop-type]'));
             });
 
             const label = document.createElement('span');
-            label.className = 'text-sm text-gray-700 flex-1 cursor-pointer select-none';
+            label.style.cssText = 'font-size:0.8rem;color:var(--slate-700);flex:1;cursor:pointer;user-select:none;';
             label.textContent = person.staff_name
                 + (person.nip      ? ' — ' + person.nip      : '')
                 + (person.position ? ' (' + person.position + ')' : '');
             label.addEventListener('click', function() { cb.click(); });
 
             const handle = document.createElement('span');
-            handle.className = 'text-gray-300 text-base select-none cursor-grab flex-shrink-0';
+            handle.style.cssText = 'color:var(--slate-300);font-size:1rem;user-select:none;cursor:grab;flex-shrink:0;';
             handle.textContent = '⠿';
 
             div.appendChild(cb);
@@ -636,30 +789,24 @@
 
         function updateLoopCount(container) {
             if (!container) return;
-            const countEl  = container.querySelector('.loop-count');
-            const checked  = container.querySelectorAll('.loop-item input[type="checkbox"]:checked').length;
+            const countEl = container.querySelector('.loop-count');
+            const checked = container.querySelectorAll('.loop-item input[type="checkbox"]:checked').length;
             if (!countEl) return;
-            if (checked === 0) {
-                countEl.textContent = '';
-                countEl.classList.add('hidden');
-            } else {
-                countEl.textContent = checked + ' dipilih';
-                countEl.classList.remove('hidden');
-            }
-        }       
+            if (checked === 0) { countEl.textContent = ''; countEl.classList.add('hidden'); }
+            else { countEl.textContent = checked + ' dipilih'; countEl.classList.remove('hidden'); }
+        }
 
         function initLoopDrag(listEl) {
             let dragging = null;
-
-            listEl.addEventListener('dragstart', function (e) {
+            listEl.addEventListener('dragstart', function(e) {
                 dragging = e.target.closest('.loop-item');
                 if (dragging) dragging.classList.add('dragging');
             });
-            listEl.addEventListener('dragend', function () {
+            listEl.addEventListener('dragend', function() {
                 if (dragging) dragging.classList.remove('dragging');
                 dragging = null;
             });
-            listEl.addEventListener('dragover', function (e) {
+            listEl.addEventListener('dragover', function(e) {
                 e.preventDefault();
                 const target = e.target.closest('.loop-item');
                 if (target && target !== dragging) {
@@ -669,39 +816,29 @@
                 }
             });
         }
-        
+
         function fillFromSource(docTypeKey, slotKey, source, personId) {
             if (!personId) return;
             const dataset = source === 'staff' ? staffData : officialData;
             const person  = dataset.find(p => p.id == personId);
             if (!person) return;
-
             const map = autofillMap[docTypeKey] || {};
             let filledCount = 0;
-
             document.querySelectorAll(`#form-${docTypeKey} [data-field-key]`).forEach(function(wrapper) {
                 const fieldKey    = wrapper.dataset.fieldKey;
                 const fieldConfig = map[fieldKey];
-                if (!fieldConfig) return;
-                if (fieldConfig.role !== slotKey) return;
-
-                const col   = fieldConfig.col;
+                if (!fieldConfig || fieldConfig.role !== slotKey) return;
                 const input = wrapper.querySelector('input, select, textarea');
-                if (input && person[col] !== undefined && person[col] !== null) {
-                    input.value = person[col];
-                    // Flash highlight
+                if (input && person[fieldConfig.col] !== undefined && person[fieldConfig.col] !== null) {
+                    input.value = person[fieldConfig.col];
                     input.classList.remove('autofill-highlight');
-                    void input.offsetWidth; // force reflow to restart animation
+                    void input.offsetWidth;
                     input.classList.add('autofill-highlight');
-                    setTimeout(() => input.classList.remove('autofill-highlight'), 1300);
+                    setTimeout(() => input.classList.remove('autofill-highlight'), 1400);
                     filledCount++;
                 }
             });
-
-            // Brief toast feedback
-            if (filledCount > 0) {
-                showToast(`${filledCount} field terisi otomatis dari data ${source === 'staff' ? 'staff' : 'pejabat'}.`);
-            }
+            if (filledCount > 0) showToast(`${filledCount} field terisi dari data ${source === 'staff' ? 'staff' : 'pejabat'}.`);
         }
 
         let toastTimer = null;
@@ -710,129 +847,80 @@
             if (!toast) {
                 toast = document.createElement('div');
                 toast.id = 'toast-notification';
-                toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium text-white z-50 transition-all duration-300 opacity-0 translate-y-2';
+                toast.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(8px);z-index:9999;transition:all 0.3s ease;opacity:0;';
                 document.body.appendChild(toast);
             }
             toast.textContent = message;
-            toast.style.background = type === 'success' ? '#2563EB' : '#DC2626';
-            // Animate in
-            requestAnimationFrame(() => {
-                toast.classList.remove('opacity-0', 'translate-y-2');
-                toast.classList.add('opacity-100', 'translate-y-0');
-            });
+            toast.style.background = type === 'success' ? 'var(--navy-700)' : '#dc2626';
+            toast.className = 'badge';
+            toast.style.cssText += 'padding:0.6rem 1.1rem;border-radius:8px;font-size:0.8rem;font-weight:500;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.25);';
+            requestAnimationFrame(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(0)'; });
             clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                toast.classList.remove('opacity-100', 'translate-y-0');
-            }, 2500);
+            toastTimer = setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(8px)'; }, 2500);
         }
-        
+
         function showForm(selectedKey) {
             document.querySelectorAll('[id^="form-"]').forEach(function(el) {
                 if (!el.classList.contains('hidden')) {
-                    // Fade out current
-                    el.style.opacity    = '0';
-                    el.style.transform  = 'translateY(4px)';
                     el.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+                    el.style.opacity = '0'; el.style.transform = 'translateY(4px)';
                     setTimeout(() => {
                         el.classList.add('hidden');
                         el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
-                        el.style.opacity   = '';
-                        el.style.transform = '';
+                        el.style.opacity = ''; el.style.transform = '';
                     }, 150);
                 } else {
                     el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
                 }
             });
-
             setTimeout(() => {
                 const target = document.getElementById('form-' + selectedKey);
                 if (target) {
                     target.classList.remove('hidden');
                     target.querySelectorAll('input, select, textarea').forEach(i => i.disabled = false);
-                    // Fade in
-                    target.style.opacity   = '0';
-                    target.style.transform = 'translateY(8px)';
+                    target.style.opacity = '0'; target.style.transform = 'translateY(8px)';
                     target.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-                    requestAnimationFrame(() => {
-                        target.style.opacity   = '1';
-                        target.style.transform = 'translateY(0)';
-                    });
-                    setTimeout(() => {
-                        target.style.transition = '';
-                        target.style.opacity    = '';
-                        target.style.transform  = '';
-                    }, 220);
+                    requestAnimationFrame(() => { target.style.opacity = '1'; target.style.transform = 'translateY(0)'; });
+                    setTimeout(() => { target.style.transition = ''; target.style.opacity = ''; target.style.transform = ''; }, 230);
                 }
             }, 160);
         }
-        
+
         function submitIfConsented() {
             if (!document.getElementById('consent').checked) {
-                showToast('Mohon centang pernyataan persetujuan terlebih dahulu.', 'error');
-                // Shake the consent area
-                const consentArea = document.getElementById('consent').closest('div');
-                consentArea.style.animation = 'none';
-                consentArea.style.transition = 'transform 0.1s';
-                const shakes = [4, -4, 3, -3, 2, -2, 0];
-                shakes.forEach((x, i) => {
-                    setTimeout(() => consentArea.style.transform = `translateX(${x}px)`, i * 50);
-                });
-                setTimeout(() => consentArea.style.transform = '', shakes.length * 50);
+                showToast('Centang pernyataan persetujuan terlebih dahulu.', 'error');
+                const ca = document.getElementById('consent').closest('.consent-area');
+                const shakes = [6, -6, 4, -4, 2, -2, 0];
+                shakes.forEach((x, i) => setTimeout(() => ca.style.transform = `translateX(${x}px)`, i * 55));
+                setTimeout(() => ca.style.transform = '', shakes.length * 55);
                 return;
             }
-
-            // Disable hidden sections
             document.querySelectorAll('[id^="form-"]').forEach(function(section) {
                 if (section.classList.contains('hidden')) {
                     section.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
                 }
             });
-
-            // Show loading overlay and disable button
             const btn = document.getElementById('submit-btn');
-            if (btn) {
-                btn.disabled    = true;
-                btn.textContent = 'Membuat dokumen...';
-            }
+            if (btn) { btn.disabled = true; btn.textContent = 'Membuat dokumen...'; }
             document.getElementById('submit-overlay').classList.add('active');
-
             document.getElementById('main-form').submit();
         }
 
         const rowCounters = {};
-
         function addRow(docTypeKey, groupKey) {
             const container = document.getElementById(`rows-${docTypeKey}-${groupKey}`);
             const template  = document.getElementById(`row-template-${docTypeKey}-${groupKey}`);
             if (!container || !template) return;
-
             const key   = `${docTypeKey}-${groupKey}`;
             const index = rowCounters[key] = (rowCounters[key] || 0) + 1;
-
             const clone = template.content.cloneNode(true);
             clone.querySelectorAll('[name]').forEach(el => el.name = el.name.replace('__INDEX__', index));
-
-            // Animate new row in
-            const rowDiv = clone.querySelector('.row-item');
-            if (rowDiv) {
-                rowDiv.style.opacity   = '0';
-                rowDiv.style.transform = 'translateY(-6px)';
-                rowDiv.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-            }
             container.appendChild(clone);
-            // Trigger animation after append
             const newRow = container.lastElementChild;
             if (newRow) {
-                requestAnimationFrame(() => {
-                    newRow.style.opacity   = '1';
-                    newRow.style.transform = 'translateY(0)';
-                    setTimeout(() => {
-                        newRow.style.transition = '';
-                        newRow.style.opacity    = '';
-                        newRow.style.transform  = '';
-                    }, 220);
-                });
+                newRow.style.opacity = '0'; newRow.style.transform = 'translateY(-4px)';
+                newRow.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                requestAnimationFrame(() => { newRow.style.opacity = '1'; newRow.style.transform = 'translateY(0)'; });
             }
         }
 
@@ -840,131 +928,57 @@
             const row = btn.closest('.row-item');
             if (!row) return;
             row.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
-            row.style.opacity    = '0';
-            row.style.transform  = 'translateX(8px)';
+            row.style.opacity = '0'; row.style.transform = 'translateX(6px)';
             setTimeout(() => row.remove(), 160);
         }
+
+        function openPreview(previewUrl) {
+            const modal   = document.getElementById('preview-modal');
+            const iframe  = document.getElementById('preview-iframe');
+            const loading = document.getElementById('preview-loading');
+            const error   = document.getElementById('preview-error');
+            iframe.classList.add('hidden');
+            loading.classList.remove('hidden');
+            error.classList.add('hidden');
+            iframe.src = '';
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            iframe.onload = function() { loading.classList.add('hidden'); iframe.classList.remove('hidden'); };
+            iframe.onerror = function() {
+                loading.classList.add('hidden');
+                error.classList.remove('hidden');
+                document.getElementById('preview-error-msg').textContent = 'Pastikan LibreOffice terinstall di server.';
+            };
+            iframe.src = previewUrl;
+        }
+
+        function closePreview() {
+            document.getElementById('preview-modal').classList.add('hidden');
+            document.getElementById('preview-iframe').src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePreview(); });
 
         document.addEventListener('DOMContentLoaded', function() {
             loadAllData();
             const select = document.getElementById('letter-type-select');
             if (select) {
-                // Show initial form without transition
+                document.querySelectorAll('[id^="form-"]').forEach(el => {
+                    el.classList.add('hidden');
+                    el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
+                });
                 const initial = document.getElementById('form-' + select.value);
                 if (initial) {
-                    document.querySelectorAll('[id^="form-"]').forEach(el => {
-                        el.classList.add('hidden');
-                        el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
-                    });
                     initial.classList.remove('hidden');
                     initial.querySelectorAll('input, select, textarea').forEach(i => i.disabled = false);
                 }
             }
-
-            // Hide overlay if page loaded from back/forward cache
             document.getElementById('submit-overlay').classList.remove('active');
             const btn = document.getElementById('submit-btn');
             if (btn) { btn.disabled = false; btn.textContent = 'Buat Dokumen'; }
         });
     </script>
 
-    <div id="preview-modal"
-        class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden"
-        onclick="if(event.target===this) closePreview()">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl mx-4 flex flex-col"
-            style="height: 90vh;">
-
-            {{-- Modal header --}}
-            <div class="flex items-center justify-between px-5 py-3 border-b flex-shrink-0">
-                <h2 class="text-base font-semibold text-gray-800">Preview Dokumen</h2>
-                <div class="flex items-center gap-3">
-                    <a id="preview-download-btn" href="#"
-                    class="text-sm bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 font-medium hidden">
-                        <i class="fa-solid fa-file-arrow-down"></i> Unduh
-                    </a>
-                    <button onclick="closePreview()"
-                        class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
-                        ✕
-                    </button>
-                </div>
-            </div>
-
-            {{-- Loading state --}}
-            <div id="preview-loading"
-                class="flex-1 flex items-center justify-center text-gray-400 text-sm">
-                <div class="text-center">
-                    <div class="text-3xl mb-2"><i class="fa-solid fa-hourglass-half"></i></div>
-                    <p>Memuat preview...</p>
-                    <p class="text-xs mt-1 text-gray-300">Proses konversi mungkin memerlukan beberapa detik</p>
-                </div>
-            </div>
-
-            {{-- Error state --}}
-            <div id="preview-error"
-                class="flex-1 flex items-center justify-center text-red-400 text-sm hidden">
-                <div class="text-center">
-                    <div class="text-3xl mb-2"><i class="fa-solid fa-heart-crack"></i></div>
-                    <p class="font-medium">Gagal memuat preview</p>
-                    <p class="text-xs mt-1 text-gray-400" id="preview-error-msg"></p>
-                </div>
-            </div>
-
-            {{-- iframe --}}
-            <iframe id="preview-iframe"
-                    class="flex-1 w-full hidden rounded-b-lg"
-                    src=""
-                    title="Document Preview">
-            </iframe>
-
-        </div>
-    </div>
-
-    <script>
-        function openPreview(previewUrl) {
-            const modal   = document.getElementById('preview-modal');
-            const iframe  = document.getElementById('preview-iframe');
-            const loading = document.getElementById('preview-loading');
-            const error   = document.getElementById('preview-error');
-
-            // Reset state
-            iframe.classList.add('hidden');
-            loading.classList.remove('hidden');
-            error.classList.add('hidden');
-            iframe.src = '';
-
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-
-            // Load the PDF
-            iframe.onload = function() {
-                loading.classList.add('hidden');
-                iframe.classList.remove('hidden');
-            };
-
-            iframe.onerror = function() {
-                loading.classList.add('hidden');
-                error.classList.remove('hidden');
-                document.getElementById('preview-error-msg').textContent =
-                    'Pastikan LibreOffice terinstall di server.';
-            };
-
-            iframe.src = previewUrl;
-        }
-
-        function closePreview() {
-            const modal  = document.getElementById('preview-modal');
-            const iframe = document.getElementById('preview-iframe');
-            modal.classList.add('hidden');
-            iframe.src = '';
-            document.body.style.overflow = '';
-        }
-
-        // Close on Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closePreview();
-        });
-    </script>
-
 </body>
-
 </html>

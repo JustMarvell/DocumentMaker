@@ -1,321 +1,147 @@
 @extends('admin.layout')
+@section('page-title', 'Data Staff')
 
 @section('content')
+<div class="space-y-4 fade-up">
 
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Manajemen Data Staff</h1>
-
-    {{-- ============================================================ --}}
-    {{-- Add Staff Form --}}
-    {{-- ============================================================ --}}
-    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Tambah Staff</h3>
-    <div class="bg-white rounded-lg shadow p-6 mb-8">
-        <form method="POST" action="{{ route('admin.staff-data.store') }}">
-            @csrf
-            <div class="grid grid-cols-2 gap-4">
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pegawai <span
-                            class="text-red-500">*</span></label>
-                    <input type="text" name="staff_name"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="John Doe..." value="{{ old('staff_name') }}" />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">NIP <span
-                            class="text-red-500">*</span></label>
-                    <input type="text" name="nip"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="71030504050001..." value="{{ old('nip') }}" />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email<span
-                            class="text-red-500">*</span></label>
-                    <input type="email" name="email"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="email@gmail.com..." value="{{ old('email') }}" />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja <span
-                            class="text-red-500">*</span></label>
-                    <input type="text" name="work_unit"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Bidang Bina Marga..." value="{{ old('work_unit') }}" />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat / Gol. Bidang</label>
-                    <input type="text" name="rank"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Pembina Tkd. I..." value="{{ old('rank') }}" />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                    <input type="text" name="position"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Staff..." value="{{ old('position') }}" />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">No. HP</label>
-                    <input type="text" name="phone_number"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="082256472819..." value="{{ old('phone_number') }}" />
-                </div>
-
-                <div class="flex items-end">
-                    <button type="submit"
-                        class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium">
-                        + Tambah Staff
-                    </button>
-                </div>
-
-            </div>
-        </form>
+    <div class="flex items-center justify-between">
+        <div>
+            <div class="section-label mb-1">Admin Panel</div>
+            <h1 class="display-heading" style="font-size:1.35rem;">Data Staff</h1>
+        </div>
+        <span class="badge badge-navy">{{ count($staffData) }} entri</span>
     </div>
 
-    {{-- ============================================================ --}}
-    {{-- Search & Filter Bar --}}
-    {{-- ============================================================ --}}
-    <div class="mb-8 bg-white rounded-lg shadow p-6">
-        <form method="GET" action="{{ route('admin.staff-data') }}" class="flex flex-wrap gap-4 items-end">
+    {{-- Upload section --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-            <!-- Search Bar -->
-            <div class="flex-1 min-w-[240px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Pencarian</label>
-                <input type="text" name="search" value="{{ request('search') }}"
-                    placeholder="Cari nama, NIP, email, unit kerja..."
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        {{-- Upload form --}}
+        <div class="glass-card rounded-2xl p-5 fade-up fade-up-1">
+            <div class="flex items-center gap-2 mb-4">
+                <div style="width:3px;height:16px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
+                <h2 style="font-size:0.88rem;font-weight:700;color:var(--navy-800);">Upload / Perbarui Data</h2>
             </div>
-
-            <!-- Filter: Unit Kerja -->
-            <div class="min-w-[180px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja</label>
-                <select name="work_unit"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Semua Unit Kerja</option>
-                    @foreach ($workUnits ?? [] as $unit)
-                        <option value="{{ $unit }}" {{ request('work_unit') == $unit ? 'selected' : '' }}>
-                            {{ $unit }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Filter: Jabatan / Gol. Pangkat -->
-            <div class="min-w-[180px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat / Gol. Bidang</label>
-                <select name="rank"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Semua Pangkat / Golongan</option>
-                    @foreach ($ranks ?? [] as $rank)
-                        <option value="{{ $rank }}" {{ request('rank') == $rank ? 'selected' : '' }}>
-                            {{ $rank }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Filter: Posisi -->
-            <div class="min-w-[180px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                <select name="position"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Semua Jabatan</option>
-                    @foreach ($positions ?? [] as $position)
-                        <option value="{{ $position }}" {{ request('position') == $position ? 'selected' : '' }}>
-                            {{ $position }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Buttons -->
-            <div class="flex items-end gap-3">
-                <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium">
-                    Cari
-                </button>
-
-                @if (request()->filled('search') || request()->filled('work_unit') || request()->filled('rank') || request()->filled('position'))
-                    <a href="{{ route('admin.staff-data') }}"
-                        class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg text-sm">
-                        Reset
-                    </a>
-                @endif
-            </div>
-        </form>
-    </div>
-
-    {{-- ============================================================ --}}
-    {{-- Staff Table --}}
-    {{-- ============================================================ --}}
-    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Daftar Staff</h3>
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="w-full text-sm">
-            <thead class="bg-gray-50 text-gray-500 text-left">
-                <tr>
-                    <th class="px-3 py-3 text-center">No</th>
-                    <th class="px-4 py-3">Nama</th>
-                    <th class="px-4 py-3">NIP</th>
-                    <th class="px-4 py-3">Email</th>
-                    <th class="px-4 py-3">Unit Kerja</th>
-                    <th class="px-4 py-3">Pangkat / Gol. Bidang</th>
-                    <th class="px-4 py-3">Jabatan</th>
-                    <th class="px-4 py-3">No. HP</th>
-                    <th class="px-4 py-3 text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse ($staffList as $index => $staff)
-                    <tr>
-                        <td class="px-3 py-3 text-center text-gray-400">{{ $staffList->firstItem() + $index }}</td>
-                        <td class="px-4 py-3 font-medium text-gray-800">{{ $staff->staff_name }}</td>
-                        <td class="px-4 py-3 text-gray-500 font-mono text-xs">{{ $staff->nip }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $staff->email }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $staff->work_unit }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $staff->rank ?? '—' }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $staff->position ?? '—' }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $staff->phone_number ?? '—' }}</td>
-                        <td class="px-4 py-3 text-center flex gap-2 justify-center">
-
-                            {{-- Edit button — opens modal --}}
-                            <button type="button"
-                                onclick="openEditModal({{ $staff->id }}, '{{ addslashes($staff->staff_name) }}', '{{ $staff->nip }}', '{{ $staff->email }}', '{{ addslashes($staff->work_unit) }}', '{{ addslashes($staff->rank) }}', '{{ addslashes($staff->position) }}', '{{ $staff->phone_number }}')"
-                                class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
-                                Edit
-                            </button>
-
-                            {{-- Delete button --}}
-                            <form method="POST" action="{{ route('admin.staff-data.destroy', $staff) }}"
-                                onsubmit="return confirm('Hapus data {{ addslashes($staff->staff_name) }}?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700">
-                                    Hapus
-                                </button>
-                            </form>
-
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="9" class="px-4 py-8 text-center text-gray-400">
-                            Belum ada data staff. Tambahkan menggunakan form di atas.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{-- Pagination --}}
-    <div class="mt-4">
-        {{ $staffList->links() }}
-    </div>
-
-    {{-- ============================================================ --}}
-    {{-- Edit Modal --}}
-    {{-- ============================================================ --}}
-    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
-
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-800">Edit Data Staff</h2>
-                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">✕</button>
-            </div>
-
-            <form method="POST" id="edit-form" action="">
+            <form method="POST" action="{{ route('admin.staff-data.upload') }}" enctype="multipart/form-data">
                 @csrf
-                @method('PATCH')
-                <div class="grid grid-cols-2 gap-4">
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pegawai <span
-                                class="text-red-500">*</span></label>
-                        <input type="text" name="staff_name" id="edit-staff-name"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <div class="mb-4">
+                    <label class="form-label">File Excel (.xlsx)</label>
+                    <div style="border:2px dashed var(--slate-200);border-radius:10px;padding:1.5rem;text-align:center;transition:border-color 0.2s;cursor:pointer;"
+                         id="upload-zone"
+                         ondragover="event.preventDefault();this.style.borderColor='var(--navy-400)';this.style.background='rgba(42,82,152,0.04)'"
+                         ondragleave="this.style.borderColor='var(--slate-200)';this.style.background='transparent'"
+                         ondrop="handleDrop(event,'staff-file')">
+                        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--slate-300);">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        <p style="font-size:0.8rem;color:var(--slate-400);">Drag & drop atau <label for="staff-file" style="color:var(--navy-500);cursor:pointer;font-weight:600;">klik untuk pilih file</label></p>
+                        <p style="font-size:0.7rem;color:var(--slate-300);margin-top:0.25rem;" id="staff-file-name">Format: .xlsx</p>
+                        <input type="file" name="file" id="staff-file" accept=".xlsx" class="hidden"
+                               onchange="document.getElementById('staff-file-name').textContent = this.files[0]?.name ?? 'Format: .xlsx'">
                     </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">NIP <span
-                                class="text-red-500">*</span></label>
-                        <input type="text" name="nip" id="edit-nip"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email <span
-                                class="text-red-500">*</span></label>
-                        <input type="email" name="email" id="edit-email"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja <span
-                                class="text-red-500">*</span></label>
-                        <input type="text" name="work_unit" id="edit-work-unit"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan / Gol. Pangkat</label>
-                        <input type="text" name="rank" id="edit-rank"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Posisi</label>
-                        <input type="text" name="position" id="edit-position"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">No. HP</label>
-                        <input type="text" name="phone_number" id="edit-phone-number"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-
+                    @error('file')
+                        <p style="font-size:0.75rem;color:#dc2626;margin-top:0.35rem;">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <div class="flex gap-3 mt-6 justify-end">
-                    <button type="button" onclick="closeEditModal()"
-                        class="px-4 py-2 rounded-lg border text-sm text-gray-600 hover:bg-gray-50">
-                        Batal
-                    </button>
-                    <button type="submit"
-                        class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium">
-                        Simpan Perubahan
-                    </button>
+                {{-- Column mapping info --}}
+                <div style="background:rgba(42,82,152,0.05);border:1px solid rgba(42,82,152,0.12);border-radius:8px;padding:0.75rem;margin-bottom:1rem;">
+                    <p style="font-size:0.72rem;font-weight:700;color:var(--navy-600);margin-bottom:0.4rem;letter-spacing:0.04em;text-transform:uppercase;">Kolom yang diperlukan</p>
+                    <div class="grid grid-cols-2 gap-x-3 gap-y-1">
+                        @foreach(['staff_name','nip','position','rank','unit','email','phone'] as $col)
+                        <div style="font-size:0.72rem;">
+                            <code style="background:var(--slate-100);padding:0.1rem 0.35rem;border-radius:3px;color:var(--navy-600);font-family:var(--font-mono);font-size:0.68rem;">{{ $col }}</code>
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
+
+                <button type="submit" class="btn-primary w-full justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    Upload Data
+                </button>
             </form>
+        </div>
+
+        {{-- Stats + tips --}}
+        <div class="space-y-4 fade-up fade-up-2">
+            <div class="stat-card">
+                <div class="stat-label mb-1">Total Staff Terdaftar</div>
+                <div class="stat-value" style="color:var(--navy-600);">{{ count($staffData) }}</div>
+                <div class="stat-label mt-1" style="color:var(--slate-300);font-size:0.68rem;">entri dalam database</div>
+            </div>
+            <div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:0.9rem;">
+                <p style="font-size:0.72rem;font-weight:700;color:#7a5f1a;margin-bottom:0.5rem;letter-spacing:0.04em;text-transform:uppercase;">Catatan Upload</p>
+                <ul style="font-size:0.73rem;color:#7a5f1a;space-y:0.25rem;line-height:1.6;">
+                    <li>• Upload baru akan <strong>menggantikan</strong> seluruh data lama.</li>
+                    <li>• Pastikan format kolom sesuai tabel di sebelah kiri.</li>
+                    <li>• Baris pertama harus berupa header kolom.</li>
+                    <li>• NIP harus unik untuk setiap staff.</li>
+                </ul>
+            </div>
         </div>
     </div>
 
-    <script>
-        function openEditModal(id, name, nip, email, workUnit, rank, position, phone) {
-            document.getElementById('edit-form').action = `/admin/staff-data/${id}`;
-            document.getElementById('edit-staff-name').value = name;
-            document.getElementById('edit-nip').value = nip;
-            document.getElementById('edit-email').value = email;
-            document.getElementById('edit-work-unit').value = workUnit;
-            document.getElementById('edit-rank').value = rank !== 'null' ? rank : '';
-            document.getElementById('edit-position').value = position !== 'null' ? position : '';
-            document.getElementById('edit-phone-number').value = phone !== 'null' ? phone : '';
-            document.getElementById('edit-modal').classList.remove('hidden');
-        }
+    {{-- Data table --}}
+    @if(count($staffData) > 0)
+    <div class="glass-card rounded-2xl overflow-hidden fade-up fade-up-3">
+        <div style="padding:0.75rem 1.25rem;border-bottom:1px solid var(--slate-100);display:flex;align-items:center;gap:2;">
+            <div style="width:3px;height:16px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;margin-right:0.6rem;"></div>
+            <span style="font-size:0.82rem;font-weight:700;color:var(--navy-800);">Daftar Staff (preview 20 pertama)</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="sipadu-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nama</th>
+                        <th>NIP</th>
+                        <th>Jabatan</th>
+                        <th>Pangkat</th>
+                        <th>Unit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(collect($staffData)->take(20) as $i => $staff)
+                    <tr>
+                        <td style="color:var(--slate-300);font-size:0.75rem;font-family:var(--font-mono);">{{ $i + 1 }}</td>
+                        <td style="font-weight:600;color:var(--slate-800);font-size:0.8rem;">{{ $staff['staff_name'] ?? '—' }}</td>
+                        <td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--slate-500);">{{ $staff['nip'] ?? '—' }}</td>
+                        <td style="font-size:0.78rem;color:var(--slate-600);">{{ $staff['position'] ?? '—' }}</td>
+                        <td style="font-size:0.78rem;color:var(--slate-500);">{{ $staff['rank'] ?? '—' }}</td>
+                        <td style="font-size:0.78rem;color:var(--slate-500);">{{ $staff['unit'] ?? '—' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @if(count($staffData) > 20)
+        <div style="padding:0.65rem 1.25rem;border-top:1px solid var(--slate-100);text-align:center;">
+            <span style="font-size:0.75rem;color:var(--slate-400);">
+                Menampilkan 20 dari {{ count($staffData) }} entri.
+            </span>
+        </div>
+        @endif
+    </div>
+    @endif
 
-        function closeEditModal() {
-            document.getElementById('edit-modal').classList.add('hidden');
-        }
+</div>
 
-        // Close modal when clicking outside
-        document.getElementById('edit-modal').addEventListener('click', function (e) {
-            if (e.target === this) closeEditModal();
-        });
-    </script>
-
+<script>
+function handleDrop(event, inputId) {
+    event.preventDefault();
+    const input = document.getElementById(inputId);
+    const file = event.dataTransfer.files[0];
+    if (file && input) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        const nameEl = document.getElementById(inputId + '-name') ?? document.getElementById('staff-file-name');
+        if (nameEl) nameEl.textContent = file.name;
+        event.currentTarget.style.borderColor = 'var(--navy-400)';
+        event.currentTarget.style.background = 'rgba(42,82,152,0.04)';
+    }
+}
+</script>
 @endsection
