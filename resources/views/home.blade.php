@@ -640,7 +640,8 @@
 
     {{-- ── Preview Modal ───────────────────────────────────── --}}
     <div id="preview-modal"
-        class="sipadu-modal-bg hidden"
+        class="sipadu-modal-bg"
+        style="display: none;"
         onclick="if(event.target===this) closePreview()">
         <div class="sipadu-modal w-full max-w-4xl mx-4 flex flex-col" style="height:90vh;">
 
@@ -941,7 +942,7 @@
             loading.classList.remove('hidden');
             error.classList.add('hidden');
             iframe.src = '';
-            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             iframe.onload = function() { loading.classList.add('hidden'); iframe.classList.remove('hidden'); };
             iframe.onerror = function() {
@@ -953,7 +954,7 @@
         }
 
         function closePreview() {
-            document.getElementById('preview-modal').classList.add('hidden');
+            document.getElementById('preview-modal').style.display = 'none';
             document.getElementById('preview-iframe').src = '';
             document.body.style.overflow = '';
         }
