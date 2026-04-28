@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Automatisasi Surat — DINAS PUPRD</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { background: linear-gradient(155deg, #eef2f8 0%, #f5f7fc 55%, #edf1f7 100%); }
@@ -464,29 +467,29 @@
                         {{-- ── Dynamic form sections ────────── --}}
                         @foreach ($documentTypes as $docType)
                             @php
-                                $fields = $allFields[$docType->id] ?? collect();
-                                $topFields = $fields->where('is_group_child', false);
-                                $slots = $docType->slots;
+        $fields = $allFields[$docType->id] ?? collect();
+        $topFields = $fields->where('is_group_child', false);
+        $slots = $docType->slots;
 
-                                $chunks = [];
-                                foreach ($topFields as $field) {
-                                    if (is_null($field->row_group)) {
-                                        $chunks[] = ['type' => 'single', 'field' => $field];
-                                    } else {
-                                        $found = false;
-                                        foreach ($chunks as &$chunk) {
-                                            if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
-                                                $chunk['fields'][] = $field;
-                                                $found = true;
-                                                break;
-                                            }
-                                        }
-                                        unset($chunk);
-                                        if (!$found) {
-                                            $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
-                                        }
-                                    }
-                                }
+        $chunks = [];
+        foreach ($topFields as $field) {
+            if (is_null($field->row_group)) {
+                $chunks[] = ['type' => 'single', 'field' => $field];
+            } else {
+                $found = false;
+                foreach ($chunks as &$chunk) {
+                    if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
+                        $chunk['fields'][] = $field;
+                        $found = true;
+                        break;
+                    }
+                }
+                unset($chunk);
+                if (!$found) {
+                    $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
+                }
+            }
+        }
                             @endphp
 
                             <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
@@ -573,15 +576,15 @@
                     <div class="guide-section-title">Cara Membuat Dokumen</div>
                     <div class="space-y-0">
                         @foreach([
-                            ['Pilih Jenis Dokumen','Gunakan dropdown untuk memilih template.'],
-                            ['Gunakan Autofill','Pilih nama dari panel biru untuk isi otomatis.'],
-                            ['Isi Form','Lengkapi semua field wajib (*).'],
-                            ['Centang Persetujuan','Konfirmasi kebenaran data.'],
-                            ['Klik Buat Dokumen','Sistem akan memproses dan menghasilkan file.'],
-                            ['Unduh / Preview','Tombol muncul setelah dokumen berhasil dibuat.'],
-                        ] as $i => [$t, $d])
+        ['Pilih Jenis Dokumen', 'Gunakan dropdown untuk memilih template.'],
+        ['Gunakan Autofill', 'Pilih nama dari panel biru untuk isi otomatis.'],
+        ['Isi Form', 'Lengkapi semua field wajib (*).'],
+        ['Centang Persetujuan', 'Konfirmasi kebenaran data.'],
+        ['Klik Buat Dokumen', 'Sistem akan memproses dan menghasilkan file.'],
+        ['Unduh / Preview', 'Tombol muncul setelah dokumen berhasil dibuat.'],
+    ] as $i => [$t, $d])
                         <div class="guide-step">
-                            <div class="guide-step-num {{ $i >= 4 ? 'done' : '' }}">{{ $i+1 }}</div>
+                            <div class="guide-step-num {{ $i >= 4 ? 'done' : '' }}">{{ $i + 1 }}</div>
                             <div>
                                 <div class="guide-step-title">{{ $t }}</div>
                                 <div class="guide-step-desc">{{ $d }}</div>
@@ -596,14 +599,14 @@
                     <div class="guide-section-title">Jenis Field</div>
                     <div class="space-y-1.5">
                         @foreach([
-                            ['Text / Textarea','Ketik teks bebas.'],
-                            ['Date','Pilih dari kalender — format Indonesia.'],
-                            ['Number','Ketik angka.'],
-                            ['Select','Pilih satu dari daftar.'],
-                            ['Checkbox','Centang untuk Ya/Benar.'],
-                            ['Repeating Group','Tambah baris data dinamis.'],
-                            ['Staff / Pejabat Loop','Centang nama, drag ⠿ untuk urutkan.'],
-                        ] as [$t, $d])
+        ['Text / Textarea', 'Ketik teks bebas.'],
+        ['Date', 'Pilih dari kalender — format Indonesia.'],
+        ['Number', 'Ketik angka.'],
+        ['Select', 'Pilih satu dari daftar.'],
+        ['Checkbox', 'Centang untuk Ya/Benar.'],
+        ['Repeating Group', 'Tambah baris data dinamis.'],
+        ['Staff / Pejabat Loop', 'Centang nama, drag ⠿ untuk urutkan.'],
+    ] as [$t, $d])
                         <div style="font-size:0.75rem;">
                             <span style="font-weight:600;color:var(--slate-700);">{{ $t }}</span>
                             <span style="color:var(--slate-400);"> — {{ $d }}</span>
@@ -640,7 +643,8 @@
 
     {{-- ── Preview Modal ───────────────────────────────────── --}}
     <div id="preview-modal"
-        class="sipadu-modal-bg hidden"
+        class="sipadu-modal-bg"
+        style="display: none;"
         onclick="if(event.target===this) closePreview()">
         <div class="sipadu-modal w-full max-w-4xl mx-4 flex flex-col" style="height:90vh;">
 
@@ -941,7 +945,7 @@
             loading.classList.remove('hidden');
             error.classList.add('hidden');
             iframe.src = '';
-            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             iframe.onload = function() { loading.classList.add('hidden'); iframe.classList.remove('hidden'); };
             iframe.onerror = function() {
@@ -953,7 +957,7 @@
         }
 
         function closePreview() {
-            document.getElementById('preview-modal').classList.add('hidden');
+            document.getElementById('preview-modal').style.display = 'none';
             document.getElementById('preview-iframe').src = '';
             document.body.style.overflow = '';
         }
