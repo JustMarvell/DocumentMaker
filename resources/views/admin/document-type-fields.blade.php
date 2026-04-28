@@ -56,6 +56,9 @@
 
     <div class="grid grid-cols-5 gap-6">
 
+        {{-- ================================================================ --}}
+        {{-- LEFT: Add field form                                             --}}
+        {{-- ================================================================ --}}
         <div class="col-span-2">
             <div class="bg-white rounded-lg shadow p-5 sticky top-6">
                 <h2 class="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide border-b pb-2">
@@ -74,7 +77,7 @@
                             <input type="text" name="field_key" value="{{ old('field_key') }}"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="employee_name" />
-                            <p class="text-xs text-gray-400 mt-0.5">Hanya huruf kecil, angka, underscore. Harus cocok dengan placeholder di template.</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Hanya huruf kecil, angka, underscore.</p>
                             @error('field_key') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
 
@@ -113,13 +116,74 @@
                                 placeholder="Opsi A, Opsi B, Opsi C" />
                         </div>
 
+                        {{-- ── ICON PICKER ─────────────────────────────────── --}}
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">
+                                Icon (opsional)
+                            </label>
+                            {{-- Hidden input that stores the selected FA class --}}
+                            <input type="hidden" name="icon" id="add-icon-value" value="{{ old('icon') }}" />
+
+                            {{-- Preview + clear button --}}
+                            <div class="flex items-center gap-2 mb-2">
+                                <div id="add-icon-preview"
+                                     class="w-8 h-8 rounded border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 text-sm">
+                                    @if(old('icon'))
+                                        <i class="{{ old('icon') }}"></i>
+                                    @else
+                                        <span class="text-gray-300 text-xs">—</span>
+                                    @endif
+                                </div>
+                                <span id="add-icon-label" class="text-xs text-gray-500 flex-1">
+                                    {{ old('icon') ? old('icon') : 'Belum dipilih' }}
+                                </span>
+                                <button type="button" onclick="clearIcon('add')"
+                                    class="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded border border-red-200 hover:border-red-400">
+                                    Hapus
+                                </button>
+                            </div>
+
+                            {{-- Icon grid --}}
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                {{-- Search --}}
+                                <div class="px-2 py-1.5 border-b bg-gray-50">
+                                    <input type="text"
+                                        placeholder="Cari icon..."
+                                        class="w-full text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                        oninput="filterIcons('add', this.value)" />
+                                </div>
+                                {{-- Scrollable grid --}}
+                                <div id="add-icon-grid"
+                                     class="overflow-y-auto p-2"
+                                     style="max-height: 200px;">
+                                    @foreach (\App\Models\DocumentField::availableIcons() as $groupName => $icons)
+                                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-2 mb-1 first:mt-0"
+                                           data-group-label>{{ $groupName }}</p>
+                                        <div class="grid grid-cols-8 gap-1 mb-1">
+                                            @foreach ($icons as $faClass => $iconLabel)
+                                                <button type="button"
+                                                    title="{{ $iconLabel }}"
+                                                    data-icon="{{ $faClass }}"
+                                                    data-label="{{ $iconLabel }}"
+                                                    onclick="selectIcon('add', '{{ $faClass }}', '{{ $iconLabel }}')"
+                                                    class="icon-btn w-7 h-7 rounded flex items-center justify-center text-sm text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition border border-transparent hover:border-blue-200
+                                                           {{ old('icon') === $faClass ? 'bg-blue-100 text-blue-600 border-blue-300' : '' }}">
+                                                    <i class="{{ $faClass }}"></i>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                        {{-- ── END ICON PICKER ─────────────────────────────── --}}
+
                         {{-- Section Label --}}
                         <div>
                             <label class="block text-xs font-medium text-gray-600 mb-1">Label Seksi (opsional)</label>
                             <input type="text" name="section_label" value="{{ old('section_label') }}"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Data Pegawai" />
-                            <p class="text-xs text-gray-400 mt-0.5">Tampilkan heading seksi di atas field ini.</p>
                         </div>
 
                         {{-- Row Group --}}
@@ -128,10 +192,10 @@
                             <input type="number" name="row_group" value="{{ old('row_group') }}" min="1"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="1" />
-                            <p class="text-xs text-gray-400 mt-0.5">Field dengan angka yang sama akan tampil berdampingan dalam satu baris.</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Field dengan angka yang sama akan tampil berdampingan.</p>
                         </div>
 
-                        {{-- Staff Autofill Column (hidden for loop types) --}}
+                        {{-- Staff Autofill --}}
                         <div id="add-autofill-section">
                             <label class="block text-xs font-medium text-gray-600 mb-1">Staff Autofill Column</label>
                             <select name="staff_autofill_column"
@@ -149,8 +213,6 @@
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="none" />
                             <p class="text-xs text-gray-400 mt-0.5">
-                                Isi dengan slot_key yang sesuai (misal: <code class="bg-gray-100 px-1 rounded">employee</code>),
-                                atau <code class="bg-gray-100 px-1 rounded">none</code> jika tidak ada autofill.
                                 @if ($slots->isNotEmpty())
                                     Slot tersedia:
                                     @foreach ($slots as $slot)
@@ -196,6 +258,9 @@
             </div>
         </div>
 
+        {{-- ================================================================ --}}
+        {{-- RIGHT: Fields table                                              --}}
+        {{-- ================================================================ --}}
         <div class="col-span-3">
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="px-5 py-4 border-b flex items-center justify-between">
@@ -214,6 +279,7 @@
                         <thead class="bg-gray-50 text-gray-500 text-left text-xs uppercase">
                             <tr>
                                 <th class="px-2 py-3 w-6"></th>
+                                <th class="px-3 py-3">Icon</th>
                                 <th class="px-3 py-3">Key / Label</th>
                                 <th class="px-3 py-3">Tipe</th>
                                 <th class="px-3 py-3">Autofill</th>
@@ -226,6 +292,16 @@
                             @foreach ($fields as $field)
                                 <tr data-id="{{ $field->id }}" class="hover:bg-gray-50">
                                     <td class="px-2 py-3 text-gray-300 cursor-grab select-none text-base">⠿</td>
+                                    {{-- Icon column --}}
+                                    <td class="px-3 py-3 text-center">
+                                        @if ($field->icon)
+                                            <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-blue-50 text-blue-500 text-sm" title="{{ $field->icon }}">
+                                                <i class="{{ $field->icon }}"></i>
+                                            </span>
+                                        @else
+                                            <span class="text-gray-300 text-xs">—</span>
+                                        @endif
+                                    </td>
                                     <td class="px-3 py-3">
                                         <span class="font-mono text-xs text-gray-400 block">{{ $field->field_key }}</span>
                                         <span class="text-gray-700 text-xs block">{{ $field->label }}</span>
@@ -277,7 +353,8 @@
                                                     '{{ addslashes($field->section_label ?? '') }}',
                                                     '{{ $field->staff_autofill_column ?? '' }}',
                                                     '{{ $field->autofill_role ?? 'none' }}',
-                                                    {{ $field->row_group ?? 'null' }}
+                                                    {{ $field->row_group ?? 'null' }},
+                                                    '{{ addslashes($field->icon ?? '') }}'
                                                 )"
                                                 class="text-xs px-2 py-1 rounded border border-blue-400 text-blue-600 hover:bg-blue-50 text-center">
                                                 Edit
@@ -303,6 +380,9 @@
         </div>
     </div>
 
+    {{-- ================================================================ --}}
+    {{-- EDIT MODAL                                                       --}}
+    {{-- ================================================================ --}}
     <div id="edit-field-modal"
          class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg max-h-screen overflow-y-auto">
@@ -338,6 +418,54 @@
                         <input type="text" name="field_options" id="edit-field-options-input"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
+
+                    {{-- ── EDIT ICON PICKER ──────────────────────────────── --}}
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Icon (opsional)</label>
+                        <input type="hidden" name="icon" id="edit-icon-value" value="" />
+
+                        <div class="flex items-center gap-2 mb-2">
+                            <div id="edit-icon-preview"
+                                 class="w-8 h-8 rounded border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 text-sm">
+                                <span class="text-gray-300 text-xs">—</span>
+                            </div>
+                            <span id="edit-icon-label" class="text-xs text-gray-500 flex-1">Belum dipilih</span>
+                            <button type="button" onclick="clearIcon('edit')"
+                                class="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded border border-red-200 hover:border-red-400">
+                                Hapus
+                            </button>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg overflow-hidden">
+                            <div class="px-2 py-1.5 border-b bg-gray-50">
+                                <input type="text"
+                                    placeholder="Cari icon..."
+                                    class="w-full text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                    oninput="filterIcons('edit', this.value)" />
+                            </div>
+                            <div id="edit-icon-grid"
+                                 class="overflow-y-auto p-2"
+                                 style="max-height: 200px;">
+                                @foreach (\App\Models\DocumentField::availableIcons() as $groupName => $icons)
+                                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-2 mb-1 first:mt-0"
+                                       data-group-label>{{ $groupName }}</p>
+                                    <div class="grid grid-cols-8 gap-1 mb-1">
+                                        @foreach ($icons as $faClass => $iconLabel)
+                                            <button type="button"
+                                                title="{{ $iconLabel }}"
+                                                data-icon="{{ $faClass }}"
+                                                data-label="{{ $iconLabel }}"
+                                                onclick="selectIcon('edit', '{{ $faClass }}', '{{ $iconLabel }}')"
+                                                class="icon-btn w-7 h-7 rounded flex items-center justify-center text-sm text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition border border-transparent hover:border-blue-200">
+                                                <i class="{{ $faClass }}"></i>
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    {{-- ── END EDIT ICON PICKER ─────────────────────────── --}}
 
                     <div>
                         <label class="block text-xs font-medium text-gray-600 mb-1">Label Seksi</label>
@@ -404,19 +532,15 @@
     const NO_ROWGROUP_TYPES = ['staff_loop', 'official_loop', 'repeating_group'];
 
     function onFieldTypeChange(prefix, type) {
-        // Options input — only for select
         const optEl = document.getElementById(prefix === 'add' ? 'add-field-options' : 'edit-field-options-wrap');
         if (optEl) optEl.classList.toggle('hidden', type !== 'select');
 
-        // Autofill section — hidden for loop/group types
         const autofillEl = document.getElementById(prefix === 'add' ? 'add-autofill-section' : 'edit-autofill-section');
         if (autofillEl) autofillEl.classList.toggle('hidden', NO_AUTOFILL_TYPES.includes(type));
 
-        // Row group — hidden for loop/group types
         const rowGroupEl = document.getElementById(prefix === 'add' ? 'add-row-group-section' : null);
         if (rowGroupEl) rowGroupEl.classList.toggle('hidden', NO_ROWGROUP_TYPES.includes(type));
 
-        // Group child section — only shown for regular fields
         const gcEl = document.getElementById('add-group-child-section');
         if (gcEl) gcEl.classList.toggle('hidden', LOOP_TYPES.includes(type) || type === 'repeating_group');
     }
@@ -426,7 +550,66 @@
         if (el) el.classList.toggle('hidden', !checked);
     }
 
-    function openEditField(id, label, type, options, required, section, autofill, autofillRole, rowGroup) {
+    // ── Icon picker helpers ──────────────────────────────────────────────
+
+    function selectIcon(prefix, faClass, label) {
+        document.getElementById(prefix + '-icon-value').value = faClass;
+        document.getElementById(prefix + '-icon-label').textContent = label + ' (' + faClass + ')';
+
+        const preview = document.getElementById(prefix + '-icon-preview');
+        preview.innerHTML = '<i class="' + faClass + ' text-blue-500"></i>';
+
+        // Highlight selected button, clear others in this grid
+        document.querySelectorAll('#' + prefix + '-icon-grid .icon-btn').forEach(function(btn) {
+            const selected = btn.dataset.icon === faClass;
+            btn.classList.toggle('bg-blue-100', selected);
+            btn.classList.toggle('text-blue-600', selected);
+            btn.classList.toggle('border-blue-300', selected);
+            btn.classList.toggle('text-gray-500', !selected);
+        });
+    }
+
+    function clearIcon(prefix) {
+        document.getElementById(prefix + '-icon-value').value = '';
+        document.getElementById(prefix + '-icon-label').textContent = 'Belum dipilih';
+        document.getElementById(prefix + '-icon-preview').innerHTML = '<span class="text-gray-300 text-xs">—</span>';
+
+        document.querySelectorAll('#' + prefix + '-icon-grid .icon-btn').forEach(function(btn) {
+            btn.classList.remove('bg-blue-100', 'text-blue-600', 'border-blue-300');
+            btn.classList.add('text-gray-500');
+        });
+    }
+
+    function filterIcons(prefix, query) {
+        const grid = document.getElementById(prefix + '-icon-grid');
+        const q = query.toLowerCase().trim();
+
+        grid.querySelectorAll('[data-group-label]').forEach(function(label) {
+            // We'll show/hide group labels based on whether any sibling icons match
+            label.style.display = '';
+        });
+
+        let anyVisible = false;
+        grid.querySelectorAll('.icon-btn').forEach(function(btn) {
+            const match = !q
+                || btn.dataset.label.toLowerCase().includes(q)
+                || btn.dataset.icon.toLowerCase().includes(q);
+            btn.style.display = match ? '' : 'none';
+            if (match) anyVisible = true;
+        });
+
+        // Hide group labels where all icons are hidden
+        grid.querySelectorAll('[data-group-label]').forEach(function(label) {
+            let siblingGrid = label.nextElementSibling;
+            if (!siblingGrid) return;
+            const visibleInGroup = siblingGrid.querySelectorAll('.icon-btn:not([style*="display: none"])').length;
+            label.style.display = visibleInGroup === 0 ? 'none' : '';
+        });
+    }
+
+    // ── Edit modal ───────────────────────────────────────────────────────
+
+    function openEditField(id, label, type, options, required, section, autofill, autofillRole, rowGroup, icon) {
         document.getElementById('edit-field-form').action =
             `/admin/document-types/{{ $documentType->id }}/fields/${id}`;
         document.getElementById('edit-field-label').value          = label;
@@ -440,6 +623,16 @@
         document.getElementById('edit-field-type').value = type;
         onFieldTypeChange('edit', type);
 
+        // Restore icon state
+        if (icon) {
+            // Find the matching button to get its label
+            const btn = document.querySelector('#edit-icon-grid .icon-btn[data-icon="' + icon + '"]');
+            const iconLabel = btn ? btn.dataset.label : icon;
+            selectIcon('edit', icon, iconLabel);
+        } else {
+            clearIcon('edit');
+        }
+
         document.getElementById('edit-field-modal').classList.remove('hidden');
     }
 
@@ -450,6 +643,8 @@
     document.getElementById('edit-field-modal').addEventListener('click', function(e) {
         if (e.target === this) closeEditField();
     });
+
+    // ── Drag-to-reorder ──────────────────────────────────────────────────
 
     (function() {
         const tbody = document.getElementById('fields-sortable');

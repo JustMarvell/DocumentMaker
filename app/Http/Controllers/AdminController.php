@@ -203,6 +203,14 @@ class AdminController extends Controller
             'staff_autofill_column' => 'nullable|string',
             'autofill_role'         => 'nullable|string|max:100',
             'row_group'             => 'nullable|integer|min:1',
+            'icon'                  => ['nullable', 'string', 'max:100', function($attribute, $value, $fail)
+            {
+                if ($value && !in_array($value, array_merge(...array_values(\App\Models\DocumentField::availableIcons())))) {
+                    // just allow
+                    // uncomment if want hard fail
+                    // $fail('Icon tidak valid');
+                }
+            }],            
         ]);
  
         $fieldOptions = null;
@@ -226,6 +234,7 @@ class AdminController extends Controller
             'is_group_child'        => $request->boolean('is_group_child'),
             'staff_autofill_column' => $request->staff_autofill_column ?: null,
             'autofill_role'         => $request->autofill_role ?? 'none',
+            'icon'                  => $request->icon ?: null,
         ]);
  
         return back()->with('success', "Field '{$request->label}' berhasil ditambahkan.");
@@ -243,6 +252,7 @@ class AdminController extends Controller
             'staff_autofill_column' => 'nullable|string',
             'autofill_role'         => 'nullable|string|max:100',
             'row_group'             => 'nullable|integer|min:1',
+            'icon'                  => 'nullable|string|max:100'
         ]);
  
         $fieldOptions = $field->field_options;
@@ -260,6 +270,7 @@ class AdminController extends Controller
             'section_label'         => $request->section_label,
             'staff_autofill_column' => $request->staff_autofill_column ?: null,
             'autofill_role'         => $request->autofill_role ?? 'none',
+            'icon'                  => $request->icon ?: null,
         ]);
  
         return back()->with('success', "Field '{$field->label}' berhasil diperbarui.");
