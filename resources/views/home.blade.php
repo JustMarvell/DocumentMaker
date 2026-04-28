@@ -86,42 +86,121 @@
         /* ── Guide panel cards ──────────────────────────── */
         .guide-card { transition: box-shadow 0.2s; }
         .guide-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* ── Mobile: row group grid collapses to single column ── */
+        @media (max-width: 640px) {
+            .row-group-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* ── Mobile: page header smaller ───────────────────── */
+        @media (max-width: 640px) {
+            .page-title { font-size: 1.25rem; }
+        }
+
+        /* ── Mobile: loop checklist taller for touch ────────── */
+        @media (max-width: 640px) {
+            .loop-checklist { max-height: 200px; }
+            .loop-item { padding: 10px 12px; }
+        }
+
+        /* ── Mobile: submit button larger touch target ──────── */
+        @media (max-width: 640px) {
+            #submit-btn { padding-top: 0.875rem; padding-bottom: 0.875rem; font-size: 1rem; }
+        }
+
+        /* ── Mobile: consent area wraps nicely ──────────────── */
+        @media (max-width: 400px) {
+            .consent-wrap { align-items: flex-start; }
+        }
+
+        /* ── Prevent horizontal scroll ──────────────────────── */
+        body { overflow-x: hidden; }
     </style>
 </head>
 
 <body class="bg-gray-100 font-sans">
 
     {{-- Navbar --}}
-    <nav class="bg-white shadow px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-        <span class="font-bold text-gray-800">DINAS PUPRD Kota Tomohon</span>
-        <div class="flex items-center gap-4">
-            @auth
-                <span class="text-sm text-gray-600">
-                    {{ auth()->user()->name }}
-                    <span class="ml-1 px-2 py-0.5 rounded text-xs font-semibold
+    <nav class="bg-white shadow px-4 sm:px-6 py-3 sm:py-4" x-data="{ menuOpen: false }">
+        <div class="flex items-center justify-between">
+            <span class="font-bold text-gray-800 text-sm sm:text-base leading-tight">
+                DINAS PUPRD<br class="sm:hidden"> <span class="hidden sm:inline">Kota Tomohon</span>
+                <span class="sm:hidden text-xs font-normal text-gray-500">Kota Tomohon</span>
+            </span>
+
+            {{-- Desktop nav --}}
+            <div class="hidden sm:flex items-center gap-4">
+                @auth
+                    <span class="text-sm text-gray-600">
+                        {{ auth()->user()->name }}
+                        <span class="ml-1 px-2 py-0.5 rounded text-xs font-semibold
                             {{ auth()->user()->role === 'admin' ? 'bg-purple-100 text-purple-700' : '' }}
-                            {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700' : '' }}
-                            {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600' : '' }}">
+                            {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700'   : '' }}
+                            {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600'   : '' }}">
+                            {{ ucfirst(auth()->user()->role) }}
+                        </span>
+                    </span>
+                    @if (auth()->user()->isAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="text-sm text-purple-600 hover:underline font-medium">
+                            Admin Panel
+                        </a>
+                    @endif
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-sm text-red-500 hover:underline">Logout</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}"    class="text-sm text-blue-600 hover:underline">Login</a>
+                    <a href="{{ route('register') }}" class="text-sm text-blue-600 hover:underline">Daftar</a>
+                @endauth
+            </div>
+
+            {{-- Mobile hamburger --}}
+            <button class="sm:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100"
+                    @click="menuOpen = !menuOpen" aria-label="Menu">
+                <svg x-show="!menuOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <svg x-show="menuOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Mobile dropdown menu --}}
+        <div x-show="menuOpen" x-transition class="sm:hidden mt-3 pt-3 border-t border-gray-100 space-y-2">
+            @auth
+                <div class="flex items-center gap-2 px-1 pb-2 border-b border-gray-100">
+                    <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
+                    <span class="px-2 py-0.5 rounded text-xs font-semibold
+                        {{ auth()->user()->role === 'admin' ? 'bg-purple-100 text-purple-700' : '' }}
+                        {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700'   : '' }}
+                        {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600'   : '' }}">
                         {{ ucfirst(auth()->user()->role) }}
                     </span>
-                </span>
+                </div>
                 @if (auth()->user()->isAdmin())
-                    <a href="{{ route('admin.dashboard') }}" class="text-sm text-purple-600 hover:underline font-medium">
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="block px-1 py-1.5 text-sm text-purple-600 font-medium">
                         Admin Panel
                     </a>
                 @endif
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="text-sm text-red-500 hover:underline">Logout</button>
+                    <button type="submit" class="block w-full text-left px-1 py-1.5 text-sm text-red-500">
+                        Logout
+                    </button>
                 </form>
             @else
-                <a href="{{ route('login') }}" class="text-sm text-blue-600 hover:underline">Login</a>
-                <a href="{{ route('register') }}" class="text-sm text-blue-600 hover:underline">Daftar</a>
+                <a href="{{ route('login') }}"    class="block px-1 py-1.5 text-sm text-blue-600">Login</a>
+                <a href="{{ route('register') }}" class="block px-1 py-1.5 text-sm text-blue-600">Daftar</a>
             @endauth
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
 
         {{--Loading overlay --}}
         <div id="submit-overlay">
@@ -131,7 +210,7 @@
         </div>
 
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Sistem Automatisasi Surat</h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 page-title">Sistem Automatisasi Surat</h1>
             <p class="text-sm text-gray-500 mt-1">Pilih jenis dokumen dan isi form yang tersedia.</p>
         </div>
 
@@ -146,9 +225,9 @@
         @endif
 
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-4 flex items-center justify-between">
-                <p class="text-sm mb-2">{{ session('success') }}</p>
-                <div class="flex gap-3 flex-wrap">
+            <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-4">
+                <p class="text-sm mb-3">{{ session('success') }}</p>
+                <div class="flex flex-wrap gap-3">
                     @if (session('download_url'))
                         <a href="{{ session('download_url') }}"
                             class="bg-green-600 text-white text-sm px-4 py-1.5 rounded hover:bg-green-700 font-medium">
@@ -181,15 +260,14 @@
 
         @if ($documentTypes->isEmpty())
             <div class="bg-white rounded-lg shadow p-8 text-center text-gray-400">
-            Tidak ada dokumen yang tersedia saat ini.
+                Tidak ada dokumen yang tersedia saat ini.
             </div>
         @else
+                <!-- Left Column -->
+                <div class="flex flex-col lg:flex-row gap-6 items-start fade-up fade-up-delay-2">
 
-            <!-- Two Column -->
-            <div class="flex flex-col lg:flex-row gap-6 items-start fade-up fade-up-delay-2">
-
-                {{-- Left column: form --}}
-                <div class="flex-1 min-w-0 w-full">
+                    {{-- Left column: form --}}
+                    <div class="flex-1 min-w-0 w-full">
                     <div class="bg-white rounded-lg shadow p-4 sm:p-6">
                         <form action="{{ route('document.generate') }}" method="POST" id="main-form">
                             @csrf
@@ -197,39 +275,49 @@
                             {{-- Document type selector --}}
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Surat / Dokumen</label>
-                                <select name="letter-type" id="letter-type-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer" onchange="showForm(this.value)">
+                                <select name="letter-type" id="letter-type-select"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer"
+                                    onchange="showForm(this.value)">
                                     @foreach ($documentTypes as $type)
                                         <option value="{{ $type->key }}">{{ $type->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
+                            {{-- ============================================================ --}}
                             {{-- Dynamic form sections — one per document type                --}}
+                            {{-- ============================================================ --}}
                             @foreach ($documentTypes as $docType)
                                 @php
-                                    $fields = $allFields[$docType->id] ?? collect();
-                                    $topFields = $fields->where('is_group_child', false);
-                                    $slots = $docType->slots;
+        $fields = $allFields[$docType->id] ?? collect();
+        $topFields = $fields->where('is_group_child', false);
+        $slots = $docType->slots;
                                 @endphp
 
                                 <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
 
+                                    {{-- -------------------------------------------------- --}}
                                     {{-- Autofill selectors — one pair per slot              --}}
+                                    {{-- -------------------------------------------------- --}}
                                     @foreach ($slots as $slot)
                                         <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                             <p class="text-sm font-medium text-blue-700 mb-2">
                                                 Pilih {{ $slot->slot_label }} (opsional — mengisi otomatis)
                                             </p>
-                                            <div class="grid grid-cols-2 gap-3">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
                                                     <label class="block text-xs text-blue-600 mb-1">Dari Data Staff</label>
-                                                    <select onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)" class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
+                                                    <select
+                                                        onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
+                                                        class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
                                                         <option value="">— Pilih Staff —</option>
                                                     </select>
                                                 </div>
                                                 <div>
                                                     <label class="block text-xs text-blue-600 mb-1">Dari Data Pejabat</label>
-                                                    <select onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)" class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 official-dropdown">
+                                                    <select
+                                                        onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
+                                                        class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 official-dropdown">
                                                         <option value="">— Pilih Pejabat —</option>
                                                     </select>
                                                 </div>
@@ -237,35 +325,37 @@
                                         </div>
                                     @endforeach
 
+                                    {{-- -------------------------------------------------- --}}
                                     {{-- Render fields — grouped by row_group                --}}
+                                    {{-- -------------------------------------------------- --}}
                                     @php
-                                        $currentSection = null;
-                                        $currentRowGroup = null;
-                                        $rowGroupBuffer = [];
+        $currentSection = null;
+        $currentRowGroup = null;
+        $rowGroupBuffer = [];
 
-                                        // Group top-level fields into renderable chunks:
-                                        // Each chunk is either a single field (row_group=null)
-                                        // or a collection of fields sharing the same row_group
-                                        $chunks = [];
-                                        foreach ($topFields as $field) {
-                                            if (is_null($field->row_group)) {
-                                                $chunks[] = ['type' => 'single', 'field' => $field];
-                                            } else {
-                                                // Find or create a row group chunk
-                                                $found = false;
-                                                foreach ($chunks as &$chunk) {
-                                                    if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
-                                                        $chunk['fields'][] = $field;
-                                                        $found = true;
-                                                        break;
-                                                    }
-                                                }
-                                                unset($chunk);
-                                                if (!$found) {
-                                                    $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
-                                                }
-                                            }
-                                        }
+        // Group top-level fields into renderable chunks:
+        // Each chunk is either a single field (row_group=null)
+        // or a collection of fields sharing the same row_group
+        $chunks = [];
+        foreach ($topFields as $field) {
+            if (is_null($field->row_group)) {
+                $chunks[] = ['type' => 'single', 'field' => $field];
+            } else {
+                // Find or create a row group chunk
+                $found = false;
+                foreach ($chunks as &$chunk) {
+                    if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
+                        $chunk['fields'][] = $field;
+                        $found = true;
+                        break;
+                    }
+                }
+                unset($chunk);
+                if (!$found) {
+                    $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
+                }
+            }
+        }
                                     @endphp
 
                                     @foreach ($chunks as $chunk)
@@ -285,8 +375,8 @@
                                             </div>
 
                                         @else
-                                        {{-- Row group: render fields side by side --}}
-                                        @php $firstField = $chunk['fields'][0]; @endphp
+                                            {{-- Row group: render fields side by side --}}
+                                            @php $firstField = $chunk['fields'][0]; @endphp
 
                                             {{-- Section heading from first field in group --}}
                                             @if ($firstField->section_label && $firstField->section_label !== $currentSection)
@@ -296,27 +386,27 @@
                                                 </h3>
                                             @endif
 
-                                            <div class="grid gap-4 mb-4" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
+                                            <div class="grid gap-4 mb-4 row-group-grid" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
                                                 @foreach ($chunk['fields'] as $field)
-                                                <div>
-                                                    @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
-                                                </div>
+                                                    <div>
+                                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                                    </div>
                                                 @endforeach
                                             </div>
                                         @endif
                                     @endforeach
+
                                 </div>
                             @endforeach
-                        
-                            {{-- Consent --}}
-                            <div class="mt-6 pt-4 border-t flex items-center gap-3">
-                                <input type="checkbox" name="consent" id="consent" class="rounded border-gray-300 text-blue-600" />
+
+                            {{-- Consent + Submit --}}
+                            <div class="mt-6 pt-4 border-t flex items-center gap-3 consent-wrap">
+                                <input type="checkbox" name="consent" id="consent"
+                                    class="rounded border-gray-300 text-blue-600" />
                                 <label for="consent" class="text-sm text-gray-600">
                                     Saya menyatakan bahwa informasi yang saya berikan adalah benar adanya.
                                 </label>
                             </div>
-
-                            <!-- Submit -->
                             <button type="button" id="submit-btn" onclick="submitIfConsented()"
                                 class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
                                 Buat Dokumen
@@ -324,25 +414,29 @@
 
                         </form>
                     </div>
-                </div>
-                {{-- End left column --}}
+                    </div>
+                    {{-- End left column --}}
 
-                {{-- Right column — guide panel                               --}}
-                <div class="w-full lg:w-80 flex-shrink-0 space-y-4 lg:sticky lg:top-6">
-                    {{-- Quick start card --}}
-                    <div class="bg-white rounded-lg shadow p-4 sm:p-5 guide-card fade-up fade-up-delay-2">
-                        <div class="flex items-center gap-2 mb-3">
-                            <h2 class="text-sm font-bold text-gray-800">Cara Membuat Dokumen</h2>
-                        </div>
-                        <ol class="space-y-2">
-                            @foreach ([
-                                ['1', 'bg-blue-600', 'Pilih Jenis Dokumen', 'Gunakan dropdown "Jenis Surat / Dokumen" untuk memilih template yang diinginkan.'],
-                                ['2', 'bg-blue-600', 'Gunakan Autofill (Opsional)', 'Jika tersedia, pilih nama pegawai dari dropdown autofill berwarna biru/ungu untuk mengisi otomatis field seperti nama, NIP, dan jabatan.'],
-                                ['3', 'bg-blue-600', 'Isi Form', 'Lengkapi semua field yang tersedia. Field bertanda * wajib diisi. Field tanggal otomatis diformat ke format Indonesia.'],
-                                ['4', 'bg-blue-600', 'Centang Persetujuan', 'Centang pernyataan persetujuan di bagian bawah form sebelum melanjutkan.'],
-                                ['5', 'bg-blue-600', 'Klik Buat Dokumen', 'Tekan tombol "Buat Dokumen". Sistem akan memproses dan menghasilkan file dokumen.'],
-                                ['6', 'bg-green-600', 'Unduh / Preview', 'Setelah berhasil, tombol Unduh akan muncul. Tombol Preview muncul jika diaktifkan admin.'],
-                                ] as [$num, $color, $title, $desc])
+                    {{-- ======================================================== --}}
+                    {{-- Right column — guide panel                               --}}
+                    {{-- ======================================================== --}}
+                    <div class="w-full lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-6 space-y-3">
+
+                        {{-- Quick start card --}}
+                        <div class="bg-white rounded-lg shadow p-4 guide-card fade-up fade-up-delay-2">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-blue-600 text-lg">📋</span>
+                                <h2 class="text-sm font-bold text-gray-800">Cara Membuat Dokumen</h2>
+                            </div>
+                            <ol class="space-y-2">
+                                @foreach ([
+        ['1', 'bg-blue-600', 'Pilih Jenis Dokumen', 'Gunakan dropdown "Jenis Surat / Dokumen" untuk memilih template yang diinginkan.'],
+        ['2', 'bg-blue-600', 'Gunakan Autofill (Opsional)', 'Jika tersedia, pilih nama pegawai dari dropdown autofill berwarna biru/ungu untuk mengisi otomatis field seperti nama, NIP, dan jabatan.'],
+        ['3', 'bg-blue-600', 'Isi Form', 'Lengkapi semua field yang tersedia. Field bertanda * wajib diisi. Field tanggal otomatis diformat ke format Indonesia.'],
+        ['4', 'bg-blue-600', 'Centang Persetujuan', 'Centang pernyataan persetujuan di bagian bawah form sebelum melanjutkan.'],
+        ['5', 'bg-blue-600', 'Klik Buat Dokumen', 'Tekan tombol "Buat Dokumen". Sistem akan memproses dan menghasilkan file dokumen.'],
+        ['6', 'bg-green-600', 'Unduh / Preview', 'Setelah berhasil, tombol Unduh akan muncul. Tombol Preview muncul jika diaktifkan admin.'],
+    ] as [$num, $color, $title, $desc])
                                 <li class="flex gap-3">
                                     <span class="flex-shrink-0 w-5 h-5 {{ $color }} text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">{{ $num }}</span>
                                     <div>
@@ -350,25 +444,26 @@
                                         <p class="text-xs text-gray-500 leading-relaxed mt-0.5">{{ $desc }}</p>
                                     </div>
                                 </li>
-                            @endforeach
-                        </ol>
-                    </div>
-
-                    {{-- Field types card --}}
-                    <div class="bg-white rounded-lg shadow p-4 sm:p-5 guide-card fade-up fade-up-delay-3">
-                        <div class="flex items-center gap-2 mb-3">
-                            <h2 class="text-sm font-bold text-gray-800">Jenis Field di Form</h2>
+                                @endforeach
+                            </ol>
                         </div>
-                        <div class="space-y-2 text-xs text-gray-600">
-                            @foreach ([
-                                ['•', 'Text / Textarea', 'Ketik teks bebas. Textarea untuk keterangan panjang.'],
-                                ['•', 'Date', 'Pilih tanggal dari kalender. Otomatis diformat ke "01 Januari 2025".'],
-                                ['•', 'Number', 'Ketik angka (jumlah hari, nomor urut, dsb.)'],
-                                ['•', 'Select (Dropdown)', 'Pilih satu opsi dari daftar yang tersedia.'],
-                                ['•', 'Checkbox', 'Centang untuk nilai Ya/Benar.'],
-                                ['•', 'Repeating Group', 'Klik "+ Tambah Baris" untuk menambah baris data. Klik × untuk menghapus.'],
-                                ['•', 'Staff / Pejabat Loop', 'Centang nama yang ingin dimasukkan. Drag ⠿ untuk mengubah urutan dalam dokumen.'],
-                                ] as [$icon, $type, $desc])
+
+                        {{-- Field types card --}}
+                        <div class="bg-white rounded-lg shadow p-4 guide-card fade-up fade-up-delay-3">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-blue-600 text-lg">🗂</span>
+                                <h2 class="text-sm font-bold text-gray-800">Jenis Field di Form</h2>
+                            </div>
+                            <div class="space-y-2 text-xs text-gray-600">
+                                @foreach ([
+        ['📝', 'Text / Textarea', 'Ketik teks bebas. Textarea untuk keterangan panjang.'],
+        ['📅', 'Date', 'Pilih tanggal dari kalender. Otomatis diformat ke "01 Januari 2025".'],
+        ['🔢', 'Number', 'Ketik angka (jumlah hari, nomor urut, dsb.)'],
+        ['▼', 'Select (Dropdown)', 'Pilih satu opsi dari daftar yang tersedia.'],
+        ['☑', 'Checkbox', 'Centang untuk nilai Ya/Benar.'],
+        ['➕', 'Repeating Group', 'Klik "+ Tambah Baris" untuk menambah baris data. Klik × untuk menghapus.'],
+        ['👥', 'Staff / Pejabat Loop', 'Centang nama yang ingin dimasukkan. Drag ⠿ untuk mengubah urutan dalam dokumen.'],
+    ] as [$icon, $type, $desc])
                                 <div class="flex gap-2">
                                     <span class="flex-shrink-0 w-5 text-center">{{ $icon }}</span>
                                     <div>
@@ -377,40 +472,44 @@
                                         <span>{{ $desc }}</span>
                                     </div>
                                 </div>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
 
-                    {{-- Autofill tip card --}}
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-5">
-                        <div class="flex items-center gap-2 mb-2">
-                            <h2 class="text-sm font-bold text-blue-800">Tips Autofill</h2>
+                        {{-- Autofill tip card --}}
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-blue-600 text-lg">💡</span>
+                                <h2 class="text-sm font-bold text-blue-800">Tips Autofill</h2>
+                            </div>
+                            <ul class="space-y-1.5 text-xs text-blue-700">
+                                <li>• Setiap slot autofill (biru/ungu) memiliki <strong>dua dropdown</strong>: satu dari Data Staff dan satu dari Data Pejabat.</li>
+                                <li>• Memilih dari salah satu dropdown akan otomatis mengisi nama, NIP, jabatan, dan unit kerja.</li>
+                                <li>• Field yang terisi otomatis masih <strong>bisa diedit manual</strong> jika perlu.</li>
+                                <li>• Untuk daftar peserta (Staff/Pejabat Loop), centang beberapa nama lalu <strong>drag untuk mengubah urutan</strong> dalam dokumen.</li>
+                            </ul>
                         </div>
-                        <ul class="space-y-1.5 text-xs text-blue-700">
-                            <li>• Setiap slot autofill (biru/ungu) memiliki <strong>dua dropdown</strong>: satu dari Data Staff dan satu dari Data Pejabat.</li>
-                            <li>• Memilih dari salah satu dropdown akan otomatis mengisi nama, NIP, jabatan, dan unit kerja.</li>
-                            <li>• Field yang terisi otomatis masih <strong>bisa diedit manual</strong> jika perlu.</li>
-                            <li>• Untuk daftar peserta (Staff/Pejabat Loop), centang beberapa nama lalu <strong>drag untuk mengubah urutan</strong> dalam dokumen.</li>
-                        </ul>
-                    </div>
 
-                    {{-- Warning card --}}
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 sm:p-5">
-                        <div class="flex items-center gap-2 mb-2">
-                            <h2 class="text-sm font-bold text-yellow-800">Perhatian</h2>
+                        {{-- Warning card --}}
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-lg">⚠️</span>
+                                <h2 class="text-sm font-bold text-yellow-800">Perhatian</h2>
+                            </div>
+                            <ul class="space-y-1.5 text-xs text-yellow-700">
+                                <li>• File dokumen akan <strong>otomatis terhapus</strong> dari server setelah beberapa menit. Segera unduh setelah dibuat.</li>
+                                <li>• Pastikan semua field wajib (*) terisi sebelum menekan "Buat Dokumen".</li>
+                                <li>• Jika ada field yang kurang atau tidak sesuai, hubungi administrator.</li>
+                            </ul>
                         </div>
-                        <ul class="space-y-1.5 text-xs text-yellow-700">
-                            <li>• File dokumen akan <strong>otomatis terhapus</strong> dari server setelah beberapa menit. Segera unduh setelah dibuat.</li>
-                            <li>• Pastikan semua field wajib (*) terisi sebelum menekan "Buat Dokumen".</li>
-                            <li>• Jika ada field yang kurang atau tidak sesuai, hubungi administrator.</li>
-                        </ul>
-                    </div>
-                </div>
-                {{-- End right column --}}
-            </div>
-            {{-- End two-column grid --}}
 
-        @endif
+                    </div>
+                    {{-- End right column --}}
+
+                    </div>
+                    {{-- End two-column grid --}}
+
+                    @endif
     </main>
     <script>
         const autofillMap = {
