@@ -3,28 +3,36 @@
     Variables: $field, $docType, $fields
 --}}
 @php
+$inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2
+    focus:ring-blue-500 transition-colors';
 $key = "field_{$field->field_key}";
 $label = $field->label;
 $required = $field->is_required;
 $type = $field->field_type;
 $old = old($key);
+$icon = $field->icon ?? null;
+$inputWithIconClass = $icon ? 'w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+    transition-colors' : $inputClass;
 @endphp
 
 <div data-field-key="{{ $field->field_key }}" class="field-wrapper">
 
     {{-- ── Label ─────────────────────────────────────────────── --}}
     @if(!in_array($type, ['loop_staff', 'loop_official', 'repeating_group', 'checkbox', 'heading']))
-    <label class="form-label" for="{{ $key }}">
-        {{ $label }}
-        @if($required)
-            <span style="color:#dc2626;margin-left:0.15rem;">*</span>
+        <label class="form-label" for="{{ $key }}">
+        @if ($icon)
+            <i class="{{ $icon }} text-gray-400 text-sm w-4 text-center flex-shrink-0"></i>
         @endif
-        @if($field->helper_text)
-            <span style="font-weight:400;color:var(--slate-400);font-size:0.72rem;margin-left:0.35rem;">
-                — {{ $field->helper_text }}
-            </span>
-        @endif
-    </label>
+            {{ $label }}
+            @if($required)
+                <span style="color:#dc2626;margin-left:0.15rem;">*</span>
+            @endif
+            @if($field->helper_text)
+                <span style="font-weight:400;color:var(--slate-400);font-size:0.72rem;margin-left:0.35rem;">
+                    — {{ $field->helper_text }}
+                </span>
+            @endif
+        </label>
     @endif
 
     {{-- ── TEXT ────────────────────────────────────────────────── --}}
@@ -127,6 +135,9 @@ $old = old($key);
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="{{ $loopType === 'staff' ? 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0' : 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' }}"/>
                         </svg>
+                        @if ($icon)
+                            <i class="{{ $icon }} text-gray-400 text-sm flex-shrink-0"></i>
+                        @endif
                         {{ $label }}
                         @if($required)<span style="color:rgba(239,68,68,0.7);"> *</span>@endif
                     </span>
@@ -163,10 +174,10 @@ $old = old($key);
         {{-- ── REPEATING GROUP ─────────────────────────────────────── --}}
     @elseif($type === 'repeating_group')
         @php
-            $groupKey = $field->field_key;
-            $childFields = $fields->where('is_group_child', true)
-                ->where('group_key', $groupKey);
-            $maxRows = $field->max_rows ?? 50;
+    $groupKey = $field->field_key;
+    $childFields = $fields->where('is_group_child', true)
+        ->where('group_key', $groupKey);
+    $maxRows = $field->max_rows ?? 50;
         @endphp
             <div style="border:1.5px solid var(--slate-200);border-radius:10px;overflow:hidden;background:rgba(255,255,255,0.5);">
 
@@ -199,7 +210,7 @@ $old = old($key);
                                         <option value="">— Pilih —</option>
                                         @foreach($child->options ?? [] as $opt)
                                             @php $v = is_array($opt) ? ($opt['value'] ?? $opt) : $opt;
-                    $l = is_array($opt) ? ($opt['label'] ?? $opt) : $opt; @endphp
+                $l = is_array($opt) ? ($opt['label'] ?? $opt) : $opt; @endphp
                                             <option value="{{ $v }}">{{ $l }}</option>
                                         @endforeach
                                     </select>
@@ -239,7 +250,7 @@ $old = old($key);
                                         <option value="">— Pilih —</option>
                                         @foreach($child->options ?? [] as $opt)
                                             @php $v = is_array($opt) ? ($opt['value'] ?? $opt) : $opt;
-                    $l = is_array($opt) ? ($opt['label'] ?? $opt) : $opt; @endphp
+                $l = is_array($opt) ? ($opt['label'] ?? $opt) : $opt; @endphp
                                             <option value="{{ $v }}">{{ $l }}</option>
                                         @endforeach
                                     </select>
