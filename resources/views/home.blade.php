@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Automatisasi Surat — DINAS PUPRD</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- FontAwesome 6 Free (CDN) — covers fa-solid, fa-regular, fa-brands --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <style>
         /* ── Loop items ────────────────────────────────── */
         .loop-item { cursor: grab; transition: background 0.15s, box-shadow 0.15s; }
@@ -137,8 +142,8 @@
                         {{ auth()->user()->name }}
                         <span class="ml-1 px-2 py-0.5 rounded text-xs font-semibold
                             {{ auth()->user()->role === 'admin' ? 'bg-purple-100 text-purple-700' : '' }}
-                            {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700'   : '' }}
-                            {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600'   : '' }}">
+                            {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700' : '' }}
+                            {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600' : '' }}">
                             {{ ucfirst(auth()->user()->role) }}
                         </span>
                     </span>
@@ -176,8 +181,8 @@
                     <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
                     <span class="px-2 py-0.5 rounded text-xs font-semibold
                         {{ auth()->user()->role === 'admin' ? 'bg-purple-100 text-purple-700' : '' }}
-                        {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700'   : '' }}
-                        {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600'   : '' }}">
+                        {{ auth()->user()->role === 'staff' ? 'bg-blue-100 text-blue-700' : '' }}
+                        {{ auth()->user()->role === 'guest' ? 'bg-gray-100 text-gray-600' : '' }}">
                         {{ ucfirst(auth()->user()->role) }}
                     </span>
                 </div>
@@ -289,9 +294,9 @@
                                     {{-- ============================================================ --}}
                                     @foreach ($documentTypes as $docType)
                                         @php
-                $fields = $allFields[$docType->id] ?? collect();
-                $topFields = $fields->where('is_group_child', false);
-                $slots = $docType->slots;
+        $fields = $allFields[$docType->id] ?? collect();
+        $topFields = $fields->where('is_group_child', false);
+        $slots = $docType->slots;
                                         @endphp
 
                                         <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
@@ -329,33 +334,33 @@
                                             {{-- Render fields — grouped by row_group                --}}
                                             {{-- -------------------------------------------------- --}}
                                             @php
-                $currentSection = null;
-                $currentRowGroup = null;
-                $rowGroupBuffer = [];
+        $currentSection = null;
+        $currentRowGroup = null;
+        $rowGroupBuffer = [];
 
-                // Group top-level fields into renderable chunks:
-                // Each chunk is either a single field (row_group=null)
-                // or a collection of fields sharing the same row_group
-                $chunks = [];
-                foreach ($topFields as $field) {
-                    if (is_null($field->row_group)) {
-                        $chunks[] = ['type' => 'single', 'field' => $field];
-                    } else {
-                        // Find or create a row group chunk
-                        $found = false;
-                        foreach ($chunks as &$chunk) {
-                            if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
-                                $chunk['fields'][] = $field;
-                                $found = true;
-                                break;
-                            }
-                        }
-                        unset($chunk);
-                        if (!$found) {
-                            $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
-                        }
+        // Group top-level fields into renderable chunks:
+        // Each chunk is either a single field (row_group=null)
+        // or a collection of fields sharing the same row_group
+        $chunks = [];
+        foreach ($topFields as $field) {
+            if (is_null($field->row_group)) {
+                $chunks[] = ['type' => 'single', 'field' => $field];
+            } else {
+                // Find or create a row group chunk
+                $found = false;
+                foreach ($chunks as &$chunk) {
+                    if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
+                        $chunk['fields'][] = $field;
+                        $found = true;
+                        break;
                     }
                 }
+                unset($chunk);
+                if (!$found) {
+                    $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
+                }
+            }
+        }
                                             @endphp
 
                                             @foreach ($chunks as $chunk)
@@ -429,13 +434,13 @@
                                     </div>
                                     <ol class="space-y-2">
                                         @foreach ([
-                ['1', 'bg-blue-600', 'Pilih Jenis Dokumen', 'Gunakan dropdown "Jenis Surat / Dokumen" untuk memilih template yang diinginkan.'],
-                ['2', 'bg-blue-600', 'Gunakan Autofill (Opsional)', 'Jika tersedia, pilih nama pegawai dari dropdown autofill berwarna biru/ungu untuk mengisi otomatis field seperti nama, NIP, dan jabatan.'],
-                ['3', 'bg-blue-600', 'Isi Form', 'Lengkapi semua field yang tersedia. Field bertanda * wajib diisi. Field tanggal otomatis diformat ke format Indonesia.'],
-                ['4', 'bg-blue-600', 'Centang Persetujuan', 'Centang pernyataan persetujuan di bagian bawah form sebelum melanjutkan.'],
-                ['5', 'bg-blue-600', 'Klik Buat Dokumen', 'Tekan tombol "Buat Dokumen". Sistem akan memproses dan menghasilkan file dokumen.'],
-                ['6', 'bg-green-600', 'Unduh / Preview', 'Setelah berhasil, tombol Unduh akan muncul. Tombol Preview muncul jika diaktifkan admin.'],
-            ] as [$num, $color, $title, $desc])
+        ['1', 'bg-blue-600', 'Pilih Jenis Dokumen', 'Gunakan dropdown "Jenis Surat / Dokumen" untuk memilih template yang diinginkan.'],
+        ['2', 'bg-blue-600', 'Gunakan Autofill (Opsional)', 'Jika tersedia, pilih nama pegawai dari dropdown autofill berwarna biru/ungu untuk mengisi otomatis field seperti nama, NIP, dan jabatan.'],
+        ['3', 'bg-blue-600', 'Isi Form', 'Lengkapi semua field yang tersedia. Field bertanda * wajib diisi. Field tanggal otomatis diformat ke format Indonesia.'],
+        ['4', 'bg-blue-600', 'Centang Persetujuan', 'Centang pernyataan persetujuan di bagian bawah form sebelum melanjutkan.'],
+        ['5', 'bg-blue-600', 'Klik Buat Dokumen', 'Tekan tombol "Buat Dokumen". Sistem akan memproses dan menghasilkan file dokumen.'],
+        ['6', 'bg-green-600', 'Unduh / Preview', 'Setelah berhasil, tombol Unduh akan muncul. Tombol Preview muncul jika diaktifkan admin.'],
+    ] as [$num, $color, $title, $desc])
                                         <li class="flex gap-3">
                                             <span class="flex-shrink-0 w-5 h-5 {{ $color }} text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">{{ $num }}</span>
                                             <div>
@@ -454,14 +459,14 @@
                                     </div>
                                     <div class="space-y-2 text-xs text-gray-600">
                                         @foreach ([
-                                                ['•', 'Text / Textarea', 'Ketik teks bebas. Textarea untuk keterangan panjang.'],
-                                                ['•', 'Date', 'Pilih tanggal dari kalender. Otomatis diformat ke "01 Januari 2025".'],
-                                                ['•', 'Number', 'Ketik angka (jumlah hari, nomor urut, dsb.)'],
-                                                ['•', 'Select (Dropdown)', 'Pilih satu opsi dari daftar yang tersedia.'],
-                                                ['•', 'Checkbox', 'Centang untuk nilai Ya/Benar.'],
-                                                ['•', 'Repeating Group', 'Klik "+ Tambah Baris" untuk menambah baris data. Klik × untuk menghapus.'],
-                                                ['•', 'Staff / Pejabat Loop', 'Centang nama yang ingin dimasukkan. Drag ⠿ untuk mengubah urutan dalam dokumen.'],
-                                            ] as [$icon, $type, $desc])
+        ['•', 'Text / Textarea', 'Ketik teks bebas. Textarea untuk keterangan panjang.'],
+        ['•', 'Date', 'Pilih tanggal dari kalender. Otomatis diformat ke "01 Januari 2025".'],
+        ['•', 'Number', 'Ketik angka (jumlah hari, nomor urut, dsb.)'],
+        ['•', 'Select (Dropdown)', 'Pilih satu opsi dari daftar yang tersedia.'],
+        ['•', 'Checkbox', 'Centang untuk nilai Ya/Benar.'],
+        ['•', 'Repeating Group', 'Klik "+ Tambah Baris" untuk menambah baris data. Klik × untuk menghapus.'],
+        ['•', 'Staff / Pejabat Loop', 'Centang nama yang ingin dimasukkan. Drag ⠿ untuk mengubah urutan dalam dokumen.'],
+    ] as [$icon, $type, $desc])
                                                     <div class="flex gap-2">
                                                         <span class="flex-shrink-0 w-5 text-center">{{ $icon }}</span>
                                                         <div>
