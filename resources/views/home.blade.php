@@ -263,253 +263,249 @@
                 Tidak ada dokumen yang tersedia saat ini.
             </div>
         @else
-                <!-- Left Column -->
-                <div class="flex flex-col lg:flex-row gap-6 items-start fade-up fade-up-delay-2">
+                        <!-- Left Column -->
+                        <div class="flex flex-col lg:flex-row gap-6 items-start fade-up fade-up-delay-2">
 
-                    {{-- Left column: form --}}
-                    <div class="flex-1 min-w-0 w-full">
-                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-                        <form action="{{ route('document.generate') }}" method="POST" id="main-form">
-                            @csrf
+                            {{-- Left column: form --}}
+                            <div class="flex-1 min-w-0 w-full">
+                            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                                <form action="{{ route('document.generate') }}" method="POST" id="main-form">
+                                    @csrf
 
-                            {{-- Document type selector --}}
-                            <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Surat / Dokumen</label>
-                                <select name="letter-type" id="letter-type-select"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer"
-                                    onchange="showForm(this.value)">
-                                    @foreach ($documentTypes as $type)
-                                        <option value="{{ $type->key }}">{{ $type->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                    {{-- Document type selector --}}
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Surat / Dokumen</label>
+                                        <select name="letter-type" id="letter-type-select"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer"
+                                            onchange="showForm(this.value)">
+                                            @foreach ($documentTypes as $type)
+                                                <option value="{{ $type->key }}">{{ $type->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                            {{-- ============================================================ --}}
-                            {{-- Dynamic form sections — one per document type                --}}
-                            {{-- ============================================================ --}}
-                            @foreach ($documentTypes as $docType)
-                                @php
-        $fields = $allFields[$docType->id] ?? collect();
-        $topFields = $fields->where('is_group_child', false);
-        $slots = $docType->slots;
-                                @endphp
+                                    {{-- ============================================================ --}}
+                                    {{-- Dynamic form sections — one per document type                --}}
+                                    {{-- ============================================================ --}}
+                                    @foreach ($documentTypes as $docType)
+                                        @php
+                $fields = $allFields[$docType->id] ?? collect();
+                $topFields = $fields->where('is_group_child', false);
+                $slots = $docType->slots;
+                                        @endphp
 
-                                <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
+                                        <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
 
-                                    {{-- -------------------------------------------------- --}}
-                                    {{-- Autofill selectors — one pair per slot              --}}
-                                    {{-- -------------------------------------------------- --}}
-                                    @foreach ($slots as $slot)
-                                        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                            <p class="text-sm font-medium text-blue-700 mb-2">
-                                                Pilih {{ $slot->slot_label }} (opsional — mengisi otomatis)
-                                            </p>
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                <div>
-                                                    <label class="block text-xs text-blue-600 mb-1">Dari Data Staff</label>
-                                                    <select
-                                                        onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
-                                                        class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
-                                                        <option value="">— Pilih Staff —</option>
-                                                    </select>
+                                            {{-- -------------------------------------------------- --}}
+                                            {{-- Autofill selectors — one pair per slot              --}}
+                                            {{-- -------------------------------------------------- --}}
+                                            @foreach ($slots as $slot)
+                                                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                                    <p class="text-sm font-medium text-blue-700 mb-2">
+                                                        Pilih {{ $slot->slot_label }} (opsional — mengisi otomatis)
+                                                    </p>
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label class="block text-xs text-blue-600 mb-1">Dari Data Staff</label>
+                                                            <select
+                                                                onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
+                                                                class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 staff-dropdown">
+                                                                <option value="">— Pilih Staff —</option>
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label class="block text-xs text-blue-600 mb-1">Dari Data Pejabat</label>
+                                                            <select
+                                                                onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
+                                                                class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 official-dropdown">
+                                                                <option value="">— Pilih Pejabat —</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <label class="block text-xs text-blue-600 mb-1">Dari Data Pejabat</label>
-                                                    <select
-                                                        onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
-                                                        class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 official-dropdown">
-                                                        <option value="">— Pilih Pejabat —</option>
-                                                    </select>
-                                                </div>
-                                            </div>
+                                            @endforeach
+
+                                            {{-- -------------------------------------------------- --}}
+                                            {{-- Render fields — grouped by row_group                --}}
+                                            {{-- -------------------------------------------------- --}}
+                                            @php
+                $currentSection = null;
+                $currentRowGroup = null;
+                $rowGroupBuffer = [];
+
+                // Group top-level fields into renderable chunks:
+                // Each chunk is either a single field (row_group=null)
+                // or a collection of fields sharing the same row_group
+                $chunks = [];
+                foreach ($topFields as $field) {
+                    if (is_null($field->row_group)) {
+                        $chunks[] = ['type' => 'single', 'field' => $field];
+                    } else {
+                        // Find or create a row group chunk
+                        $found = false;
+                        foreach ($chunks as &$chunk) {
+                            if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
+                                $chunk['fields'][] = $field;
+                                $found = true;
+                                break;
+                            }
+                        }
+                        unset($chunk);
+                        if (!$found) {
+                            $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
+                        }
+                    }
+                }
+                                            @endphp
+
+                                            @foreach ($chunks as $chunk)
+                                                @if ($chunk['type'] === 'single')
+                                                    @php $field = $chunk['field']; @endphp
+
+                                                    {{-- Section heading --}}
+                                                    @if ($field->section_label && $field->section_label !== $currentSection)
+                                                        @php $currentSection = $field->section_label; @endphp
+                                                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
+                                                            {{ $field->section_label }}
+                                                        </h3>
+                                                    @endif
+
+                                                    <div class="mb-4">
+                                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                                    </div>
+
+                                                @else
+                                                    {{-- Row group: render fields side by side --}}
+                                                    @php $firstField = $chunk['fields'][0]; @endphp
+
+                                                    {{-- Section heading from first field in group --}}
+                                                    @if ($firstField->section_label && $firstField->section_label !== $currentSection)
+                                                        @php $currentSection = $firstField->section_label; @endphp
+                                                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
+                                                            {{ $firstField->section_label }}
+                                                        </h3>
+                                                    @endif
+
+                                                    <div class="grid gap-4 mb-4 row-group-grid" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
+                                                        @foreach ($chunk['fields'] as $field)
+                                                            <div>
+                                                                @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+                                            @endforeach
+
                                         </div>
                                     @endforeach
 
-                                    {{-- -------------------------------------------------- --}}
-                                    {{-- Render fields — grouped by row_group                --}}
-                                    {{-- -------------------------------------------------- --}}
-                                    @php
-        $currentSection = null;
-        $currentRowGroup = null;
-        $rowGroupBuffer = [];
+                                    {{-- Consent + Submit --}}
+                                    <div class="mt-6 pt-4 border-t flex items-center gap-3 consent-wrap">
+                                        <input type="checkbox" name="consent" id="consent"
+                                            class="rounded border-gray-300 text-blue-600" />
+                                        <label for="consent" class="text-sm text-gray-600">
+                                            Saya menyatakan bahwa informasi yang saya berikan adalah benar adanya.
+                                        </label>
+                                    </div>
+                                    <button type="button" id="submit-btn" onclick="submitIfConsented()"
+                                        class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+                                        Buat Dokumen
+                                    </button>
 
-        // Group top-level fields into renderable chunks:
-        // Each chunk is either a single field (row_group=null)
-        // or a collection of fields sharing the same row_group
-        $chunks = [];
-        foreach ($topFields as $field) {
-            if (is_null($field->row_group)) {
-                $chunks[] = ['type' => 'single', 'field' => $field];
-            } else {
-                // Find or create a row group chunk
-                $found = false;
-                foreach ($chunks as &$chunk) {
-                    if ($chunk['type'] === 'row' && $chunk['row_group'] === $field->row_group) {
-                        $chunk['fields'][] = $field;
-                        $found = true;
-                        break;
-                    }
-                }
-                unset($chunk);
-                if (!$found) {
-                    $chunks[] = ['type' => 'row', 'row_group' => $field->row_group, 'fields' => [$field]];
-                }
-            }
-        }
-                                    @endphp
+                                </form>
+                            </div>
+                            </div>
+                            {{-- End left column --}}
 
-                                    @foreach ($chunks as $chunk)
-                                        @if ($chunk['type'] === 'single')
-                                            @php $field = $chunk['field']; @endphp
+                            {{-- ======================================================== --}}
+                            {{-- Right column — guide panel                               --}}
+                            {{-- ======================================================== --}}
+                            <div class="w-full lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-6 space-y-3">
 
-                                            {{-- Section heading --}}
-                                            @if ($field->section_label && $field->section_label !== $currentSection)
-                                                @php $currentSection = $field->section_label; @endphp
-                                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
-                                                    {{ $field->section_label }}
-                                                </h3>
-                                            @endif
-
-                                            <div class="mb-4">
-                                                @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                {{-- Quick start card --}}
+                                <div class="bg-white rounded-lg shadow p-4 guide-card fade-up fade-up-delay-2">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <h2 class="text-sm font-bold text-gray-800">Cara Membuat Dokumen</h2>
+                                    </div>
+                                    <ol class="space-y-2">
+                                        @foreach ([
+                ['1', 'bg-blue-600', 'Pilih Jenis Dokumen', 'Gunakan dropdown "Jenis Surat / Dokumen" untuk memilih template yang diinginkan.'],
+                ['2', 'bg-blue-600', 'Gunakan Autofill (Opsional)', 'Jika tersedia, pilih nama pegawai dari dropdown autofill berwarna biru/ungu untuk mengisi otomatis field seperti nama, NIP, dan jabatan.'],
+                ['3', 'bg-blue-600', 'Isi Form', 'Lengkapi semua field yang tersedia. Field bertanda * wajib diisi. Field tanggal otomatis diformat ke format Indonesia.'],
+                ['4', 'bg-blue-600', 'Centang Persetujuan', 'Centang pernyataan persetujuan di bagian bawah form sebelum melanjutkan.'],
+                ['5', 'bg-blue-600', 'Klik Buat Dokumen', 'Tekan tombol "Buat Dokumen". Sistem akan memproses dan menghasilkan file dokumen.'],
+                ['6', 'bg-green-600', 'Unduh / Preview', 'Setelah berhasil, tombol Unduh akan muncul. Tombol Preview muncul jika diaktifkan admin.'],
+            ] as [$num, $color, $title, $desc])
+                                        <li class="flex gap-3">
+                                            <span class="flex-shrink-0 w-5 h-5 {{ $color }} text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">{{ $num }}</span>
+                                            <div>
+                                                <p class="text-xs font-semibold text-gray-700">{{ $title }}</p>
+                                                <p class="text-xs text-gray-500 leading-relaxed mt-0.5">{{ $desc }}</p>
                                             </div>
+                                        </li>
+                                        @endforeach
+                                    </ol>
+                                </div>
 
-                                        @else
-                                            {{-- Row group: render fields side by side --}}
-                                            @php $firstField = $chunk['fields'][0]; @endphp
-
-                                            {{-- Section heading from first field in group --}}
-                                            @if ($firstField->section_label && $firstField->section_label !== $currentSection)
-                                                @php $currentSection = $firstField->section_label; @endphp
-                                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mt-5 mb-3 border-b pb-2">
-                                                    {{ $firstField->section_label }}
-                                                </h3>
-                                            @endif
-
-                                            <div class="grid gap-4 mb-4 row-group-grid" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
-                                                @foreach ($chunk['fields'] as $field)
-                                                    <div>
-                                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                {{-- Field types card --}}
+                                <div class="bg-white rounded-lg shadow p-4 guide-card fade-up fade-up-delay-3">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <h2 class="text-sm font-bold text-gray-800">Jenis Field di Form</h2>
+                                    </div>
+                                    <div class="space-y-2 text-xs text-gray-600">
+                                        @foreach ([
+                                                ['•', 'Text / Textarea', 'Ketik teks bebas. Textarea untuk keterangan panjang.'],
+                                                ['•', 'Date', 'Pilih tanggal dari kalender. Otomatis diformat ke "01 Januari 2025".'],
+                                                ['•', 'Number', 'Ketik angka (jumlah hari, nomor urut, dsb.)'],
+                                                ['•', 'Select (Dropdown)', 'Pilih satu opsi dari daftar yang tersedia.'],
+                                                ['•', 'Checkbox', 'Centang untuk nilai Ya/Benar.'],
+                                                ['•', 'Repeating Group', 'Klik "+ Tambah Baris" untuk menambah baris data. Klik × untuk menghapus.'],
+                                                ['•', 'Staff / Pejabat Loop', 'Centang nama yang ingin dimasukkan. Drag ⠿ untuk mengubah urutan dalam dokumen.'],
+                                            ] as [$icon, $type, $desc])
+                                                    <div class="flex gap-2">
+                                                        <span class="flex-shrink-0 w-5 text-center">{{ $icon }}</span>
+                                                        <div>
+                                                            <span class="font-medium text-gray-700">{{ $type }}</span>
+                                                            <span class="text-gray-400"> — </span>
+                                                            <span>{{ $desc }}</span>
+                                                        </div>
                                                     </div>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    @endforeach
-
-                                </div>
-                            @endforeach
-
-                            {{-- Consent + Submit --}}
-                            <div class="mt-6 pt-4 border-t flex items-center gap-3 consent-wrap">
-                                <input type="checkbox" name="consent" id="consent"
-                                    class="rounded border-gray-300 text-blue-600" />
-                                <label for="consent" class="text-sm text-gray-600">
-                                    Saya menyatakan bahwa informasi yang saya berikan adalah benar adanya.
-                                </label>
-                            </div>
-                            <button type="button" id="submit-btn" onclick="submitIfConsented()"
-                                class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                                Buat Dokumen
-                            </button>
-
-                        </form>
-                    </div>
-                    </div>
-                    {{-- End left column --}}
-
-                    {{-- ======================================================== --}}
-                    {{-- Right column — guide panel                               --}}
-                    {{-- ======================================================== --}}
-                    <div class="w-full lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-6 space-y-3">
-
-                        {{-- Quick start card --}}
-                        <div class="bg-white rounded-lg shadow p-4 guide-card fade-up fade-up-delay-2">
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="text-blue-600 text-lg">📋</span>
-                                <h2 class="text-sm font-bold text-gray-800">Cara Membuat Dokumen</h2>
-                            </div>
-                            <ol class="space-y-2">
-                                @foreach ([
-        ['1', 'bg-blue-600', 'Pilih Jenis Dokumen', 'Gunakan dropdown "Jenis Surat / Dokumen" untuk memilih template yang diinginkan.'],
-        ['2', 'bg-blue-600', 'Gunakan Autofill (Opsional)', 'Jika tersedia, pilih nama pegawai dari dropdown autofill berwarna biru/ungu untuk mengisi otomatis field seperti nama, NIP, dan jabatan.'],
-        ['3', 'bg-blue-600', 'Isi Form', 'Lengkapi semua field yang tersedia. Field bertanda * wajib diisi. Field tanggal otomatis diformat ke format Indonesia.'],
-        ['4', 'bg-blue-600', 'Centang Persetujuan', 'Centang pernyataan persetujuan di bagian bawah form sebelum melanjutkan.'],
-        ['5', 'bg-blue-600', 'Klik Buat Dokumen', 'Tekan tombol "Buat Dokumen". Sistem akan memproses dan menghasilkan file dokumen.'],
-        ['6', 'bg-green-600', 'Unduh / Preview', 'Setelah berhasil, tombol Unduh akan muncul. Tombol Preview muncul jika diaktifkan admin.'],
-    ] as [$num, $color, $title, $desc])
-                                <li class="flex gap-3">
-                                    <span class="flex-shrink-0 w-5 h-5 {{ $color }} text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">{{ $num }}</span>
-                                    <div>
-                                        <p class="text-xs font-semibold text-gray-700">{{ $title }}</p>
-                                        <p class="text-xs text-gray-500 leading-relaxed mt-0.5">{{ $desc }}</p>
-                                    </div>
-                                </li>
-                                @endforeach
-                            </ol>
-                        </div>
-
-                        {{-- Field types card --}}
-                        <div class="bg-white rounded-lg shadow p-4 guide-card fade-up fade-up-delay-3">
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="text-blue-600 text-lg">🗂</span>
-                                <h2 class="text-sm font-bold text-gray-800">Jenis Field di Form</h2>
-                            </div>
-                            <div class="space-y-2 text-xs text-gray-600">
-                                @foreach ([
-        ['📝', 'Text / Textarea', 'Ketik teks bebas. Textarea untuk keterangan panjang.'],
-        ['📅', 'Date', 'Pilih tanggal dari kalender. Otomatis diformat ke "01 Januari 2025".'],
-        ['🔢', 'Number', 'Ketik angka (jumlah hari, nomor urut, dsb.)'],
-        ['▼', 'Select (Dropdown)', 'Pilih satu opsi dari daftar yang tersedia.'],
-        ['☑', 'Checkbox', 'Centang untuk nilai Ya/Benar.'],
-        ['➕', 'Repeating Group', 'Klik "+ Tambah Baris" untuk menambah baris data. Klik × untuk menghapus.'],
-        ['👥', 'Staff / Pejabat Loop', 'Centang nama yang ingin dimasukkan. Drag ⠿ untuk mengubah urutan dalam dokumen.'],
-    ] as [$icon, $type, $desc])
-                                <div class="flex gap-2">
-                                    <span class="flex-shrink-0 w-5 text-center">{{ $icon }}</span>
-                                    <div>
-                                        <span class="font-medium text-gray-700">{{ $type }}</span>
-                                        <span class="text-gray-400"> — </span>
-                                        <span>{{ $desc }}</span>
+                                        @endforeach
                                     </div>
                                 </div>
-                                @endforeach
+
+                                {{-- Autofill tip card --}}
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <h2 class="text-sm font-bold text-blue-800">Tips Autofill</h2>
+                                    </div>
+                                    <ul class="space-y-1.5 text-xs text-blue-700">
+                                        <li>• Setiap slot autofill (biru/ungu) memiliki <strong>dua dropdown</strong>: satu dari Data Staff dan satu dari Data Pejabat.</li>
+                                        <li>• Memilih dari salah satu dropdown akan otomatis mengisi nama, NIP, jabatan, dan unit kerja.</li>
+                                        <li>• Field yang terisi otomatis masih <strong>bisa diedit manual</strong> jika perlu.</li>
+                                        <li>• Untuk daftar peserta (Staff/Pejabat Loop), centang beberapa nama lalu <strong>drag untuk mengubah urutan</strong> dalam dokumen.</li>
+                                    </ul>
+                                </div>
+
+                                {{-- Warning card --}}
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <h2 class="text-sm font-bold text-yellow-800">Perhatian</h2>
+                                    </div>
+                                    <ul class="space-y-1.5 text-xs text-yellow-700">
+                                        <li>• File dokumen akan <strong>otomatis terhapus</strong> dari server setelah beberapa menit. Segera unduh setelah dibuat.</li>
+                                        <li>• Pastikan semua field wajib (*) terisi sebelum menekan "Buat Dokumen".</li>
+                                        <li>• Jika ada field yang kurang atau tidak sesuai, hubungi administrator.</li>
+                                    </ul>
+                                </div>
+
                             </div>
-                        </div>
+                            {{-- End right column --}}
 
-                        {{-- Autofill tip card --}}
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-blue-600 text-lg">💡</span>
-                                <h2 class="text-sm font-bold text-blue-800">Tips Autofill</h2>
                             </div>
-                            <ul class="space-y-1.5 text-xs text-blue-700">
-                                <li>• Setiap slot autofill (biru/ungu) memiliki <strong>dua dropdown</strong>: satu dari Data Staff dan satu dari Data Pejabat.</li>
-                                <li>• Memilih dari salah satu dropdown akan otomatis mengisi nama, NIP, jabatan, dan unit kerja.</li>
-                                <li>• Field yang terisi otomatis masih <strong>bisa diedit manual</strong> jika perlu.</li>
-                                <li>• Untuk daftar peserta (Staff/Pejabat Loop), centang beberapa nama lalu <strong>drag untuk mengubah urutan</strong> dalam dokumen.</li>
-                            </ul>
-                        </div>
+                            {{-- End two-column grid --}}
 
-                        {{-- Warning card --}}
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-lg">⚠️</span>
-                                <h2 class="text-sm font-bold text-yellow-800">Perhatian</h2>
-                            </div>
-                            <ul class="space-y-1.5 text-xs text-yellow-700">
-                                <li>• File dokumen akan <strong>otomatis terhapus</strong> dari server setelah beberapa menit. Segera unduh setelah dibuat.</li>
-                                <li>• Pastikan semua field wajib (*) terisi sebelum menekan "Buat Dokumen".</li>
-                                <li>• Jika ada field yang kurang atau tidak sesuai, hubungi administrator.</li>
-                            </ul>
-                        </div>
-
-                    </div>
-                    {{-- End right column --}}
-
-                    </div>
-                    {{-- End two-column grid --}}
-
-                    @endif
+        @endif
     </main>
     <script>
         const autofillMap = {
