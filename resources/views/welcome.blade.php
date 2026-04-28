@@ -1,98 +1,334 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name') }}</title>
+    <title>SIPADU — {{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        body { background: #0d1526; font-family: var(--font-body); }
+
+        /* Hero background */
+        .hero-bg {
+            min-height: 100vh;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% -10%, rgba(42,82,152,0.35) 0%, transparent 65%),
+                radial-gradient(ellipse 40% 30% at 80% 80%, rgba(201,168,76,0.12) 0%, transparent 60%),
+                linear-gradient(160deg, #0a0f1e 0%, #0d1526 50%, #101c38 100%);
+        }
+
+        /* Geometric decoration */
+        .geo-circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(201,168,76,0.08);
+            animation: expandCircle 8s ease-in-out infinite alternate;
+        }
+        @keyframes expandCircle {
+            from { transform: scale(1); opacity: 0.4; }
+            to   { transform: scale(1.04); opacity: 0.7; }
+        }
+
+        /* Grid pattern overlay */
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(42,82,152,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(42,82,152,0.06) 1px, transparent 1px);
+            background-size: 64px 64px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+        }
+
+        /* Gold accent line */
+        .gold-accent-line {
+            width: 48px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold-500), transparent);
+        }
+
+        /* Feature cards */
+        .feature-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(201,168,76,0.2);
+            transform: translateY(-2px);
+        }
+        .feature-icon {
+            width: 40px; height: 40px;
+            background: rgba(201,168,76,0.12);
+            border: 1px solid rgba(201,168,76,0.2);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--gold-400);
+            margin-bottom: 0.85rem;
+        }
+        .feature-title {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+        .feature-desc {
+            color: rgba(255,255,255,0.45);
+            font-size: 0.78rem;
+            line-height: 1.55;
+        }
+
+        /* Login card */
+        .login-panel {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px) saturate(1.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        /* Seal / emblem circle */
+        .emblem {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, var(--gold-500), var(--gold-300));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 0 6px rgba(201,168,76,0.12), 0 8px 24px rgba(201,168,76,0.25);
+            animation: pulse-gold 3s ease-in-out infinite;
+        }
+
+        /* Scroll fade hint */
+        .scroll-hint {
+            opacity: 0;
+            animation: fadeIn 1s ease 1.8s forwards;
+        }
+
+        /* Stats strip */
+        .stats-strip {
+            background: rgba(255,255,255,0.03);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .stat-num {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            color: var(--gold-400);
+            line-height: 1;
+        }
+        .stat-desc {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.45);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+        }
+
+        /* Footer */
+        .welcome-footer {
+            background: rgba(0,0,0,0.25);
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+    </style>
 </head>
+<body class="hero-bg">
 
-<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+    <!-- Grid overlay -->
+    <div class="grid-overlay pointer-events-none"></div>
 
-    {{-- Navbar --}}
-    <nav class="bg-white shadow px-4 sm:px-8 py-4 flex items-center justify-between">
-        <div>
-            <p class="font-bold text-gray-800 text-sm sm:text-base">DINAS PUPRD</p>
-            <p class="text-xs text-gray-500 hidden sm:block">Kota Tomohon</p>
-        </div>
-        <div class="flex items-center gap-3">
-            @auth
-                <a href="{{ route('home') }}" class="text-sm text-blue-600 hover:underline font-medium">
-                    Buka Aplikasi
-                </a>
-            @else
-                <a href="{{ route('login') }}" class="text-sm text-blue-600 hover:underline">Login</a>
-                <a href="{{ route('register') }}" class="text-sm text-gray-600 hover:underline">Daftar</a>
-            @endauth
+    <!-- Decorative circles -->
+    <div class="geo-circle" style="width:500px;height:500px;top:-150px;left:-150px;"></div>
+    <div class="geo-circle" style="width:300px;height:300px;bottom:10%;right:-80px;animation-delay:-4s;border-color:rgba(201,168,76,0.06);"></div>
+
+    <!-- Navbar -->
+    <nav class="sipadu-nav">
+        <div class="max-w-6xl mx-auto px-5 sm:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="emblem" style="width:34px;height:34px;box-shadow:none;animation:none;">
+                    <svg class="w-4 h-4 text-navy-900" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#0d1526;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="nav-brand-title text-sm">SIPADU</div>
+                    <div class="nav-brand-sub" style="font-size:0.55rem;">DINAS PUPRD · Kota Tomohon</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                @auth
+                    <a href="{{ route('home') }}" class="btn-gold" style="padding:0.4rem 1rem;font-size:0.78rem;">
+                        Buka Aplikasi
+                    </a>
+                @else
+                    <a href="{{ route('login') }}" class="btn-ghost" style="padding:0.4rem 1rem;font-size:0.78rem;">Login</a>
+                    <a href="{{ route('register') }}" class="btn-gold" style="padding:0.4rem 1rem;font-size:0.78rem;">Daftar</a>
+                @endauth
+            </div>
         </div>
     </nav>
 
-    {{-- Hero section --}}
-    <main class="flex-1 flex items-center justify-center px-4 py-12 sm:py-20">
-        <div class="w-full max-w-lg text-center">
+    <!-- Hero Section -->
+    <main class="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-24 relative z-10">
 
-            {{-- Logo / icon --}}
-            <div class="mx-auto mb-6 w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
-                             a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            <!-- Left: Hero copy -->
+            <div>
+                <div class="fade-up fade-up-1 flex items-center gap-3 mb-6">
+                    <div class="gold-accent-line"></div>
+                    <span class="section-label" style="color:var(--gold-400);font-size:0.65rem;">Sistem Otomasi Persuratan Resmi</span>
+                </div>
+
+                <div class="fade-up fade-up-2 emblem mb-6">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#0d1526;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+
+                <h1 class="fade-up fade-up-2 display-heading text-white mb-3" style="font-size:clamp(2.2rem,5vw,3.4rem);">
+                    SIPADU
+                </h1>
+                <p class="fade-up fade-up-3 mb-2" style="font-size:0.95rem;color:rgba(255,255,255,0.5);letter-spacing:0.05em;text-transform:uppercase;font-weight:500;">
+                    Sistem Generasi Administrasi Persuratan
+                </p>
+                <p class="fade-up fade-up-3 mb-8" style="font-size:0.82rem;color:var(--gold-400);letter-spacing:0.06em;text-transform:uppercase;">
+                    Dinas Pekerjaan Umum dan Penataan Ruang Daerah
+                </p>
+
+                <p class="fade-up fade-up-4 mb-8 leading-relaxed" style="color:rgba(255,255,255,0.55);font-size:0.9rem;max-width:440px;">
+                    Platform pembuatan surat dan dokumen resmi secara otomatis.
+                    Efisiensi administrasi dengan teknologi modern untuk pelayanan publik yang lebih baik.
+                </p>
+
+                <div class="fade-up fade-up-4 flex flex-wrap gap-3">
+                    @auth
+                        <a href="{{ route('home') }}" class="btn-gold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                            Buka Aplikasi
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="btn-gold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14"/></svg>
+                            Masuk ke Sistem
+                        </a>
+                        <a href="{{ route('register') }}" class="btn-ghost">
+                            Daftarkan Akun
+                        </a>
+                    @endauth
+                </div>
+
+                <!-- Scroll hint -->
+                <div class="scroll-hint mt-12 flex items-center gap-2" style="color:rgba(255,255,255,0.25);font-size:0.72rem;letter-spacing:0.06em;">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    Fitur Unggulan
+                </div>
             </div>
 
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-                Sistem Automatisasi Surat
-            </h1>
-            <p class="text-sm sm:text-base font-semibold text-blue-700 mb-2">
-                SIPADU
-            </p>
-            <p class="text-sm text-gray-500 mb-1">
-                DINAS PEKERJAAN UMUM DAN PENATAAN RUANG DAERAH
-            </p>
-            <p class="text-sm text-gray-500 mb-8">
-                KOTA TOMOHON
-            </p>
+            <!-- Right: Login / CTA panel -->
+            <div class="fade-up fade-up-3">
+                <div class="login-panel">
+                    <div class="flex items-center gap-2 mb-5">
+                        <div class="gold-accent-line"></div>
+                        <span style="font-size:0.7rem;color:var(--gold-400);letter-spacing:0.08em;text-transform:uppercase;font-weight:600;">Akses Sistem</span>
+                    </div>
 
-            <p class="text-sm text-gray-600 mb-8 leading-relaxed px-4 sm:px-0">
-                Platform pembuatan surat dan dokumen resmi secara otomatis.
-                Login untuk mulai membuat dokumen.
-            </p>
+                    <!-- Feature list -->
+                    <div class="space-y-3 mb-6">
+                        @foreach([
+                            ['Pembuatan Surat Otomatis', 'Isi form, sistem mengisi template — selesai dalam hitungan detik.'],
+                            ['Autofill Data Pegawai', 'Data nama, NIP, jabatan terisi otomatis dari database dinas.'],
+                            ['Multi-format Dokumen', 'Dukungan template Word (.docx) dan Excel (.xlsx).'],
+                            ['Riwayat & Audit', 'Setiap dokumen tercatat dengan lengkap untuk keperluan audit.'],
+                        ] as $f)
+                        <div class="flex items-start gap-3 py-2 border-b" style="border-color:rgba(255,255,255,0.06);">
+                            <div class="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5" style="background:rgba(201,168,76,0.15);">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--gold-400);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <p style="color:rgba(255,255,255,0.85);font-size:0.82rem;font-weight:600;">{{ $f[0] }}</p>
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin-top:0.15rem;line-height:1.4;">{{ $f[1] }}</p>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
 
-            {{-- CTA buttons --}}
-            @auth
-                <a href="{{ route('home') }}"
-                    class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold text-sm hover:bg-blue-700 transition shadow">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                    Buka Aplikasi
-                </a>
-            @else
-                <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <a href="{{ route('login') }}"
-                        class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold text-sm hover:bg-blue-700 transition shadow">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                        </svg>
-                        Login
-                    </a>
-                    <a href="{{ route('register') }}"
-                        class="inline-flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-semibold text-sm hover:bg-gray-50 transition shadow-sm">
-                        Daftar Akun Baru
-                    </a>
+                    <!-- Role info -->
+                    <div class="rounded-10 p-3 mb-5" style="background:rgba(42,82,152,0.15);border:1px solid rgba(42,82,152,0.2);border-radius:8px;">
+                        <p style="font-size:0.72rem;color:rgba(255,255,255,0.5);margin-bottom:0.5rem;letter-spacing:0.04em;text-transform:uppercase;font-weight:600;">Level Akses</p>
+                        <div class="flex gap-3">
+                            @foreach([['Guest','Dokumen Publik'],['Staff','Semua Dokumen'],['Admin','Kelola Sistem']] as $r)
+                            <div class="text-center flex-1">
+                                <div style="color:var(--gold-400);font-size:0.78rem;font-weight:700;">{{ $r[0] }}</div>
+                                <div style="color:rgba(255,255,255,0.35);font-size:0.65rem;margin-top:0.1rem;">{{ $r[1] }}</div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    @auth
+                        <a href="{{ route('home') }}" class="btn-gold w-full justify-center" style="width:100%;">
+                            Buka Aplikasi →
+                        </a>
+                    @else
+                        <div class="flex flex-col gap-2">
+                            <a href="{{ route('login') }}" class="btn-gold justify-center" style="width:100%;">
+                                Masuk ke Sistem
+                            </a>
+                            <a href="{{ route('register') }}" class="btn-ghost justify-center" style="width:100%;border-color:rgba(255,255,255,0.15);">
+                                Daftarkan Akun Baru
+                            </a>
+                        </div>
+                    @endauth
                 </div>
-            @endauth
+            </div>
+        </div>
 
+        <!-- Stats strip -->
+        <div class="stats-strip mt-20 rounded-2xl fade-up fade-up-5">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-0 divide-x" style="divide-color:rgba(255,255,255,0.06);">
+                @foreach([['3','Jenis Dokumen'],['Auto','Pengisian Data'],['PDF','Preview Instan'],['Aman','Berbasis Akun']] as $s)
+                <div class="text-center py-5 px-4">
+                    <div class="stat-num">{{ $s[0] }}</div>
+                    <div class="stat-desc">{{ $s[1] }}</div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="mt-16 fade-up fade-up-5">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="gold-accent-line"></div>
+                <span class="section-label" style="color:rgba(255,255,255,0.4);">Kemampuan Sistem</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach([
+                    ['M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z','Template Fleksibel','Dukung format Word dan Excel dengan placeholder Jinja2 yang powerful.'],
+                    ['M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0','Data Staff & Pejabat','Database terpusat untuk pegawai dan pejabat, mengisi form secara otomatis.'],
+                    ['M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z','Preview PDF','Pratinjau dokumen langsung di browser sebelum mengunduh.'],
+                    ['M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2','Daftar Peserta','Pilih dan urutkan peserta dari daftar dengan drag-and-drop.'],
+                    ['M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z','Kontrol Akses','Tiga tingkat akses: Guest, Staff, dan Admin dengan hak yang berbeda.'],
+                    ['M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z','Hapus Otomatis','File temporer dibersihkan otomatis, menjaga server tetap efisien.'],
+                ] as $feat)
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $feat[0] }}"/></svg>
+                    </div>
+                    <div class="feature-title">{{ $feat[1] }}</div>
+                    <div class="feature-desc">{{ $feat[2] }}</div>
+                </div>
+                @endforeach
+            </div>
         </div>
     </main>
 
-    {{-- Footer --}}
-    <footer class="text-center py-4 text-xs text-gray-400 border-t border-gray-200 bg-white">
-        SIPADU © {{ date('Y') }} — DINAS PUPRD Kota Tomohon
+    <!-- Footer -->
+    <footer class="welcome-footer mt-10 py-5 text-center" style="color:rgba(255,255,255,0.25);font-size:0.73rem;letter-spacing:0.04em;">
+        SIPADU © {{ date('Y') }} — Dinas Pekerjaan Umum dan Penataan Ruang Daerah · Kota Tomohon
     </footer>
 
 </body>
-
 </html>
