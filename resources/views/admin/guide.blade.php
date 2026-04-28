@@ -1,249 +1,757 @@
 @extends('admin.layout')
-@section('page-title', 'Panduan Penggunaan')
 
 @section('content')
-<div class="space-y-5 fade-up">
-
+<div class="flex items-start justify-between mb-6">
     <div>
-        <div class="section-label mb-1">Dokumentasi</div>
-        <h1 class="display-heading" style="font-size:1.35rem;">Panduan Penggunaan SIPADU</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Panduan Sistem SIPADU</h1>
+        <p class="text-sm text-gray-500 mt-1">
+            Panduan penggunaan dan administrasi — Versi 1.0 | 2026 | by. Marvelous Makaluwu
+        </p>
     </div>
+    <a href="{{ route('admin.guide.download') }}"
+       class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium flex-shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Unduh Panduan (.docx)
+    </a>
+</div>
+<div class="flex gap-6 items-start">
 
-    {{-- Tab nav --}}
-    <div style="display:flex;gap:0.5rem;border-bottom:2px solid var(--slate-200);" x-data="{ tab: 'overview' }">
-        @foreach([
-            ['overview',  'Gambaran Umum'],
-            ['fields',    'Jenis Field'],
-            ['templates', 'Template Dokumen'],
-            ['autofill',  'Autofill & Loop'],
-            ['admin',     'Panduan Admin'],
-        ] as [$key, $lbl])
-        <button type="button"
-            @click="tab = '{{ $key }}'"
-            :style="tab === '{{ $key }}' ? 'border-bottom:2px solid var(--navy-600);color:var(--navy-700);margin-bottom:-2px;background:rgba(42,82,152,0.05);' : ''"
-            style="padding:0.55rem 1rem;font-size:0.8rem;font-weight:600;color:var(--slate-400);background:transparent;border:none;border-radius:8px 8px 0 0;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;"
-            onmouseover="if(!this.style.borderBottom) this.style.color='var(--slate-600)'"
-            onmouseout="if(!this.style.borderBottom) this.style.color='var(--slate-400)'">
-            {{ $lbl }}
-        </button>
-        @endforeach
-    </div>
-
-    <div x-data="{ tab: 'overview' }">
-
-        {{-- Overview --}}
-        <div x-show="tab === 'overview'" x-transition class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div class="lg:col-span-2 space-y-4">
-                <div class="glass-card rounded-2xl p-5">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div style="width:3px;height:16px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
-                        <h2 style="font-size:0.9rem;font-weight:700;color:var(--navy-800);">Apa itu SIPADU?</h2>
-                    </div>
-                    <p style="font-size:0.83rem;color:var(--slate-600);line-height:1.7;">
-                        SIPADU (<em>Sistem Administrasi Persuratan</em>) adalah platform web untuk pembuatan dokumen dan surat resmi secara otomatis di lingkungan Dinas Pekerjaan Umum dan Penataan Ruang Daerah Kota Tomohon.
-                    </p>
-                    <p style="font-size:0.83rem;color:var(--slate-600);line-height:1.7;margin-top:0.75rem;">
-                        Dengan SIPADU, staf hanya perlu mengisi form yang tersedia — sistem akan mengisi template Word atau Excel secara otomatis, termasuk data nama, NIP, jabatan, dan pangkat dari database pegawai yang sudah dikelola oleh Admin.
-                    </p>
-                </div>
-
-                <div class="glass-card rounded-2xl p-5">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div style="width:3px;height:16px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
-                        <h2 style="font-size:0.9rem;font-weight:700;color:var(--navy-800);">Cara Kerja</h2>
-                    </div>
-                    <div class="space-y-0">
-                        @foreach([
-                            ['Admin', 'Admin menyiapkan template (.docx/.xlsx) dengan placeholder Jinja2 seperti {{nama}} atau {{nip}}.'],
-                            ['Admin', 'Admin mendefinisikan field-field form yang diperlukan beserta konfigurasinya.'],
-                            ['Staff', 'Staff membuka halaman utama, memilih jenis dokumen dari dropdown.'],
-                            ['Staff', 'Staff mengisi form — bisa gunakan autofill untuk isi data pegawai otomatis.'],
-                            ['Sistem', 'Sistem merender template menggunakan data form, menghasilkan file .docx atau .xlsx.'],
-                            ['Staff', 'Staff mengunduh dokumen dan/atau melihat preview PDF di browser.'],
-                        ] as $i => [$actor, $step])
-                        <div style="display:flex;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid rgba(42,82,152,0.06);">
-                            <div style="width:22px;height:22px;border-radius:50%;background:{{ $actor === 'Admin' ? 'var(--navy-700)' : ($actor === 'Staff' ? 'var(--gold-500)' : 'rgba(42,82,152,0.15)') }};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;">
-                                <span style="font-size:0.6rem;font-weight:700;color:{{ $actor === 'Admin' ? '#fff' : ($actor === 'Staff' ? '#0d1526' : 'var(--navy-500)') }};">{{ $i + 1 }}</span>
-                            </div>
-                            <div>
-                                <span class="badge {{ $actor === 'Admin' ? 'badge-navy' : ($actor === 'Staff' ? 'badge-gold' : 'badge-gray') }}" style="font-size:0.6rem;margin-bottom:0.2rem;">{{ $actor }}</span>
-                                <p style="font-size:0.8rem;color:var(--slate-600);line-height:1.5;">{{ $step }}</p>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            {{-- Quick ref --}}
-            <div class="space-y-3">
-                <div class="glass-card rounded-2xl p-4">
-                    <div class="section-label mb-3">Level Akses</div>
-                    @foreach([
-                        ['Guest','Lihat dan buat dokumen publik saja.','badge-gray'],
-                        ['Staff','Akses semua jenis dokumen.','badge-gold'],
-                        ['Admin','Kelola sistem: template, field, user, data pegawai.','badge-navy'],
-                    ] as [$role, $desc, $badge])
-                    <div style="padding:0.5rem 0;border-bottom:1px solid var(--slate-100);">
-                        <span class="badge {{ $badge }}" style="font-size:0.65rem;margin-bottom:0.25rem;">{{ $role }}</span>
-                        <p style="font-size:0.75rem;color:var(--slate-500);line-height:1.4;">{{ $desc }}</p>
-                    </div>
-                    @endforeach
-                </div>
-                <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:1rem;">
-                    <p style="font-size:0.72rem;font-weight:700;color:#7a5f1a;margin-bottom:0.5rem;">⚠ Penting</p>
-                    <ul style="font-size:0.73rem;color:#7a5f1a;line-height:1.6;">
-                        <li>• File hasil generate <strong>otomatis dihapus</strong> dari server setelah beberapa menit.</li>
-                        <li>• Segera unduh setelah dokumen berhasil dibuat.</li>
-                        <li>• Data pegawai hanya bisa diubah oleh Admin.</li>
-                    </ul>
-                </div>
-            </div>
+    {{-- Sticky sidebar TOC --}}
+    <aside class="w-56 flex-shrink-0 sticky top-6">
+        <div class="bg-white rounded-lg shadow p-4">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Daftar Isi</p>
+            <nav class="space-y-1 text-xs">
+                <a href="#pengenalan"      class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Pengenalan Sistem</a>
+                <a href="#persyaratan"     class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Persyaratan Sistem</a>
+                <a href="#panduan-admin"   class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Panduan Administrator</a>
+                <a href="#akses-admin"     class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Akses Panel Admin</a>
+                <a href="#dashboard"       class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Dashboard</a>
+                <a href="#manajemen-user"  class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Manajemen Pengguna</a>
+                <a href="#data-staff"      class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Data Staff & Pejabat</a>
+                <a href="#jenis-dokumen"   class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Jenis Dokumen</a>
+                <a href="#kelola-field"    class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Kelola Field</a>
+                <a href="#autofill-slots"  class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Autofill Slots</a>
+                <a href="#template"        class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Membuat Template</a>
+                <a href="#jinja2"          class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Referensi Jinja2</a>
+                <a href="#contoh"          class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Contoh Template</a>
+                <a href="#preview"         class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Fitur Preview</a>
+                <a href="#scheduler"       class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Pembersihan Otomatis</a>
+                <a href="#deployment"      class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Deployment</a>
+                <a href="#troubleshooting" class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Troubleshooting</a>
+            </nav>
         </div>
+    </aside>
 
-        {{-- Field types --}}
-        <div x-show="tab === 'fields'" x-transition class="glass-card rounded-2xl overflow-hidden">
-            <table class="sipadu-table">
-                <thead>
-                    <tr>
-                        <th>Tipe Field</th>
-                        <th>Placeholder Template</th>
-                        <th>Keterangan</th>
-                        <th>Contoh Output</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach([
-                        ['text',            '{{ "{{field_key}}" }}',        'Input teks bebas satu baris.',                       'Dinas PUPRD Kota Tomohon'],
-                        ['textarea',        '{{ "{{field_key}}" }}',        'Input teks panjang multi-baris.',                    'Kegiatan pembangunan jalan...'],
-                        ['number',          '{{ "{{field_key}}" }}',        'Input angka (integer atau desimal).',                 '12'],
-                        ['date',            '{{ "{{field_key}}" }}',        'Pilih tanggal — diformat ke bahasa Indonesia.',      '01 Januari 2025'],
-                        ['select',          '{{ "{{field_key}}" }}',        'Pilih satu dari daftar opsi yang ditentukan.',       'Pembangunan'],
-                        ['checkbox',        '{{ "{{field_key}}" }}',        'Nilai boolean: "Ya" / "" (kosong).',                 'Ya'],
-                        ['loop_staff',      '{{ "{{#loop_key}}" }} ... {{ "{{/loop_key}}" }}', 'Blok perulangan untuk daftar staff yang dipilih.',   'Budi (NIP 123) ...'],
-                        ['loop_official',   '{{ "{{#loop_key}}" }} ... {{ "{{/loop_key}}" }}', 'Blok perulangan untuk daftar pejabat yang dipilih.', 'Kepala Dinas...'],
-                        ['repeating_group', 'Array loop di template.',      'Grup field yang bisa ditambah per baris dinamis.',   'Row 1: A, B; Row 2: C, D'],
-                        ['heading',         '(tidak ada)',                   'Label pemisah seksi — tidak dikirim ke template.',   '—'],
-                    ] as [$type, $placeholder, $desc, $example])
-                    <tr>
-                        <td><code style="font-family:var(--font-mono);font-size:0.72rem;background:var(--slate-100);padding:0.15rem 0.45rem;border-radius:4px;color:var(--navy-600);">{{ $type }}</code></td>
-                        <td><code style="font-family:var(--font-mono);font-size:0.7rem;color:var(--slate-500);">{!! $placeholder !!}</code></td>
-                        <td style="font-size:0.78rem;color:var(--slate-600);">{{ $desc }}</td>
-                        <td style="font-size:0.75rem;color:var(--slate-400);font-style:italic;">{{ $example }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+    <div class="flex-1 min-w-0 space-y-8">
+        <section id="pengenalan" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Pengenalan Sistem</h2>
 
-        {{-- Templates --}}
-        <div x-show="tab === 'templates'" x-transition class="glass-card rounded-2xl p-5">
-            <div class="flex items-center gap-2 mb-4">
-                <div style="width:3px;height:16px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
-                <h2 style="font-size:0.9rem;font-weight:700;color:var(--navy-800);">Membuat Template Dokumen</h2>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                <div>
-                    <p style="font-size:0.75rem;font-weight:700;color:var(--navy-600);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:0.5rem;">Format .docx (Word)</p>
-                    <ul style="font-size:0.8rem;color:var(--slate-600);line-height:1.8;space-y:0.25rem;">
-                        <li>• Buat file Word normal dengan konten surat/dokumen.</li>
-                        <li>• Sisipkan placeholder <code style="background:var(--slate-100);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.73rem;">{{"{{"}}nama_field{{"}}"}}</code> di posisi yang sesuai.</li>
-                        <li>• Untuk loop: gunakan <code style="background:var(--slate-100);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.73rem;">{{"{{"}}#key{{"}}"}} ... {{"{{"}}/ key{{"}}"}}</code>.</li>
-                        <li>• Simpan sebagai <code style="background:var(--slate-100);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.73rem;">.docx</code>, bukan .doc.</li>
-                        <li>• Upload via halaman Edit Jenis Dokumen di Admin Panel.</li>
-                    </ul>
-                </div>
-                <div>
-                    <p style="font-size:0.75rem;font-weight:700;color:var(--navy-600);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:0.5rem;">Format .xlsx (Excel)</p>
-                    <ul style="font-size:0.8rem;color:var(--slate-600);line-height:1.8;">
-                        <li>• Buat file Excel dengan struktur tabel yang diinginkan.</li>
-                        <li>• Placeholder di dalam cell: <code style="background:var(--slate-100);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.73rem;">{{"{{"}}nama_field{{"}}"}}</code>.</li>
-                        <li>• Sistem akan menggantikan placeholder dengan nilai dari form.</li>
-                        <li>• Gunakan sheet pertama sebagai template utama.</li>
-                    </ul>
-                </div>
-            </div>
-            <div style="margin-top:1.25rem;background:rgba(42,82,152,0.05);border:1px solid rgba(42,82,152,0.12);border-radius:8px;padding:0.9rem;">
-                <p style="font-size:0.75rem;font-weight:700;color:var(--navy-700);margin-bottom:0.5rem;">Contoh placeholder untuk surat resmi:</p>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    @foreach(['nama','nip','jabatan','pangkat','unit','tanggal','nomor_surat','perihal','tujuan'] as $ph)
-                    <code style="font-family:var(--font-mono);font-size:0.72rem;background:rgba(42,82,152,0.08);border:1px solid rgba(42,82,152,0.12);padding:0.2rem 0.5rem;border-radius:5px;color:var(--navy-600);display:block;">
-                        {{"{{"}}{{ $ph }}{{"}}"}}
-                    </code>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        {{-- Autofill --}}
-        <div x-show="tab === 'autofill'" x-transition class="glass-card rounded-2xl p-5">
-            <div class="flex items-center gap-2 mb-4">
-                <div style="width:3px;height:16px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
-                <h2 style="font-size:0.9rem;font-weight:700;color:var(--navy-800);">Fitur Autofill & Loop</h2>
-            </div>
-            <p style="font-size:0.83rem;color:var(--slate-600);line-height:1.6;margin-bottom:1rem;">
-                Autofill memungkinkan staf memilih nama pegawai dari dropdown, dan secara otomatis semua field terkait (NIP, jabatan, pangkat, unit) terisi tanpa perlu mengetik manual.
+            <p class="text-sm text-gray-700 mb-4">
+                <strong>SIPADU</strong> (Sistem Generasi Administrasi Persuratan) adalah aplikasi web berbasis Laravel yang dirancang khusus untuk
+                <strong>DINAS PEKERJAAN UMUM DAN PENATAAN RUANG DAERAH KOTA TOMOHON</strong>.
+                Sistem ini memungkinkan pegawai untuk membuat surat dan dokumen resmi secara otomatis berdasarkan template yang telah disiapkan oleh administrator.
             </p>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                    <p style="font-size:0.75rem;font-weight:700;color:var(--navy-600);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:0.5rem;">Cara Konfigurasi Autofill (Admin)</p>
-                    <ol style="font-size:0.8rem;color:var(--slate-600);line-height:1.8;list-style:decimal;padding-left:1.1rem;">
-                        <li>Buka halaman Fields untuk jenis dokumen.</li>
-                        <li>Pada field yang ingin diautofill (misal "Nama"), set <code style="background:var(--slate-100);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.72rem;">staff_autofill_column</code> ke <code style="background:var(--slate-100);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.72rem;">staff_name</code>.</li>
-                        <li>Set <code style="background:var(--slate-100);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.72rem;">autofill_role</code> ke nama slot (misalnya <code style="background:var(--slate-100);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.72rem;">penandatangan</code>).</li>
-                        <li>Buat slot di tab "Slots" dengan key yang sama dengan autofill_role.</li>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Fitur Utama</p>
+                    <ul class="space-y-1 text-sm text-gray-700">
+                        <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">•</span> Pembuatan dokumen dari template .docx dan .xlsx</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">•</span> Manajemen template dari panel admin</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">•</span> Autofill otomatis dari database staff dan pejabat</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">•</span> Dukungan data berulang (loop) untuk daftar peserta</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">•</span> 3 tingkatan akses: Guest, Staff, Admin</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">•</span> Preview dokumen via LibreOffice PDF</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">•</span> Riwayat pembuatan dokumen</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">•</span> Pembersihan file otomatis</li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Alur Kerja Sistem</p>
+                    <ol class="space-y-1 text-sm text-gray-700">
+                        <li class="flex items-start gap-2"><span class="text-blue-600 font-bold">1.</span> Admin menyiapkan template dengan placeholder Jinja2</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-600 font-bold">2.</span> Admin mengunggah template dan mendefinisikan field form</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-600 font-bold">3.</span> User memilih dokumen dan mengisi form</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-600 font-bold">4.</span> Script Python mengisi template dengan data user</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-600 font-bold">5.</span> Dokumen tersedia untuk diunduh dan/atau dipreview</li>
                     </ol>
                 </div>
-                <div>
-                    <p style="font-size:0.75rem;font-weight:700;color:var(--navy-600);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:0.5rem;">Kolom Autofill yang Tersedia</p>
-                    <div class="space-y-1">
-                        @foreach(['staff_name → nama lengkap','nip → Nomor Induk Pegawai','position → jabatan','rank → pangkat/golongan','unit → unit kerja','email → alamat email','phone → nomor telepon'] as $col)
-                        <div style="font-size:0.77rem;display:flex;gap:0.5rem;align-items:center;">
-                            <svg style="width:10px;height:10px;color:var(--gold-500);flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                            <code style="font-family:var(--font-mono);background:var(--slate-100);padding:0.1rem 0.35rem;border-radius:3px;color:var(--navy-600);font-size:0.7rem;">{{ explode(' → ', $col)[0] }}</code>
-                            <span style="color:var(--slate-500);">{{ explode(' → ', $col)[1] }}</span>
-                        </div>
+            </div>
+        </section>
+        <section id="persyaratan" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Persyaratan Sistem</h2>
+
+            <div class="overflow-x-auto mb-4">
+                <table class="w-full text-sm">
+                    <thead class="bg-blue-700 text-white">
+                        <tr>
+                            <th class="px-3 py-2 text-left font-medium">Komponen</th>
+                            <th class="px-3 py-2 text-left font-medium">Minimum</th>
+                            <th class="px-3 py-2 text-left font-medium">Direkomendasikan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <!-- Vell note : Storage probly fine if just 512 MB -->
+                         <!-- project file is abt 200+ MB -->
+                          <!-- RAM is also probly fine with just 500 MB but further testing is still needed. -->
+                        @foreach ([['PHP','8.2','8.3+'],['Laravel','11.x','11.x'],['Python','3.10','3.12'],['Node.js','18.x','20.x'],['Database','SQLite','SQLite/MySQL'],['LibreOffice','7.x (preview)','24.x'],['RAM','1 GB','2 GB+'],['Storage','1 GB','2 GB+']] as $row)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-3 py-2 font-medium text-gray-700">{{ $row[0] }}</td>
+                            <td class="px-3 py-2 text-gray-500">{{ $row[1] }}</td>
+                            <td class="px-3 py-2 text-gray-500">{{ $row[2] }}</td>
+                        </tr>
                         @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Library Python (venv)</p>
+            <x-code>venv/bin/pip install docxtpl openpyxl jinja2</x-code>
+
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 mt-3">Instalasi LibreOffice (untuk Preview)</p>
+            <x-code>
+                sudo apt update && sudo apt install libreoffice<br>libreoffice --version   # verifikasi instalasi
+            </x-code>
+        </section>
+        <section id="panduan-admin" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Panduan Administrator</h2>
+
+            <div id="akses-admin" class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Akses Panel Admin</h3>
+                <p class="text-sm text-gray-700 mb-2">
+                    Panel admin dapat diakses melalui <code class="bg-gray-100 px-1 rounded">/admin/dashboard</code>.
+                    Hanya akun dengan role <strong>Admin</strong> yang dapat mengakses halaman ini.
+                    Akun admin pertama harus diatur langsung melalui database:
+                </p>
+                <x-code>
+                    php artisan db<br>UPDATE users SET role = 'admin' WHERE email = 'email_anda@gmail.com';<br>.quit
+                </x-code>
+            </div>
+            <div id="dashboard" class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Dashboard</h3>
+                <p class="text-sm text-gray-700 mb-2">Dashboard admin menampilkan statistik penggunaan sistem:</p>
+                <ul class="text-sm text-gray-700 space-y-1 mb-2">
+                    <li class="flex items-start gap-2"><span class="text-blue-500">•</span> Total dokumen berhasil dibuat dan total yang gagal</li>
+                    <li class="flex items-start gap-2"><span class="text-blue-500">•</span> Total pengguna terdaftar</li>
+                    <li class="flex items-start gap-2"><span class="text-blue-500">•</span> Tabel jumlah dokumen per jenis</li>
+                    <li class="flex items-start gap-2"><span class="text-blue-500">•</span> 10 aktivitas pembuatan dokumen terbaru</li>
+                </ul>
+            </div>
+
+            <div id="manajemen-user" class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Manajemen Pengguna</h3>
+                <p class="text-sm text-gray-700 mb-3">Menu Pengguna menampilkan semua akun terdaftar. Tabel tingkatan akses:</p>
+                <div class="overflow-x-auto mb-3">
+                    <table class="w-full text-sm">
+                        <thead class="bg-blue-700 text-white">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-medium">Role</th>
+                                <th class="px-3 py-2 text-left font-medium">Akses Dokumen</th>
+                                <th class="px-3 py-2 text-left font-medium">Panel Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            <tr><td class="px-3 py-2 font-medium">Guest</td><td class="px-3 py-2 text-gray-600">Hanya dokumen dengan akses "Guest"</td><td class="px-3 py-2 text-gray-600">Tidak</td></tr>
+                            <tr class="bg-gray-50"><td class="px-3 py-2 font-medium">Staff</td><td class="px-3 py-2 text-gray-600">Semua dokumen aktif</td><td class="px-3 py-2 text-gray-600">Tidak</td></tr>
+                            <tr><td class="px-3 py-2 font-medium">Admin</td><td class="px-3 py-2 text-gray-600">Semua dokumen aktif</td><td class="px-3 py-2 text-gray-600">Ya — Akses Penuh</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-sm text-gray-700 mb-1 font-medium">Mengubah Role Pengguna:</p>
+                <ol class="text-sm text-gray-700 space-y-1 list-decimal list-inside">
+                    <li>Buka Admin Panel → Pengguna</li>
+                    <li>Temukan nama pengguna yang ingin diubah</li>
+                    <li>Pada kolom "Ubah Role", pilih role baru dari dropdown</li>
+                    <li>Klik Simpan — perubahan berlaku segera</li>
+                </ol>
+                <div class="mt-2 bg-yellow-50 border border-yellow-200 rounded px-3 py-2 text-xs text-yellow-800">
+                    <strong>Catatan:</strong> Admin tidak dapat mengubah role akun mereka sendiri.
+                </div>
+            </div>
+
+            <div id="data-staff" class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Manajemen Data Staff & Pejabat</h3>
+                <p class="text-sm text-gray-700 mb-3">
+                    Menu <strong>Data Staff</strong> menyimpan informasi pegawai untuk fitur autofill.
+                    Menu <strong>Data Pejabat</strong> memiliki struktur identik, diperuntukkan untuk pejabat struktural (Kepala Dinas, Sekretaris, dsb.)
+                </p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-blue-700 text-white">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-medium">Kolom Database</th>
+                                <th class="px-3 py-2 text-left font-medium">Label</th>
+                                <th class="px-3 py-2 text-left font-medium">Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            @foreach([['staff_name','Nama','Nama lengkap pegawai'],['nip','NIP','Nomor Induk Pegawai (unik)'],['email','Email','Alamat email (unik)'],['rank','Jabatan / Gol. Pangkat','Pangkat dan golongan ruang'],['position','Posisi','Jabatan fungsional/struktural'],['work_unit','Unit Kerja','Bidang/Subbidang tempat bertugas'],['phone_number','No. HP','Nomor telepon (opsional)']] as $row)
+                            <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}">
+                                <td class="px-3 py-2 font-mono text-xs text-blue-700">{{ $row[0] }}</td>
+                                <td class="px-3 py-2 font-medium text-gray-700">{{ $row[1] }}</td>
+                                <td class="px-3 py-2 text-gray-500">{{ $row[2] }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="jenis-dokumen" class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Manajemen Jenis Dokumen</h3>
+                <p class="text-sm text-gray-700 mb-3">Menu Jenis Dokumen adalah pusat kendali untuk semua template dokumen.</p>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Informasi yang Ditampilkan</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-blue-700 text-white"><tr><th class="px-2 py-1.5 text-left font-medium">Kolom</th><th class="px-2 py-1.5 text-left font-medium">Keterangan</th></tr></thead>
+                                <tbody class="divide-y divide-gray-100 text-xs">
+                                    @foreach([['Nama','Nama dokumen untuk pengguna'],['Key','ID unik internal'],['Tipe File','DOCX atau XLSX'],['Akses','Guest atau Staff'],['Fields','Jumlah field terdefinisi'],['Dibuat','Total dokumen dibuat'],['Status','Aktif atau Nonaktif'],['Preview','Toggle on/off preview PDF']] as $row)
+                                    <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}"><td class="px-2 py-1.5 font-medium text-gray-700">{{ $row[0] }}</td><td class="px-2 py-1.5 text-gray-500">{{ $row[1] }}</td></tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Aksi yang Tersedia</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-blue-700 text-white"><tr><th class="px-2 py-1.5 text-left font-medium">Tombol</th><th class="px-2 py-1.5 text-left font-medium">Fungsi</th></tr></thead>
+                                <tbody class="divide-y divide-gray-100 text-xs">
+                                    @foreach([['Kelola Field','Buka manajemen field'],['Toggle Status','Aktifkan/Nonaktifkan'],['Toggle Preview','On/Off fitur preview PDF'],['Hapus','Hapus permanen beserta field-nya']] as $row)
+                                    <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}"><td class="px-2 py-1.5 font-medium text-gray-700">{{ $row[0] }}</td><td class="px-2 py-1.5 text-gray-500">{{ $row[1] }}</td></tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-sm font-medium text-gray-700 mb-1">Menambahkan Template Baru:</p>
+                <ol class="text-sm text-gray-700 space-y-1 list-decimal list-inside mb-3">
+                    <li>Buka Admin Panel → Jenis Dokumen</li>
+                    <li>Klik "+ Tambah Template Baru"</li>
+                    <li>Isi form: Nama Dokumen, Key, Tipe File, Level Akses, File Template (maks. 10MB)</li>
+                    <li>Klik "Simpan & Kelola Field" — langsung diarahkan ke halaman Kelola Field</li>
+                </ol>
+                <p class="text-sm font-medium text-gray-700 mb-1">Re-Upload Template:</p>
+                <p class="text-sm text-gray-700 mb-1">Untuk memperbarui file template tanpa mengulang konfigurasi field:</p>
+                <ol class="text-sm text-gray-700 space-y-1 list-decimal list-inside">
+                    <li>Buka Kelola Field → klik "↑ Re-upload Template"</li>
+                    <li>Upload file baru — semua field tetap tersimpan</li>
+                </ol>
+            </div>
+
+            <div id="kelola-field" class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Kelola Field (Form Fields)</h3>
+                <p class="text-sm text-gray-700 mb-3">
+                    Halaman Kelola Field menentukan field apa yang ditampilkan pada form. Setiap field harus memiliki
+                    <code class="bg-gray-100 px-1 rounded text-xs">field_key</code> yang cocok PERSIS dengan placeholder di template.
+                </p>
+
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tipe Field yang Tersedia</p>
+                <div class="overflow-x-auto mb-4">
+                    <table class="w-full text-sm">
+                        <thead class="bg-blue-700 text-white">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-medium">Tipe Field</th>
+                                <th class="px-3 py-2 text-left font-medium">Tampilan di Form</th>
+                                <th class="px-3 py-2 text-left font-medium">Cocok Untuk</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            @foreach([['text','Input teks satu baris','Nama, alamat, nomor surat'],['textarea','Area teks multi-baris','Keterangan panjang, catatan'],['date','Date picker (kalender)','Tanggal — otomatis format Indonesia'],['number','Input angka','Jumlah hari, nomor urut'],['select','Dropdown pilihan','Pilihan tetap (status, kategori)'],['checkbox','Kotak centang','Ya/Tidak, true/false'],['repeating_group','Tabel dinamis + tombol tambah baris','Data berulang yang diketik manual'],['staff_loop','Daftar checkbox staff (searchable + draggable)','Daftar peserta dari database staff'],['official_loop','Daftar checkbox pejabat (searchable + draggable)','Daftar penandatangan dari database pejabat']] as $row)
+                            <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}">
+                                <td class="px-3 py-2 font-mono text-xs text-blue-700 font-medium">{{ $row[0] }}</td>
+                                <td class="px-3 py-2 text-gray-600">{{ $row[1] }}</td>
+                                <td class="px-3 py-2 text-gray-500">{{ $row[2] }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Parameter Field</p>
+                <div class="overflow-x-auto mb-4">
+                    <table class="w-full text-sm">
+                        <thead class="bg-blue-700 text-white">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-medium">Parameter</th>
+                                <th class="px-3 py-2 text-left font-medium">Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            @foreach([['Field Key *','Nama variabel di template. Harus cocok PERSIS dengan placeholder. Hanya huruf kecil, angka, underscore.'],['Label *','Teks judul field yang ditampilkan di form'],['Tipe Field *','Lihat tabel tipe field di atas'],['Opsi','Khusus tipe select: daftar pilihan dipisahkan koma. Contoh: Baik, Cukup, Kurang'],['Label Seksi','Heading pemisah yang muncul di atas field ini (pengelompokan visual)'],['Row Group','Field dengan angka yang sama tampil berdampingan dalam satu baris'],['Staff Autofill Column','Kolom dari staff_data/official_data yang mengisi field ini otomatis'],['Autofill Role','Slot autofill mana yang mengisi field ini (gunakan slot_key)'],['Wajib Diisi','Jika dicentang, user tidak bisa submit tanpa mengisi field ini']] as $row)
+                            <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}">
+                                <td class="px-3 py-2 font-medium text-gray-700 whitespace-nowrap">{{ $row[0] }}</td>
+                                <td class="px-3 py-2 text-gray-600">{{ $row[1] }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded px-3 py-2 text-xs text-blue-800 mb-3">
+                    <strong>Row Group:</strong> Untuk menampilkan dua field berdampingan (misal: Tanggal Mulai dan Tanggal Selesai),
+                    isi Row Group dengan angka yang sama (misal: 1) pada kedua field. Untuk kelompok baru gunakan angka berbeda (2, 3, dst.)
+                </div>
+            </div>
+
+            <div id="autofill-slots">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Autofill Slots</h3>
+                <p class="text-sm text-gray-700 mb-3">
+                    Slot autofill menentukan berapa banyak dropdown autofill yang ditampilkan di form.
+                    <strong>Satu slot = satu pasang dropdown (Staff + Pejabat).</strong>
+                </p>
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div class="bg-gray-50 rounded p-3">
+                        <p class="text-xs font-semibold text-gray-600 mb-2">Kapan Menggunakan Slots</p>
+                        <ul class="text-xs text-gray-700 space-y-1">
+                            <li>• 1 pegawai → buat 1 slot (key=employee)</li>
+                            <li>• Pegawai + penilai → buat 2 slot</li>
+                            <li>• Tiga pihak → buat 3 slot, dst.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 rounded p-3">
+                        <p class="text-xs font-semibold text-gray-600 mb-2">Cara Membuat Slot</p>
+                        <ol class="text-xs text-gray-700 space-y-1">
+                            <li>1. Kelola Field → "⚙ Kelola Slot Autofill"</li>
+                            <li>2. Isi Slot Key (misal: employee)</li>
+                            <li>3. Isi Label (misal: Pegawai yang Dinilai)</li>
+                            <li>4. Klik "+ Tambah Slot"</li>
+                        </ol>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-gray-700 mb-1">Menghubungkan Field ke Slot:</p>
+                <ol class="text-sm text-gray-700 space-y-1 list-decimal list-inside mb-2">
+                    <li>Kembali ke halaman Kelola Field</li>
+                    <li>Edit field yang ingin diisi otomatis (misal: Nama Pegawai)</li>
+                    <li>Set <strong>Staff Autofill Column</strong> ke kolom yang sesuai (misal: staff_name)</li>
+                    <li>Set <strong>Autofill Role</strong> ke slot_key yang sudah dibuat (misal: employee)</li>
+                    <li>Simpan — field ini sekarang terisi otomatis dari dropdown slot "employee"</li>
+                </ol>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-blue-700 text-white">
+                            <tr><th class="px-3 py-2 text-left font-medium">Nilai Autofill Column</th><th class="px-3 py-2 text-left font-medium">Data yang Diisi</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            @foreach([['staff_name','Nama lengkap'],['nip','NIP'],['rank','Jabatan / Golongan Pangkat'],['position','Posisi / Jabatan Fungsional'],['work_unit','Unit Kerja'],['email','Alamat Email'],['phone_number','Nomor HP']] as $row)
+                            <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}">
+                                <td class="px-3 py-2 font-mono text-xs text-blue-700">{{ $row[0] }}</td>
+                                <td class="px-3 py-2 text-gray-600">{{ $row[1] }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <section id="template" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Panduan Membuat Template Dokumen</h2>
+
+            <div class="bg-red-50 border border-red-200 rounded px-3 py-2 text-sm text-red-800 mb-4">
+                <strong>Aturan Terpenting:</strong> Nama variabel dalam template HARUS PERSIS SAMA dengan Field Key yang didefinisikan di panel admin.
+                Perbedaan satu huruf pun akan menyebabkan variabel tidak tergantikan.
+            </div>
+
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-700 mb-2">Template Word (.docx)</h3>
+                    <p class="text-xs text-gray-600 mb-2">Menggunakan library <strong>docxtpl</strong> yang mendukung sintaks Jinja2 penuh di dalam tabel, paragraf, header, footer, dan text box.</p>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Cara Membuat:</p>
+                    <ol class="text-xs text-gray-700 space-y-1 list-decimal list-inside mb-2">
+                        <li>Buka Microsoft Word atau LibreOffice Writer</li>
+                        <li>Buat dokumen dengan format yang diinginkan</li>
+                        <li>Ketik placeholder: <code class="bg-gray-100 px-1 rounded">@verbatim{{ nama_variabel }}@endverbatim</code></li>
+                        <li>Simpan sebagai <code class="bg-gray-100 px-1 rounded">.docx</code></li>
+                        <li>Upload melalui Admin Panel</li>
+                    </ol>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Catatan Penting:</p>
+                    <ul class="text-xs text-gray-700 space-y-1">
+                        <li>• Placeholder bisa di tabel, paragraf, header, footer, text box</li>
+                        <li>• Loop dalam tabel: letakkan <code class="bg-gray-100 px-1 rounded">{% for %}</code> di dalam sel tabel</li>
+                        <li>• Gunakan <code class="bg-gray-100 px-1 rounded">@verbatim{{ loop.index }}@endverbatim</code> untuk nomor urut otomatis</li>
+                        <li>• Format tanggal otomatis dikonversi ke format Indonesia</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-700 mb-2">Template Excel (.xlsx)</h3>
+                    <p class="text-xs text-gray-600 mb-2">Menggunakan manipulasi XML langsung. Placeholder di sel dan text box.</p>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Cara Membuat:</p>
+                    <ol class="text-xs text-gray-700 space-y-1 list-decimal list-inside mb-2">
+                        <li>Buat file Excel dengan format yang diinginkan</li>
+                        <li>Ketik placeholder di dalam sel yang ingin diisi</li>
+                        <li>Untuk loop: gunakan <code class="bg-gray-100 px-1 rounded">{% for %}</code> di sel terpisah</li>
+                        <li>Text box: Insert Text Box, ketik placeholder di dalamnya</li>
+                        <li>Simpan sebagai <code class="bg-gray-100 px-1 rounded">.xlsx</code> dan upload</li>
+                    </ol>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Catatan Penting:</p>
+                    <ul class="text-xs text-gray-700 space-y-1">
+                        <li>• Gambar di template akan dipertahankan di output</li>
+                        <li>• Text box dengan placeholder dirender dengan benar</li>
+                        <li>• Merged cells, border, formatting dipertahankan</li>
+                        <li>• Loop akan menyisipkan baris baru secara otomatis</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 id="jinja2" class="text-sm font-semibold text-gray-700 mb-3">Referensi Variabel Jinja2</h3>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Sintaks Dasar</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead class="bg-blue-700 text-white"><tr><th class="px-2 py-1.5 text-left">Sintaks</th><th class="px-2 py-1.5 text-left">Kegunaan</th></tr></thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr><td class="px-2 py-1.5 font-mono text-blue-700">@verbatim{{ field_key }}@endverbatim</td><td class="px-2 py-1.5 text-gray-600">Menampilkan nilai variabel</td></tr>
+                                <tr class="bg-gray-50"><td class="px-2 py-1.5 font-mono text-blue-700">@verbatim{{ val | upper }}@endverbatim</td><td class="px-2 py-1.5 text-gray-600">HURUF BESAR</td></tr>
+                                <!-- WTFFFF WHYYY IS THISS SHOWS UP AS AN ERRORRRRRRRRRRRRR -->
+                                 <!-- AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa -->
+                                <tr><td class="px-2 py-1.5 font-mono text-blue-700">@verbatim{{ val | default("") }}@endverbatim</td><td class="px-2 py-1.5 text-gray-600">Nilai default jika kosong</td></tr>
+                                <tr class="bg-gray-50"><td class="px-2 py-1.5 font-mono text-blue-700">{% if kondisi %}</td><td class="px-2 py-1.5 text-gray-600">Kondisional</td></tr>
+                                <tr><td class="px-2 py-1.5 font-mono text-blue-700">{% for x in list %}</td><td class="px-2 py-1.5 text-gray-600">Pengulangan</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Properti Loop (staff/official_loop)</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead class="bg-blue-700 text-white"><tr><th class="px-2 py-1.5 text-left">Properti</th><th class="px-2 py-1.5 text-left">Nilai</th></tr></thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @foreach([['peserta.staff_name','Nama lengkap'],['peserta.nip','NIP'],['peserta.rank','Jabatan/Gol. Pangkat'],['peserta.position','Posisi'],['peserta.work_unit','Unit Kerja'],['peserta.phone_number','Nomor HP'],['loop.index','Nomor urut (dari 1)'],['loop.index0','Nomor urut (dari 0)'],['loop.first','True jika item pertama'],['loop.last','True jika item terakhir']] as $row)
+                                <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}">
+                                    <td class="px-2 py-1.5 font-mono text-blue-700">{{ $row[0] }}</td>
+                                    <td class="px-2 py-1.5 text-gray-600">{{ $row[1] }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Admin guide --}}
-        <div x-show="tab === 'admin'" x-transition class="space-y-4">
-            @foreach([
-                ['Menambah Jenis Dokumen Baru', [
-                    'Siapkan file template (.docx atau .xlsx) dengan placeholder Jinja2.',
-                    'Buka Admin Panel → Jenis Dokumen → Tambah Dokumen.',
-                    'Isi nama, key (unik, huruf kecil, tanpa spasi), level akses, dan format file.',
-                    'Upload file template.',
-                    'Setelah disimpan, buka halaman "Fields" untuk menambahkan field-field form.',
-                ]],
-                ['Mengelola Data Pegawai', [
-                    'Siapkan file Excel dengan kolom: staff_name, nip, position, rank, unit, email, phone.',
-                    'Buka Admin Panel → Data Staff (atau Data Pejabat untuk pejabat).',
-                    'Upload file Excel — data lama akan digantikan seluruhnya.',
-                    'Verifikasi data di tabel preview yang muncul.',
-                ]],
-                ['Mengelola Pengguna', [
-                    'Buka Admin Panel → Pengguna.',
-                    'Cari pengguna menggunakan fitur pencarian.',
-                    'Ubah role melalui dropdown di kolom "Aksi" — perubahan langsung tersimpan.',
-                    'Hapus pengguna yang tidak aktif (aksi tidak dapat dibatalkan).',
-                ]],
-            ] as [$title, $steps])
-            <div class="glass-card rounded-2xl p-5">
-                <div class="flex items-center gap-2 mb-3">
-                    <div style="width:3px;height:16px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
-                    <h2 style="font-size:0.88rem;font-weight:700;color:var(--navy-800);">{{ $title }}</h2>
-                </div>
-                <ol style="font-size:0.8rem;color:var(--slate-600);line-height:1.8;list-style:decimal;padding-left:1.1rem;">
-                    @foreach($steps as $step)<li>{{ $step }}</li>@endforeach
-                </ol>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Filter Jinja2 yang Berguna</p>
+            <div class="overflow-x-auto mb-4">
+                <table class="w-full text-sm">
+                    <thead class="bg-blue-700 text-white"><tr><th class="px-3 py-2 text-left font-medium">Filter</th><th class="px-3 py-2 text-left font-medium">Contoh</th><th class="px-3 py-2 text-left font-medium">Hasil</th></tr></thead>
+                    <tbody class="divide-y divide-gray-100 text-sm">
+                        @foreach([['upper', '@{{ nama | upper }}','JOHN DOE'],['lower','@{{ nama | lower }}','john doe'],['title','@{{ nama | title }}','John Doe'],['default','@{{ nilai | default("N/A") }}','N/A jika kosong'],['length','@{{ daftar | length }}','Jumlah item dalam list'],['first','@{{ daftar | first }}','Item pertama'],['last','@{{ daftar | last }}','Item terakhir'],['join','@{{ list | join(", ") }}','A, B, C']] as $row)
+                        <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}">
+                            <td class="px-3 py-2 font-mono text-xs text-blue-700">{{ $row[0] }}</td>
+                            <td class="px-3 py-2 font-mono text-xs">{{ $row[1] }}</td>
+                            <td class="px-3 py-2 text-gray-600">{{ $row[2] }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-            @endforeach
+
+            <h3 id="contoh" class="text-sm font-semibold text-gray-700 mb-3">Contoh Template Lengkap</h3>
+
+            <div class="space-y-4">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 1: Surat Tugas (Word)</p>
+                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+                        <pre>SURAT TUGAS
+Nomor: @verbatim{{ letter_number }}@endverbatim
+
+Yang bertanda tangan di bawah ini menerangkan bahwa:
+Nama     : @verbatim{{ employee_name }}@endverbatim
+NIP      : @verbatim{{ employee_nip }}@endverbatim
+Jabatan  : @verbatim{{ employee_position }}@endverbatim
+Unit     : @verbatim{{ employee_work_unit }}@endverbatim
+
+Ditugaskan melaksanakan perjalanan dinas ke:
+@verbatim{{ destination_agency }}@endverbatim
+
+Pada tanggal @verbatim{{ departure_date }}@endverbatim s.d. @verbatim{{ return_date }}@endverbatim
+
+Tomohon, @verbatim{{ letter_date }}@endverbatim
+Kepala Dinas,
+
+@verbatim{{ head_of_office_name }}@endverbatim
+NIP. @verbatim{{ head_of_office_nip }}@endverbatim</pre>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 2: Daftar Hadir (Excel/Word dengan Loop)</p>
+                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+                        <pre>DAFTAR HADIR RAPAT
+Perihal : @verbatim{{ meeting_subject }}@endverbatim
+Tanggal : @verbatim{{ meeting_date }}@endverbatim
+Tempat  : @verbatim{{ meeting_location }}@endverbatim
+
+NO | NAMA              | NIP       | JABATAN    | TTD
+{% for peserta in participants %}
+@verbatim{{ loop.index }}@endverbatim  | @verbatim{{ peserta.staff_name }}@endverbatim | @verbatim{{ peserta.nip }}@endverbatim | @verbatim{{ peserta.position }}@endverbatim |
+{% endfor %}</pre>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 3: Dengan Kondisional</p>
+                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+                        <pre>{% if employee_rank %}
+Pangkat/Gol. Ruang: @verbatim{{ employee_rank }}@endverbatim
+{% else %}
+Pangkat/Gol. Ruang: -
+{% endif %}
+
+{% if is_approved %}
+Status: DISETUJUI
+{% else %}
+Status: MENUNGGU PERSETUJUAN
+{% endif %}</pre>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Loop di Excel — Penempatan Sel</p>
+                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
+                        <pre>Sel A1: {% for peserta in daftar_peserta %}
+Sel A2: @verbatim{{ loop.index }}@endverbatim
+Sel B2: @verbatim{{ peserta.staff_name }}@endverbatim
+Sel C2: @verbatim{{ peserta.nip }}@endverbatim
+Sel D2: @verbatim{{ peserta.position }}@endverbatim
+Sel A3: {% endfor %}</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="preview" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Fitur Preview Dokumen</h2>
+            <p class="text-sm text-gray-700 mb-4">
+                Fitur preview menggunakan LibreOffice untuk mengkonversi file ke PDF dan menampilkannya di browser.
+            </p>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-50 rounded p-3">
+                    <p class="text-xs font-semibold text-gray-600 mb-2">Cara Mengaktifkan (Admin)</p>
+                    <ol class="text-xs text-gray-700 space-y-1 list-decimal list-inside">
+                        <li>Buka Admin Panel → Jenis Dokumen</li>
+                        <li>Klik toggle di kolom Preview pada template yang diinginkan</li>
+                        <li>Toggle biru = aktif, abu = nonaktif</li>
+                    </ol>
+                </div>
+                <div class="bg-gray-50 rounded p-3">
+                    <p class="text-xs font-semibold text-gray-600 mb-2">Persyaratan Preview</p>
+                    <ul class="text-xs text-gray-700 space-y-1">
+                        <li>• LibreOffice terinstall di server</li>
+                        <li>• Folder <code class="bg-gray-100 px-1 rounded">public/cached_result/</code> dapat ditulis</li>
+                        <li>• Fitur preview diaktifkan admin untuk template</li>
+                    </ul>
+                </div>
+            </div>
+            <x-code class="mt-3">sudo apt install libreoffice   # instalasi LibreOffice</x-code>
+        </section>
+
+        <section id="scheduler" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Sistem Pembersihan File Otomatis</h2>
+            <p class="text-sm text-gray-700 mb-3">
+                Sistem secara otomatis menghapus file dokumen setelah jangka waktu tertentu (default: 120 detik).
+                Riwayat penghapusan dicatat di database.
+            </p>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Development (lokal)</p>
+                    <x-code>php artisan schedule:work</x-code>
+                    <p class="text-xs text-gray-500 mt-1">Jalankan di terminal terpisah</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Production (crontab)</p>
+                    <x-code>* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1</x-code>
+                </div>
+            </div>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Mengubah TTL (routes/console.php)</p>
+            <x-code>Schedule::command('documents:purge --ttl=300')->everyMinute();  // 5 menit</x-code>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 mt-3">Menjalankan Manual</p>
+            <x-code>
+                php artisan documents:purge<br>php artisan documents:purge --ttl=60  # hapus file > 60 detik
+            </x-code>
+        </section>
+
+        <section id="deployment" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Panduan Deployment ke VPS Ubuntu</h2>
+
+            <div class="space-y-4">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">1. Update server dan install dependensi</p>
+                    <x-code>
+                        sudo apt update && sudo apt upgrade -y<br>sudo apt install php8.3 php8.3-fpm php8.3-sqlite3 php8.3-xml php8.3-curl<br>sudo apt install python3 python3-venv python3-pip nodejs npm libreoffice nginx
+                    </x-code>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">2. Clone dan setup project</p>
+                    <x-code>
+git clone https://github.com/JustMarvell/DocumentMaker.git /var/www/sipadu
+cd /var/www/sipadu
+composer install --no-dev
+cp .env.example .env && php artisan key:generate
+python3 -m venv venv && venv/bin/pip install docxtpl openpyxl jinja2
+npm install && npm run build
+touch database/database.sqlite && php artisan migrate --seed
+                    </x-code>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">3. Set permission</p>
+                    <x-code>
+sudo chown -R www-data:www-data /var/www/SIPADU
+sudo chmod -R 775 /var/www/sipadu/storage
+sudo chmod -R 775 /var/www/sipadu/public/cached_result
+                    </x-code>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">4. Setup crontab scheduler</p>
+                    <x-code>
+                        sudo crontab -u www-data -e
+# Tambahkan baris berikut:
+* * * * * cd /var/www/sipadu && php artisan schedule:run >> /dev/null 2>&1
+</x-code>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">5. Membuat admin pertama</p>
+                    <x-code>
+                        php artisan db
+UPDATE users SET role = 'admin' WHERE email = 'admin@dinas.go.id';
+.quit
+                    </x-code>
+                </div>
+            </div>
+        </section>
+
+        <section id="troubleshooting" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Pemecahan Masalah (Troubleshooting)</h2>
+
+            <div class="space-y-4">
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-gray-50 px-4 py-2 font-medium text-sm text-gray-700 border-b border-gray-200">
+                        ❗ Dokumen gagal dibuat — muncul pesan error
+                    </div>
+                    <div class="px-4 py-3 text-sm text-gray-700 space-y-2">
+                        <p>Aktifkan debug sementara di <code class="bg-gray-100 px-1 rounded text-xs">DocumentController.php</code>:</p>
+                        <x-code>if (!$process->isSuccessful()) {
+    dd($process->getErrorOutput(), $process->getOutput());
+}</x-code>
+                        <ul class="text-xs space-y-1 text-gray-600">
+                            <li>• Coba buat dokumen lagi — error Python akan tampil di layar</li>
+                            <li>• Periksa nama variabel di template cocok dengan field_key di admin</li>
+                            <li>• Periksa file template ada di folder <code class="bg-gray-100 px-1 rounded">document_templates/</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-gray-50 px-4 py-2 font-medium text-sm text-gray-700 border-b border-gray-200">
+                        ❗ Variabel tidak tergantikan di dokumen (masih @verbatim{{ nama_variabel }}@endverbatim)
+                    </div>
+                    <div class="px-4 py-3 text-sm text-gray-700">
+                        <ul class="text-xs space-y-1 text-gray-600">
+                            <li>• Pastikan field_key di admin PERSIS sama dengan nama variabel di template (case-sensitive)</li>
+                            <li>• Periksa tidak ada spasi berlebih di dalam <code class="bg-gray-100 px-1 rounded">@verbatim{{ }}@endverbatim</code></li>
+                            <li>• Untuk Excel: pastikan variabel di sel, bukan di comment atau nama cell</li>
+                            <li>• Untuk Word: jika variabel di text box, pastikan tidak terpotong oleh formatting berbeda</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-gray-50 px-4 py-2 font-medium text-sm text-gray-700 border-b border-gray-200">
+                        ❗ Gambar atau text box hilang dari Excel
+                    </div>
+                    <div class="px-4 py-3 text-sm text-gray-700">
+                        <ul class="text-xs space-y-1 text-gray-600">
+                            <li>• Pastikan menggunakan <code class="bg-gray-100 px-1 rounded">xlsx_generator.py</code> versi terbaru</li>
+                            <li>• Jangan buka dan simpan ulang template Excel menggunakan openpyxl — selalu gunakan file asli</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-gray-50 px-4 py-2 font-medium text-sm text-gray-700 border-b border-gray-200">
+                        ❗ Autofill tidak mengisi field
+                    </div>
+                    <div class="px-4 py-3 text-sm text-gray-700">
+                        <ul class="text-xs space-y-1 text-gray-600">
+                            <li>• Periksa Autofill Role pada field sesuai dengan slot_key yang ada</li>
+                            <li>• Periksa Staff Autofill Column terisi dengan nama kolom yang benar</li>
+                            <li>• Buka browser console (F12) dan periksa apakah ada error JavaScript</li>
+                            <li>• Pastikan <code class="bg-gray-100 px-1 rounded">/api/staff</code> dan <code class="bg-gray-100 px-1 rounded">/api/officials</code> dapat diakses saat login</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-gray-50 px-4 py-2 font-medium text-sm text-gray-700 border-b border-gray-200">
+                        ❗ Preview tidak muncul
+                    </div>
+                    <div class="px-4 py-3 text-sm text-gray-700">
+                        <ul class="text-xs space-y-1 text-gray-600">
+                            <li>• Pastikan LibreOffice terinstall: <code class="bg-gray-100 px-1 rounded">libreoffice --version</code></li>
+                            <li>• Pastikan fitur preview diaktifkan di Admin Panel → Jenis Dokumen</li>
+                            <li>• Periksa log Laravel di <code class="bg-gray-100 px-1 rounded">storage/logs/laravel.log</code></li>
+                            <li>• Pastikan folder <code class="bg-gray-100 px-1 rounded">public/cached_result/</code> dapat ditulis web server</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-gray-50 px-4 py-2 font-medium text-sm text-gray-700 border-b border-gray-200">
+                        ❗ Loop tidak menghasilkan baris yang benar di Excel
+                    </div>
+                    <div class="px-4 py-3 text-sm text-gray-700">
+                        <ul class="text-xs space-y-1 text-gray-600">
+                            <li>• Pastikan <code class="bg-gray-100 px-1 rounded">{% for %}</code> dan <code class="bg-gray-100 px-1 rounded">{% endfor %}</code> ada di sel yang BERBEDA (bukan satu sel)</li>
+                            <li>• Pastikan baris template (antara for dan endfor) tidak kosong</li>
+                            <li>• Periksa field_key di admin sesuai dengan nama list di template (setelah kata "in")</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <div class="text-center text-xs text-gray-400 py-4 border-t border-gray-200">
+            SIPADU — Sistem Generasi Administrasi Persuratan &nbsp;|&nbsp;
+            DINAS PUPRD KOTA TOMOHON &nbsp;|&nbsp;
+            Panduan Versi 1.0 | 2026 | by. Marvelous Makaluwu
         </div>
 
     </div>
 </div>
+
+<script>
+const sections = document.querySelectorAll('section[id]');
+const tocLinks  = document.querySelectorAll('.toc-link');
+
+function highlightToc() {
+    let current = '';
+    sections.forEach(function(section) {
+        if (window.scrollY >= section.offsetTop - 100) {
+            current = section.getAttribute('id');
+        }
+    });
+    tocLinks.forEach(function(link) {
+        link.classList.remove('bg-blue-50', 'text-blue-700', 'font-medium');
+        if (link.getAttribute('href') === '#' + current) {
+            link.classList.add('bg-blue-50', 'text-blue-700', 'font-medium');
+        }
+    });
+}
+
+window.addEventListener('scroll', highlightToc);
+highlightToc();
+</script>
+
 @endsection
