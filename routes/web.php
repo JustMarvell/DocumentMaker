@@ -82,6 +82,7 @@ Route::middleware('auth')->group(function() {
         Route::post('/document-types/{documentType}/slots', [AdminController::class, 'storeSlot'])->name('document-types.slots.store');
         Route::delete('/document-types/{documentType}/slots/{slot}', [AdminController::class, 'destroySlot'])->name('document-types.slots.destroy');
         Route::patch('/document-types/{documentType}/toggle-preview', [AdminController::class, 'togglePreview'])->name('document-types.toggle-preview');
+        Route::patch('/document-types/{documentType}/toggle-signature', [AdminController::class, 'toggleSignature'])->name('document-types.toggle-signature');
 
         Route::get('/staff-data', [AdminController::class,'staffData'])->name('staff-data');
         Route::post('/staff-data', [StaffDataController::class, 'store'])->name('staff-data.store');
