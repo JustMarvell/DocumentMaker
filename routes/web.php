@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffDataController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OfficialDataController;
+use App\Http\Controllers\SignatureRequestController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,6 +25,9 @@ Route::get('/dashboard', function () {
 // Route::get('/home', [DocumentController::class, 'index'])->name('home');
 // Route::post('/generate', [DocumentController::class, 'generate'])->name('document.generate');
 
+Route::get('/signature/review/{token}', [SignatureRequestController::class, 'review'])->name('signature.review');
+Route::post('/signature/review/{token}', [SignatureRequestController::class, 'processReview'])->name('signature.process');
+
 Route::middleware('auth')->group(function() {
     Route::get('/dashboard', function(){
         return auth()->user()->isAdmin()
@@ -41,6 +45,10 @@ Route::middleware('auth')->group(function() {
         Route::post('/generate', [DocumentController::class,'generate'])->name('document.generate');
         Route::get('/download/{filename}', [DocumentController::class, 'download'])->name('document.download');
         Route::get('/preview/{filename}', [DocumentController::class, 'preview'])->name('document.preview');
+
+        Route::get('/signature/request/{documentLog}', [SignatureRequestController::class, 'create'])->name('signature.create');
+        Route::post('/signature/request/{documentLog}', [SignatureRequestController::class, 'store'])->name('signature.store');
+
     });
 
     Route::middleware('role:staff,admin')->group(function(){
@@ -87,6 +95,11 @@ Route::middleware('auth')->group(function() {
 
         Route::get('/guide', [AdminController::class, 'guide'])->name('guide');
         Route::get('/guide/download', [AdminController::class, 'guideDownload'])->name('guide.download');
+
+        Route::get('/signatures', [SignatureRequestController::class, 'adminIndex'])->name('signatures');
+        Route::patch('/signatures/{signatureRequest}/approve', [SignatureRequestController::class, 'adminApprove'])->name('signatures.approve');
+        Route::patch('/signatures/{signatureRequest}/reject', [SignatureRequestController::class, 'adminReject'])->name('signatures.reject');
+
     });
 
     Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');
