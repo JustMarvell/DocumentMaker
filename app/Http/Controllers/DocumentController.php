@@ -223,13 +223,14 @@ class DocumentController extends Controller
 
         $status = $process->isSuccessful() ? 'success' : 'failed';
 
-        DocumentLog::create([
+        $log = DocumentLog::create([
             'user_id' => auth()->id(),
             'document_type_id' => $documentType->id,
             'output_filename' => $uniqueFilename,
             'status' => $status,
             'generated_at' => now(),
         ]);
+
 
         if (!$process->isSuccessful()) {
             Log::error("Generation failed [{$documentType->script_name}]: " . $process->getErrorOutput());
@@ -251,7 +252,8 @@ class DocumentController extends Controller
         return back()
             ->with('success', 'Dokumen berhasil dibuat!')
             ->with('download_url', $downloadUrl)
-            ->with('preview_url', $previewUrl);
+            ->with('preview_url', $previewUrl)
+            ->with('signature_log_id', $log->id);
     }
 
 
