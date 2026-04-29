@@ -654,7 +654,7 @@
                     <h2 style="font-size:0.95rem;font-weight:700;color:var(--navy-800);">Preview Dokumen</h2>
                 </div>
                 <div style="display:flex;align-items:center;gap:0.75rem;">
-                    <a id="preview-download-btn" href="#" class="download-btn hidden" style="padding:0.4rem 0.9rem;">
+                    <a id="preview-download-btn" href="{{ session('download_url') }}" class="download-btn hidden" style="padding:0.4rem 0.9rem;">
                         ⬇ Unduh
                     </a>
                     <button onclick="closePreview()"
