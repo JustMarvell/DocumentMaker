@@ -22,6 +22,7 @@
                     <th class="px-4 py-3 text-center">Dibuat</th>
                     <th class="px-4 py-3 text-center">Status</th>
                     <th class="px-4 py-3 text-center">Preview</th>
+                    <th class="px-4 py-3 text-center">TTD Digital</th>
                     <th class="px-4 py-3 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -33,14 +34,14 @@
                         <td class="px-4 py-3">
                             <span
                                 class="px-2 py-1 rounded text-xs font-semibold
-                                    {{ $type->file_type === 'docx' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700' }}">
+                                        {{ $type->file_type === 'docx' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700' }}">
                                 {{ strtoupper($type->file_type) }}
                             </span>
                         </td>
                         <td class="px-4 py-3">
                             <span
                                 class="px-2 py-1 rounded text-xs font-semibold
-                                    {{ $type->access_level === 'staff' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600' }}">
+                                        {{ $type->access_level === 'staff' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600' }}">
                                 {{ ucfirst($type->access_level) }}
                             </span>
                         </td>
@@ -65,10 +66,25 @@
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
-                                            {{ $type->preview_enabled ? 'bg-blue-600' : 'bg-gray-300' }}"
-                                    title="{{ $type->preview_enabled ? 'Preview aktif — klik untuk menonaktifkan' : 'Preview nonaktif — klik untuk mengaktifkan' }}">
+                                                {{ $type->preview_enabled ? 'bg-blue-600' : 'bg-gray-300' }}"
+                                    title="{{ $type->preview_enabled ? 'Preview aktif' : 'Preview nonaktif' }}">
                                     <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform
-                                            {{ $type->preview_enabled ? 'translate-x-6' : 'translate-x-1' }}">
+                                                {{ $type->preview_enabled ? 'translate-x-6' : 'translate-x-1' }}">
+                                    </span>
+                                </button>
+                            </form>
+                        </td>
+
+                        {{-- ── NEW: Signature toggle ── --}}
+                        <td class="px-4 py-3 text-center">
+                            <form method="POST" action="{{ route('admin.document-types.toggle-signature', $type) }}">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
+                                                {{ $type->signature_enabled ? 'bg-purple-600' : 'bg-gray-300' }}"
+                                    title="{{ $type->signature_enabled ? 'TTD Digital aktif — klik untuk menonaktifkan' : 'TTD Digital nonaktif — klik untuk mengaktifkan' }}">
+                                    <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform
+                                                {{ $type->signature_enabled ? 'translate-x-6' : 'translate-x-1' }}">
                                     </span>
                                 </button>
                             </form>
@@ -85,7 +101,7 @@
                                     @method('PATCH')
                                     <button type="submit"
                                         class="w-full text-xs px-2 py-1 rounded border
-                                                {{ $type->is_active ? 'border-yellow-400 text-yellow-600 hover:bg-yellow-50' : 'border-green-500 text-green-600 hover:bg-green-50' }}">
+                                                    {{ $type->is_active ? 'border-yellow-400 text-yellow-600 hover:bg-yellow-50' : 'border-green-500 text-green-600 hover:bg-green-50' }}">
                                         {{ $type->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                     </button>
                                 </form>
@@ -103,7 +119,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="px-4 py-6 text-center text-gray-400">Belum ada jenis dokumen.</td>
+                        <td colspan="10" class="px-4 py-6 text-center text-gray-400">Belum ada jenis dokumen.</td>
                     </tr>
                 @endforelse
             </tbody>
