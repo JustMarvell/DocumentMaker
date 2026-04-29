@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('signature_requests', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('document_log_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('official_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('official_id')->nullable()->constrained('official_data')->nullOnDelete();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->string('token', 64)->unique();
