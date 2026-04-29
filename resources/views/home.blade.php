@@ -403,25 +403,54 @@
         @if (session('success'))
             <div class="success-banner mb-4 fade-up">
                 <div class="flex items-center gap-2 mb-3">
-                    <svg style="width:16px;height:16px;color:#15803d;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    <svg style="width:16px;height:16px;color:#15803d;flex-shrink:0;" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
                     <span style="font-size:0.85rem;font-weight:600;color:#14532d;">{{ session('success') }}</span>
                 </div>
                 <div class="flex flex-wrap gap-2">
                     @if (session('download_url'))
                         <a href="{{ session('download_url') }}" class="download-btn">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
                             Unduh Dokumen
                         </a>
                     @endif
+
                     @if (session('preview_url'))
                         <button type="button" onclick="openPreview('{{ session('preview_url') }}')" class="preview-btn">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
                             Preview Dokumen
                         </button>
+                    @endif
+                    
+                    @if (session('signature_log_id') && auth()->check())
+                        @php
+                            $sigLog = \App\Models\DocumentLog::with('documentType')->find(session('signature_log_id'));
+                        @endphp
+                        @if ($sigLog && $sigLog->documentType->signature_enabled)
+                            <a href="{{ route('signature.create', $sigLog) }}"
+                                style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:0.5rem 1.1rem;border-radius:7px;font-size:0.8rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem;transition:all 0.2s ease;box-shadow:0 3px 10px rgba(124,58,237,0.25);"
+                                onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 14px rgba(124,58,237,0.35)'"
+                                onmouseout="this.style.transform='';this.style.boxShadow='0 3px 10px rgba(124,58,237,0.25)'">
+                                <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                                Minta Tanda Tangan
+                            </a>
+                        @endif
                     @endif
                 </div>
             </div>
         @endif
+
 
         @if (session('error'))
             <div class="alert alert-error mb-4 fade-up">{{ session('error') }}</div>
