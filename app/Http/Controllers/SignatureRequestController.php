@@ -144,7 +144,7 @@ class SignatureRequestController extends Controller
 
         $pendingCount = SignatureRequest::where('status', 'pending')->count();
 
-        return view('admin.admin-signatures', compact('requests', 'pendingCount'));
+        return view('admin.signatures', compact('requests', 'pendingCount'));
     }
 
     public function adminApprove(Request $request, SignatureRequest $signatureRequest)
