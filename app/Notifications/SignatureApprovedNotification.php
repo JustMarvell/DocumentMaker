@@ -1,4 +1,4 @@
-<?
+<?php
 
 namespace App\Notifications;
 
@@ -20,37 +20,39 @@ class SignatureApprovedNotification extends Notification {
 
     public function toMail(object $notifiable): MailMessage {
         $sr = $this->signatureRequest;
-        $docLog = $sr->documentLog;
-        $docType = $docLog->documentType;
+        $docType = $sr->documentLog->documentType;
         $official = $sr->official;
-        $filePath = $sr->documentFilePath();
-        $fileName = $docLog->output_filename;
-
+        $verifyUrl = route('signature.verify', $sr->token);
         $officialName = $official?->staff_name ?? 'Pejabat';
 
         $mail = (new MailMessage)
-            ->subject("Dokumen Disetujui! - {$docType->name}")
+            ->subject("✅ Dokumen Ditandatangani — {$docType->name}")
             ->greeting("Yth. {$notifiable->name},")
-            ->line("Permintaan tanda tangan digital Anda telah **Disetujui**.")
+            ->line("Permintaan tanda tangan digital Anda telah **disetujui** dan dokumen telah ditandatangani secara digital.")
             ->line("**Jenis Dokumen:** {$docType->name}")
-            ->line("**Disetujui oleh:** {$officialName}")
-            ->line("**Tanggal Persetujuan:** " . $sr->reviewed_at->locale('id')->translatedFormat('d F Y, H:i'));
+            ->line("**Ditandatangani oleh:** {$officialName}")
+            ->line("**Tanggal:** " . $sr->reviewed_at->locale('id')->translatedFormat('d F Y, H:i'));
 
         if ($sr->notes) {
             $mail->line("**Catatan:** {$sr->notes}");
         }
 
-        $mail->line("Dokumen yang telah disetujui terlampir dalam email ini.");
+        $mail->line("Dokumen yang telah ditandatangani terlampir dalam email ini.")
+            ->line("Keaslian dokumen dapat diverifikasi melalui tautan di bawah:")
+            ->action('Verifikasi Keaslian Dokumen', $verifyUrl);
 
-        if ($sr->documentFileExists()) {
+        // Attach signed file (prefer) or fall back to original
+        $filePath = $sr->bestFilePath();
+        $fileName = $sr->bestFileName();
+
+        if ($filePath) {
             $mail->attach($filePath, ['as' => $fileName]);
         } else {
-            $mail->line("*(File dokumen tidak tersedia - Mungkin sudah dihapus otomatis dari server. Silahkan buat ulang dokumen jika diperlukan.)*");
+            $mail->line("*(File tidak tersedia — mungkin sudah dihapus otomatis. Silakan hubungi administrator.)*");
         }
 
-        $mail->line("Terimakasih telah menggunaakan *SIPADU*.")
-            ->salutation("Salam,\nSIPADU - Sistem Generasi Administrasi Persuratan\nDINAS PUPRD Kota Tomohon");
-        
+        $mail->salutation("Salam,\nSIPADU — Sistem Generasi Administrasi Persuratan\nDinas PUPRD Kota Tomohon");
+
         return $mail;
     }
 }
