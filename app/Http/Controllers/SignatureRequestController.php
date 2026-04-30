@@ -127,9 +127,9 @@ class SignatureRequestController extends Controller
             $signedFilename = $this->signingService->sign($signatureRequest);
             if ($signedFilename) {
                 $signatureRequest->update(['signed_filename' => $signedFilename]);
-                // Reload so notifications use the updated model
-                $signatureRequest->refresh();
             }
+            $signatureRequest = SignatureRequest::with(['documentLog.documentType', 'official', 'user'])
+                ->find($signatureRequest->id);
         }
 
         // Notify the requesting user
@@ -196,8 +196,9 @@ class SignatureRequestController extends Controller
         $signedFilename = $this->signingService->sign($signatureRequest);
         if ($signedFilename) {
             $signatureRequest->update(['signed_filename' => $signedFilename]);
-            $signatureRequest->refresh();
         }
+        $signatureRequest = SignatureRequest::with(['documentLog.documentType', 'official', 'user'])
+            ->find($signatureRequest->id);
 
         try {
             $user = $signatureRequest->user;
