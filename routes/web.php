@@ -28,6 +28,8 @@ Route::get('/dashboard', function () {
 Route::get('/signature/review/{token}', [SignatureRequestController::class, 'review'])->name('signature.review');
 Route::post('/signature/review/{token}', [SignatureRequestController::class, 'processReview'])->name('signature.process');
 
+Route::get('/verify/{token}', [SignatureRequestController::class, 'verify'])->name('signature.verify');
+
 Route::middleware('auth')->group(function() {
     Route::get('/dashboard', function(){
         return auth()->user()->isAdmin()
@@ -93,6 +95,7 @@ Route::middleware('auth')->group(function() {
         Route::post('/official-data', [OfficialDataController::class, 'store'])->name('official-data.store');
         Route::patch('/official-data/{officialDatum}', [OfficialDataController::class, 'update'])->name('official-data.update');
         Route::delete('/official-data/{officialDatum}', [OfficialDataController::class, 'destroy'])->name('official-data.destroy');
+        Route::delete('/official-data/{officialDatum}/signature-image', [OfficialDataController::class, 'deleteSignatureImage'])->name('official-data.delete-signature');
 
         Route::get('/guide', [AdminController::class, 'guide'])->name('guide');
         Route::get('/guide/download', [AdminController::class, 'guideDownload'])->name('guide.download');
