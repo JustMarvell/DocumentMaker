@@ -21,7 +21,7 @@ class SignatureRequest extends Model
     protected function casts(): array {
         return [
             'requested_at' => 'datetime',
-            'reviewed_at' => 'datetie',
+            'reviewed_at' => 'datetime',
         ];
     }
 
