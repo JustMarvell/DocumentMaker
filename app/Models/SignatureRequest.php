@@ -60,4 +60,24 @@ class SignatureRequest extends Model
     public function documentFileExists(): bool {
         return file_exists($this->documentFilePath());
     }
+
+    public function signedFilePath(): ?string
+    {
+        if (!$this->signed_filename)
+            return null;
+        $path = public_path('cached_result/' . $this->signed_filename);
+        return file_exists($path) ? $path : null;
+    }
+
+    /** Prefer signed file, fall back to original */
+    public function bestFilePath(): ?string
+    {
+        return $this->signedFilePath()
+            ?? ($this->documentFileExists() ? $this->documentFilePath() : null);
+    }
+
+    public function bestFileName(): string
+    {
+        return $this->signed_filename ?? $this->documentLog->output_filename;
+    }
 }
