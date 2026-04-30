@@ -12,6 +12,7 @@ class SignatureRequest extends Model
         'document_log_id',
         'official_id',
         'status',
+        'signed_filename',
         'token',
         'notes',
         'requested_at',
