@@ -26,7 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
             Request::HEADER_X_FORWARDED_PROTO);
 
         $middleware->preventRequestForgery(except: [
-            'colonist-velocity-shaded.ngrok-free.dev/*'
+            // 'colonist-velocity-shaded.ngrok-free.dev/*',
+            'signature/review/*',   // signtature
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
