@@ -6,6 +6,7 @@ use App\Models\SignatureRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class SignatureApprovedNotification extends Notification {
     use Queueable;
@@ -19,7 +20,8 @@ class SignatureApprovedNotification extends Notification {
     }
 
     public function toMail(object $notifiable): MailMessage {
-        $sr = $this->signatureRequest;
+        $sr = SignatureRequest::with(['documentLog.documentType', 'official'])
+            ->find($this->signatureRequest->id);
         $docType = $sr->documentLog->documentType;
         $official = $sr->official;
         $verifyUrl = route('signature.verify', $sr->token);
@@ -44,6 +46,13 @@ class SignatureApprovedNotification extends Notification {
         // Attach signed file (prefer) or fall back to original
         $filePath = $sr->bestFilePath();
         $fileName = $sr->bestFileName();
+
+
+        Log::info('SignatureApprovedNotification: attaching file', [
+            'signed_filename' => $sr->signed_filename,
+            'best_file_path' => $filePath,
+            'best_file_exists' => $filePath ? file_exists($filePath) : false,
+        ]);
 
         if ($filePath) {
             $mail->attach($filePath, ['as' => $fileName]);
