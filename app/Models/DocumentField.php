@@ -122,6 +122,7 @@ class DocumentField extends Model
                 'fa-solid fa-bars' => 'Baris data',
                 'fa-solid fa-database' => 'Database',
                 'fa-solid fa-repeat' => 'Repeating group',
+                'fa-solid fa-chart-simple' => 'Chart Simpel'
             ],
             'Orang & Organisasi' => [
                 'fa-solid fa-user' => 'Pengguna',
@@ -156,6 +157,7 @@ class DocumentField extends Model
                 'fa-solid fa-city' => 'Kota',
                 'fa-solid fa-house' => 'Rumah / domisili',
                 'fa-solid fa-flag' => 'Wilayah / flag',
+                'fa-solid fa-globe' => 'Globe'
             ],
             'Kontak & Komunikasi' => [
                 'fa-solid fa-phone' => 'Telepon',
@@ -163,6 +165,7 @@ class DocumentField extends Model
                 'fa-solid fa-fax' => 'Fax',
                 'fa-solid fa-at' => 'Email / @',
                 'fa-solid fa-comment' => 'Komentar',
+                'fa-solid fa-link' => 'Link'
             ],
             'Keuangan & Angka' => [
                 'fa-solid fa-money-bill' => 'Uang / nominal',
@@ -183,6 +186,8 @@ class DocumentField extends Model
                 'fa-solid fa-bell' => 'Notifikasi',
                 'fa-solid fa-lock' => 'Privat / kunci',
                 'fa-solid fa-eye' => 'Lihat / preview',
+                'fa-solid fa-bullhorn' => 'Pengeras Suara / Toa',
+                'fa-solid fa-certificate' => 'Sertifikat / Bintang'
             ],
         ];
     }
