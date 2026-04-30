@@ -201,6 +201,16 @@ class DocumentController extends Controller
 
     private function runScript(DocumentType $documentType, array $context)
     {
+        $signaturePlaceholders = [
+            'ttd_pejabat' => $documentType->signature_enabled ? '{{ ttd_pejabat }}' : '',
+            'qr_code' => $documentType->signature_enabled ? '{{ qr_code }}' : '',
+            'nama_pejabat' => $documentType->signature_enabled ? '{{ nama_pejabat }}' : '',
+            'jabatan_pejabat' => $documentType->signature_enabled ? '{{ jabatan_pejabat }}' : '',
+            'tgl_ttd' => $documentType->signature_enabled ? '{{ tgl_ttd }}' : '',
+        ];
+
+        $context = array_merge($signaturePlaceholders, $context);
+
         $pythonBin = base_path('venv/bin/python');
         $scriptPath = base_path("scripts/{$documentType->script_name}");
         $extension = pathinfo($documentType->template_filename, PATHINFO_EXTENSION);
