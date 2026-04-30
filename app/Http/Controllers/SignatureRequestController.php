@@ -8,12 +8,20 @@ use App\Models\SignatureRequest;
 use App\Notifications\SignatureApprovedNotification;
 use App\Notifications\SignatureRejectedNotification;
 use App\Notifications\SignatureRequestedNotification;
+use App\Services\SignatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class SignatureRequestController extends Controller
 {
-    public function create(DocumentLog $documentLog) {
+    public function __construct(private SignatureService $signingService)
+    {
+    }
+
+    // User: Request a signature 
+
+    public function create(DocumentLog $documentLog)
+    {
         $this->authorizeDocumentLog($documentLog);
 
         if (!file_exists(public_path('cached_result/' . $documentLog->output_filename))) {
@@ -64,22 +72,22 @@ class SignatureRequestController extends Controller
             'requested_at' => now(),
         ]);
 
-        // Send email to the official
         try {
             $official->notify(new SignatureRequestedNotification($signatureRequest));
         } catch (\Exception $e) {
             Log::error('Failed to send signature request email: ' . $e->getMessage());
-            // Don't fail the request — just log it
         }
 
         return redirect()->route('home')
             ->with('success', "Permintaan tanda tangan berhasil dikirim ke {$official->staff_name}. Anda akan menerima notifikasi via email setelah ditinjau.");
     }
 
+    // Official: Review via email token
+
     public function review(string $token)
     {
         $signatureRequest = SignatureRequest::where('token', $token)
-            ->with(['documentLog', 'official', 'user'])
+            ->with(['documentLog.documentType', 'official', 'user'])
             ->firstOrFail();
 
         if (!$signatureRequest->isPending()) {
@@ -92,7 +100,7 @@ class SignatureRequestController extends Controller
     public function processReview(Request $request, string $token)
     {
         $signatureRequest = SignatureRequest::where('token', $token)
-            ->with(['documentLog', 'official', 'user'])
+            ->with(['documentLog.documentType', 'official', 'user'])
             ->firstOrFail();
 
         if (!$signatureRequest->isPending()) {
@@ -107,11 +115,22 @@ class SignatureRequestController extends Controller
 
         $decision = $request->decision;
 
+        // Update status first so reviewed_at is set before signing
         $signatureRequest->update([
             'status' => $decision,
             'notes' => $request->notes,
             'reviewed_at' => now(),
         ]);
+
+        // If approved, run the signing script
+        if ($decision === 'approved') {
+            $signedFilename = $this->signingService->sign($signatureRequest);
+            if ($signedFilename) {
+                $signatureRequest->update(['signed_filename' => $signedFilename]);
+                // Reload so notifications use the updated model
+                $signatureRequest->refresh();
+            }
+        }
 
         // Notify the requesting user
         try {
@@ -131,6 +150,19 @@ class SignatureRequestController extends Controller
         return view('signature.review-done', compact('signatureRequest', 'label'));
     }
 
+    // public : verify doc
+
+    public function verify(string $token)
+    {
+        $signatureRequest = SignatureRequest::where('token', $token)
+            ->with(['documentLog.documentType', 'official', 'user'])
+            ->firstOrFail();
+
+        return view('signature.verify', compact('signatureRequest'));
+    }
+
+    // admin queue management
+
     public function adminIndex(Request $request)
     {
         $query = SignatureRequest::with(['user', 'documentLog.documentType', 'official'])
@@ -141,7 +173,6 @@ class SignatureRequestController extends Controller
         }
 
         $requests = $query->paginate(20)->withQueryString();
-
         $pendingCount = SignatureRequest::where('status', 'pending')->count();
 
         return view('admin.signatures', compact('requests', 'pendingCount'));
@@ -160,6 +191,13 @@ class SignatureRequestController extends Controller
             'notes' => $request->notes,
             'reviewed_at' => now(),
         ]);
+
+        // Sign the document
+        $signedFilename = $this->signingService->sign($signatureRequest);
+        if ($signedFilename) {
+            $signatureRequest->update(['signed_filename' => $signedFilename]);
+            $signatureRequest->refresh();
+        }
 
         try {
             $user = $signatureRequest->user;
@@ -199,15 +237,14 @@ class SignatureRequestController extends Controller
         return back()->with('success', 'Permintaan berhasil ditolak dan notifikasi dikirim ke pemohon.');
     }
 
+    // helper
+
     private function authorizeDocumentLog(DocumentLog $documentLog): void
     {
         $user = auth()->user();
-        if (!$user) {
+        if (!$user)
             abort(403);
-        }
-        // Admin can do anything; regular users only their own logs
-        if (!$user->isAdmin() && $documentLog->user_id !== $user->id) {
+        if (!$user->isAdmin() && $documentLog->user_id !== $user->id)
             abort(403);
-        }
     }
 }
