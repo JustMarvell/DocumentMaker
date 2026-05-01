@@ -11,6 +11,7 @@ class DocumentType extends Model
         'name', 'key', 'script_name', 'template_filename', 
         'output_filename', 'access_level', 'is_active',
         'file_type', 'preview_enabled', 'signature_enabled',
+        'signature_use_image', 'signature_use_qr'
     ];
 
     protected function casts() : array
@@ -19,6 +20,8 @@ class DocumentType extends Model
             'is_active' => 'boolean',
             'preview_enabled' => 'boolean',
             'signature_enabled' => 'boolean',
+            'signature_use_image' => 'boolean',
+            'signature_use_qr' => 'boolean',
         ];
     }
 
