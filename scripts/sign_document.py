@@ -92,8 +92,10 @@ def sign_docx(input_path: str, output_path: str, args: argparse.Namespace) -> No
         "tgl_ttd" : args.approval_date,
     }
     
+    IMAGE_SIZE_MM = 35
+    
     if args.sig_image and os.path.exists(args.sig_image):
-        context['ttd_pejabat'] = InlineImage(doc, args.sig_image, width=Mm(40))
+        context['ttd_pejabat'] = InlineImage(doc, args.sig_image, width=Mm(IMAGE_SIZE_MM), height=Mm(IMAGE_SIZE_MM))
     else:
         context['ttd_pejabat'] = f"[TTD {args.official_name}]"
 
@@ -103,7 +105,7 @@ def sign_docx(input_path: str, output_path: str, args: argparse.Namespace) -> No
         qr_tmp_path = tmp.name
         
     try:
-        context["qr_code"] = InlineImage(doc, qr_tmp_path, width=Mm(28))
+        context["qr_code"] = InlineImage(doc, qr_tmp_path, width=Mm(IMAGE_SIZE_MM), height=Mm(IMAGE_SIZE_MM))
         doc.render(context)
         doc.save(output_path)
     finally:
@@ -132,14 +134,16 @@ def sign_xlsx(input_path: str, output_path: str, args: argparse.Namespace) -> No
     from openpyxl.drawing.image import Image as XLImage
     
     wb = load_workbook(input_path)
+    
+    IMAGE_SIZE_PX = 132         # abt 35mm at 96dpi     sto.... dafug i don't know #asja
 
     inserts = []
     
     if args.sig_image and os.path.exists(args.sig_image):
-        inserts.append((open(args.sig_image, "rb").read(), "{{ttd_pejabat}}", 120, 60))
+        inserts.append((open(args.sig_image, "rb").read(), "{{ttd_pejabat}}", IMAGE_SIZE_PX, IMAGE_SIZE_PX))
     
     qr_bytes = make_qr_png(args.verify_url)
-    inserts.append((qr_bytes, "{{qr_code}}", 80, 80))
+    inserts.append((qr_bytes, "{{qr_code}}", IMAGE_SIZE_PX, IMAGE_SIZE_PX))
 
     for sheet_name in wb.sheetnames:
         ws = wb[sheet_name]
