@@ -20,6 +20,7 @@ class SignatureService
     {
         $docLog = $signatureRequest->documentLog;
         $official = $signatureRequest->official;
+        $documentType = $signatureRequest->documentLog->documentType;
 
         // Build the signed output filename  e.g. "signed_surat-tugas_<uuid>.docx"
         $ext = pathinfo($docLog->output_filename, PATHINFO_EXTENSION);
@@ -38,21 +39,16 @@ class SignatureService
 
         $cmd = [
             $pythonBin,
-            $scriptPath,
-            '--input',
-            $docLog->output_filename,
-            '--output',
-            $signedFilename,
-            '--sig-image',
-            $official?->signatureImagePath() ?? '',
-            '--verify-url',
-            $verifyUrl,
-            '--official-name',
-            $official?->staff_name ?? '',
-            '--official-position',
-            $official?->position ?? '',
-            '--approval-date',
-            $approvalDate,
+            $scriptPath, 
+            '--input', $docLog->output_filename, 
+            '--output', $signedFilename, 
+            '--sig-image', $official?->signatureImagePath() ?? '', 
+            '--verify-url', $verifyUrl, 
+            '--official-name', $official?->staff_name ?? '',
+            '--official-position', $official?->position ?? '',
+            '--approval-date', $approvalDate,
+            '--use-image', $documentType->signature_use_image ? '1' : '0',
+            '--use-qr', $documentType->signature_use_qr ? '1' : '0',
         ];
 
         $process = new Process($cmd);
