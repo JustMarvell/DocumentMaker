@@ -437,4 +437,17 @@ class AdminController extends Controller
         $status = $documentType->signature_enabled ? 'diaktifkan' : 'dinonaktifkan';
         return back()->with('success', "Fitur tanda tangan untuk {$documentType->name} berhasil {$status}.");
     }
+
+    public function toggleSignatureImage(DocumentType $documentType) {
+        $documentType->update(['signature_use_image' => !$documentType->signature_use_image]);
+        $status = $documentType->signature_use_image ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('succes', "Embed gambar untuk {$documentType->name} berhasil {$status}.");
+    }
+
+    public function toggleSignatureQr(DocumentType $documentType)
+    {
+        $documentType->update(['signature_use_qr' => !$documentType->signature_use_qr]);
+        $status = $documentType->signature_use_qr ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('succes', "Embed QR untuk {$documentType->name} berhasil {$status}.");
+    }
 }
