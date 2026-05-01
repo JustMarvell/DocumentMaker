@@ -85,6 +85,8 @@ Route::middleware('auth')->group(function() {
         Route::delete('/document-types/{documentType}/slots/{slot}', [AdminController::class, 'destroySlot'])->name('document-types.slots.destroy');
         Route::patch('/document-types/{documentType}/toggle-preview', [AdminController::class, 'togglePreview'])->name('document-types.toggle-preview');
         Route::patch('/document-types/{documentType}/toggle-signature', [AdminController::class, 'toggleSignature'])->name('document-types.toggle-signature');
+        Route::patch('/document-types/{documentType}/toggle-signature-image', [AdminController::class, 'toggleSignatureImage'])->name('document-types.toggle-signature-image');
+        Route::patch('/document-types/{documentType}/toggle-signature-qr', [AdminController::class, 'toggleSignatureQr'])->name('document-types.toggle-signature-qr');
 
         Route::get('/staff-data', [AdminController::class,'staffData'])->name('staff-data');
         Route::post('/staff-data', [StaffDataController::class, 'store'])->name('staff-data.store');
@@ -103,7 +105,6 @@ Route::middleware('auth')->group(function() {
         Route::get('/signatures', [SignatureRequestController::class, 'adminIndex'])->name('signatures');
         Route::patch('/signatures/{signatureRequest}/approve', [SignatureRequestController::class, 'adminApprove'])->name('signatures.approve');
         Route::patch('/signatures/{signatureRequest}/reject', [SignatureRequestController::class, 'adminReject'])->name('signatures.reject');
-
     });
 
     Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');
