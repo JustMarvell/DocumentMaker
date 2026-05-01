@@ -23,6 +23,8 @@
                     <th class="px-4 py-3 text-center">Status</th>
                     <th class="px-4 py-3 text-center">Preview</th>
                     <th class="px-4 py-3 text-center">TTD Digital</th>
+                    <th class="px-4 py-3 text-center">Gambar TTD</th>
+                    <th class="px-4 py-3 text-center">QR Code</th>
                     <th class="px-4 py-3 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -75,7 +77,7 @@
                             </form>
                         </td>
 
-                        {{-- ── NEW: Signature toggle ── --}}
+                        {{-- Signature toggle --}}
                         <td class="px-4 py-3 text-center">
                             <form method="POST" action="{{ route('admin.document-types.toggle-signature', $type) }}">
                                 @csrf
@@ -88,6 +90,39 @@
                                     </span>
                                 </button>
                             </form>
+                        </td>
+
+                        {{-- Signature image toggle --}}
+                        <td class="px-4 py-3 text-center">
+                            @if ($type->signature_enabled)
+                                <form method="POST" action="{{ route('admin.document-types.toggle-signature-image', $type) }}">
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                                                {{ $type->signature_use_image ? 'bg-purple-600' : 'bg-gray-300' }}"
+                                        title="Embed gambar tanda tangan">
+                                        <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform
+                                                {{ $type->signature_use_image ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-xs text-gray-300">—</span>
+                            @endif
+                        </td>
+
+                        {{-- QR code toggle --}}
+                        <td class="px-4 py-3 text-center">
+                            @if ($type->signature_enabled)
+                                <form method="POST" action="{{ route('admin.document-types.toggle-signature-qr', $type) }}">
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                                                {{ $type->signature_use_qr ? 'bg-indigo-600' : 'bg-gray-300' }}" title="Embed QR code verifikasi">
+                                        <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform
+                                                {{ $type->signature_use_qr ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-xs text-gray-300">—</span>
+                            @endif
                         </td>
 
                         <td class="px-4 py-3">
