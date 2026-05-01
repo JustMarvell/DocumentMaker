@@ -20,7 +20,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (request()->getHost() !== '127.0.0.1' && request()->getHost() !== 'localhost') {
+        // if (request()->getHost() !== '127.0.0.1' && request()->getHost() !== 'localhost') {
+        //     URL::forceScheme('https');
+        // }
+
+        // Force the URL root to APP_URL so generated links (including emails)
+        // always use the correct host — important when running behind ngrok or a proxy
+        $appUrl = config('app.url');
+
+        if ($appUrl && $appUrl !== 'http://localhost') {
+            URL::forceRootUrl($appUrl);
+        }
+
+        if (str_starts_with($appUrl, 'https://')) {
             URL::forceScheme('https');
         }
     }

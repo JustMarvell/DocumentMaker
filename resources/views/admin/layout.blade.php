@@ -167,6 +167,13 @@
             @if(request()->routeIs('admin.document-types*'))<span class="active-dot"></span>@endif
         </a>
 
+        <a href="{{ route('admin.signatures') }}"
+            class="admin-nav-link {{ request()->routeIs('admin.signatures*') ? 'active' : '' }}">
+            <i class="fa-solid fa-list-check"></i>
+            Antrian TTD
+            @if(request()->routeIs('admin.signatures'))<span class="active-dot"></span>@endif
+        </a>
+
         <div class="sidebar-nav-group">Data</div>
 
         <a href="{{ route('admin.staff-data') }}"

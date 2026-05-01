@@ -201,6 +201,16 @@ class DocumentController extends Controller
 
     private function runScript(DocumentType $documentType, array $context)
     {
+        $signaturePlaceholders = [
+            'ttd_pejabat' => $documentType->signature_enabled ? '{{ ttd_pejabat }}' : '',
+            'qr_code' => $documentType->signature_enabled ? '{{ qr_code }}' : '',
+            'nama_pejabat' => $documentType->signature_enabled ? '{{ nama_pejabat }}' : '',
+            'jabatan_pejabat' => $documentType->signature_enabled ? '{{ jabatan_pejabat }}' : '',
+            'tgl_ttd' => $documentType->signature_enabled ? '{{ tgl_ttd }}' : '',
+        ];
+
+        $context = array_merge($signaturePlaceholders, $context);
+
         $pythonBin = base_path('venv/bin/python');
         $scriptPath = base_path("scripts/{$documentType->script_name}");
         $extension = pathinfo($documentType->template_filename, PATHINFO_EXTENSION);
@@ -223,13 +233,14 @@ class DocumentController extends Controller
 
         $status = $process->isSuccessful() ? 'success' : 'failed';
 
-        DocumentLog::create([
+        $log = DocumentLog::create([
             'user_id' => auth()->id(),
             'document_type_id' => $documentType->id,
             'output_filename' => $uniqueFilename,
             'status' => $status,
             'generated_at' => now(),
         ]);
+
 
         if (!$process->isSuccessful()) {
             Log::error("Generation failed [{$documentType->script_name}]: " . $process->getErrorOutput());
@@ -251,7 +262,8 @@ class DocumentController extends Controller
         return back()
             ->with('success', 'Dokumen berhasil dibuat!')
             ->with('download_url', $downloadUrl)
-            ->with('preview_url', $previewUrl);
+            ->with('preview_url', $previewUrl)
+            ->with('signature_log_id', $log->id);
     }
 
 

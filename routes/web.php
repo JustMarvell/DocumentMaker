@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffDataController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OfficialDataController;
+use App\Http\Controllers\SignatureRequestController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,6 +25,11 @@ Route::get('/dashboard', function () {
 // Route::get('/home', [DocumentController::class, 'index'])->name('home');
 // Route::post('/generate', [DocumentController::class, 'generate'])->name('document.generate');
 
+Route::get('/signature/review/{token}', [SignatureRequestController::class, 'review'])->name('signature.review');
+Route::post('/signature/review/{token}', [SignatureRequestController::class, 'processReview'])->name('signature.process');
+
+Route::get('/verify/{token}', [SignatureRequestController::class, 'verify'])->name('signature.verify');
+
 Route::middleware('auth')->group(function() {
     Route::get('/dashboard', function(){
         return auth()->user()->isAdmin()
@@ -41,6 +47,10 @@ Route::middleware('auth')->group(function() {
         Route::post('/generate', [DocumentController::class,'generate'])->name('document.generate');
         Route::get('/download/{filename}', [DocumentController::class, 'download'])->name('document.download');
         Route::get('/preview/{filename}', [DocumentController::class, 'preview'])->name('document.preview');
+
+        Route::get('/signature/request/{documentLog}', [SignatureRequestController::class, 'create'])->name('signature.create');
+        Route::post('/signature/request/{documentLog}', [SignatureRequestController::class, 'store'])->name('signature.store');
+
     });
 
     Route::middleware('role:staff,admin')->group(function(){
@@ -74,6 +84,9 @@ Route::middleware('auth')->group(function() {
         Route::post('/document-types/{documentType}/slots', [AdminController::class, 'storeSlot'])->name('document-types.slots.store');
         Route::delete('/document-types/{documentType}/slots/{slot}', [AdminController::class, 'destroySlot'])->name('document-types.slots.destroy');
         Route::patch('/document-types/{documentType}/toggle-preview', [AdminController::class, 'togglePreview'])->name('document-types.toggle-preview');
+        Route::patch('/document-types/{documentType}/toggle-signature', [AdminController::class, 'toggleSignature'])->name('document-types.toggle-signature');
+        Route::patch('/document-types/{documentType}/toggle-signature-image', [AdminController::class, 'toggleSignatureImage'])->name('document-types.toggle-signature-image');
+        Route::patch('/document-types/{documentType}/toggle-signature-qr', [AdminController::class, 'toggleSignatureQr'])->name('document-types.toggle-signature-qr');
 
         Route::get('/staff-data', [AdminController::class,'staffData'])->name('staff-data');
         Route::post('/staff-data', [StaffDataController::class, 'store'])->name('staff-data.store');
@@ -84,9 +97,14 @@ Route::middleware('auth')->group(function() {
         Route::post('/official-data', [OfficialDataController::class, 'store'])->name('official-data.store');
         Route::patch('/official-data/{officialDatum}', [OfficialDataController::class, 'update'])->name('official-data.update');
         Route::delete('/official-data/{officialDatum}', [OfficialDataController::class, 'destroy'])->name('official-data.destroy');
+        Route::delete('/official-data/{officialDatum}/signature-image', [OfficialDataController::class, 'deleteSignatureImage'])->name('official-data.delete-signature');
 
         Route::get('/guide', [AdminController::class, 'guide'])->name('guide');
         Route::get('/guide/download', [AdminController::class, 'guideDownload'])->name('guide.download');
+
+        Route::get('/signatures', [SignatureRequestController::class, 'adminIndex'])->name('signatures');
+        Route::patch('/signatures/{signatureRequest}/approve', [SignatureRequestController::class, 'adminApprove'])->name('signatures.approve');
+        Route::patch('/signatures/{signatureRequest}/reject', [SignatureRequestController::class, 'adminReject'])->name('signatures.reject');
     });
 
     Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');

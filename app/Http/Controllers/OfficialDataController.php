@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\OfficialData;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class OfficialDataController extends Controller
 {
@@ -22,17 +23,17 @@ class OfficialDataController extends Controller
             'rank' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
             'phone_number' => 'nullable|string|max:20',
+            'signature_image' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
         ]);
 
-        OfficialData::create($request->only([
-            'staff_name',
-            'nip',
-            'email',
-            'phone_number',
-            'rank',
-            'position',
-            'work_unit',
-        ]));
+        $data = $request->only(['staff_name', 'nip', 'email', 'phone_number', 'rank', 'position', 'work_unit']);
+
+        if ($request->hasFile('signature_image')) {
+            $data['signature_image'] = $request->file('signature_image')
+                ->store('signatures', 'public');
+        }
+
+        OfficialData::create($data);
 
         return back()->with('success', "Data pejabat {$request->staff_name} berhasil ditambahkan.");
     }
@@ -47,25 +48,43 @@ class OfficialDataController extends Controller
             'rank' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
             'phone_number' => 'nullable|string|max:20',
+            'signature_image' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
         ]);
 
-        $officialDatum->update($request->only([
-            'staff_name',
-            'nip',
-            'email',
-            'phone_number',
-            'rank',
-            'position',
-            'work_unit',
-        ]));
+        $data = $request->only(['staff_name', 'nip', 'email', 'phone_number', 'rank', 'position', 'work_unit']);
+
+        if ($request->hasFile('signature_image')) {
+            // Delete old image
+            if ($officialDatum->signature_image) {
+                Storage::disk('public')->delete($officialDatum->signature_image);
+            }
+            $data['signature_image'] = $request->file('signature_image')
+                ->store('signatures', 'public');
+        }
+
+        $officialDatum->update($data);
 
         return back()->with('success', "Data pejabat {$officialDatum->staff_name} berhasil diperbarui.");
     }
 
     public function destroy(OfficialData $officialDatum)
     {
+        // Delete signature image from storage
+        if ($officialDatum->signature_image) {
+            Storage::disk('public')->delete($officialDatum->signature_image);
+        }
+
         $name = $officialDatum->staff_name;
         $officialDatum->delete();
         return back()->with('success', "Data pejabat {$name} berhasil dihapus.");
+    }
+
+    public function deleteSignatureImage(OfficialData $officialDatum)
+    {
+        if ($officialDatum->signature_image) {
+            Storage::disk('public')->delete($officialDatum->signature_image);
+            $officialDatum->update(['signature_image' => null]);
+        }
+        return back()->with('success', "Gambar tanda tangan {$officialDatum->staff_name} berhasil dihapus.");
     }
 }

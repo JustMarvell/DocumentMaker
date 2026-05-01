@@ -133,6 +133,7 @@ class AdminController extends Controller
             'file_type' => $request->file_type,
             'staff_autofill_role' => $request->staff_autofill_role,
             'is_active' => true,
+            'signature_enabled' => false,
         ]);
 
         return redirect()
@@ -428,5 +429,25 @@ class AdminController extends Controller
         abort_unless(file_exists($path), 404, 'File panduan tidak ditemukan.');
 
         return response()->download($path, 'SIPADU_Panduan_Penggunaan.docx');
+    }
+
+    public function toggleSignature(DocumentType $documentType)
+    {
+        $documentType->update(['signature_enabled' => !$documentType->signature_enabled]);
+        $status = $documentType->signature_enabled ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('success', "Fitur tanda tangan untuk {$documentType->name} berhasil {$status}.");
+    }
+
+    public function toggleSignatureImage(DocumentType $documentType) {
+        $documentType->update(['signature_use_image' => !$documentType->signature_use_image]);
+        $status = $documentType->signature_use_image ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('succes', "Embed gambar untuk {$documentType->name} berhasil {$status}.");
+    }
+
+    public function toggleSignatureQr(DocumentType $documentType)
+    {
+        $documentType->update(['signature_use_qr' => !$documentType->signature_use_qr]);
+        $status = $documentType->signature_use_qr ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('succes', "Embed QR untuk {$documentType->name} berhasil {$status}.");
     }
 }
