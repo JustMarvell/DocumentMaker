@@ -55,6 +55,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--official-name", required=True)
     p.add_argument("--official-position", required=False, default="")
     p.add_argument("--approval-date", required=True)
+    p.add_argument("--use-image", default="1", help="1 to embed signature image, 0 for no/skip")
+    p.add_argument("--use-qr", default="1", help="1 to embed signature qr image, 0 for no/skip")
     return p.parse_args()
 
 def make_qr_png(url: str) -> bytes:
@@ -92,12 +94,18 @@ def sign_docx(input_path: str, output_path: str, args: argparse.Namespace) -> No
         "tgl_ttd" : args.approval_date,
     }
     
+    use_image = args.use_image == "1"
+    use_qr = args.use_qr == "1"
+    
     IMAGE_SIZE_MM = 35
     
-    if args.sig_image and os.path.exists(args.sig_image):
-        context['ttd_pejabat'] = InlineImage(doc, args.sig_image, width=Mm(IMAGE_SIZE_MM), height=Mm(IMAGE_SIZE_MM))
+    if use_image:
+        if args.sig_image and os.path.exists(args.sig_image):
+            context['ttd_pejabat'] = InlineImage(doc, args.sig_image, width=Mm(IMAGE_SIZE_MM), height=Mm(IMAGE_SIZE_MM))
+        else:
+            context['ttd_pejabat'] = f"[TTD {args.official_name}]"
     else:
-        context['ttd_pejabat'] = f"[TTD {args.official_name}]"
+        context['ttd_pejabat'] = '' #empety
 
     qr_bytes = make_qr_png(args.verify_url)
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
@@ -105,7 +113,11 @@ def sign_docx(input_path: str, output_path: str, args: argparse.Namespace) -> No
         qr_tmp_path = tmp.name
         
     try:
-        context["qr_code"] = InlineImage(doc, qr_tmp_path, width=Mm(IMAGE_SIZE_MM), height=Mm(IMAGE_SIZE_MM))
+        if use_qr:
+            context["qr_code"] = InlineImage(doc, qr_tmp_path, width=Mm(IMAGE_SIZE_MM), height=Mm(IMAGE_SIZE_MM))
+        else:
+            context["qr_code"] = ''
+            
         doc.render(context)
         doc.save(output_path)
     finally:
