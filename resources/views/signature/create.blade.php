@@ -11,9 +11,40 @@
             min-height: 100vh;
             font-family: var(--font-body);
         }
+
+        #sig-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 15, 30, 0.55);
+            backdrop-filter: blur(6px);
+            z-index: 9998;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        #sig-overlay.active { display: flex; }
+        #sig-overlay p {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 0;
+        }
+        #sig-overlay small {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body>
+
+    {{-- Loading overlay --}}
+    <div id="sig-overlay">
+        <div class="sipadu-spinner"></div>
+        <p>Mengirim permintaan tanda tangan...</p>
+        <small>Mohon tunggu, email sedang dikirim ke pejabat.</small>
+    </div>
 
     {{-- Navbar --}}
     <nav class="sipadu-nav">
@@ -32,7 +63,6 @@
 
     <main class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
 
-        {{-- Page heading --}}
         <div class="mb-6 fade-up">
             <div class="flex items-center gap-2 mb-1">
                 <div style="width:3px;height:20px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
@@ -73,17 +103,15 @@
             </div>
         </div>
 
-        {{-- Errors --}}
         @if ($errors->any())
             <div class="alert alert-error mb-4 fade-up">
                 @foreach ($errors->all() as $error)<p>• {{ $error }}</p>@endforeach
             </div>
         @endif
 
-        {{-- Form --}}
         <div class="fade-up fade-up-2" style="background:rgba(255,255,255,0.9);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.7);border-radius:16px;box-shadow:0 4px 24px rgba(13,21,38,0.08);padding:1.75rem;">
 
-            <form method="POST" action="{{ route('signature.store', $documentLog) }}">
+            <form method="POST" action="{{ route('signature.store', $documentLog) }}" id="sig-form">
                 @csrf
 
                 <div class="mb-5">
@@ -128,10 +156,9 @@
                     @endif
                 </div>
 
-                {{-- Info box --}}
                 <div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.78rem;color:#7a5f1a;line-height:1.55;">
                     <strong>Yang akan terjadi setelah Anda mengirim:</strong>
-                    <ol style="list-style:decimal;padding-left:1.2rem;margin-top:0.4rem;space-y:0.25rem;">
+                    <ol style="list-style:decimal;padding-left:1.2rem;margin-top:0.4rem;">
                         <li>Email dikirim ke pejabat yang dipilih beserta dokumen terlampir.</li>
                         <li>Pejabat membuka tautan di email untuk meninjau dan memutuskan.</li>
                         <li>Anda akan menerima notifikasi email setelah keputusan dibuat.</li>
@@ -139,15 +166,17 @@
                 </div>
 
                 <div class="flex gap-3">
-                    <button type="submit"
+                    <button type="button"
+                        id="sig-submit-btn"
+                        onclick="submitSigForm()"
                         {{ $officials->isEmpty() ? 'disabled' : '' }}
                         style="flex:1;background:linear-gradient(135deg,var(--navy-700),var(--navy-600));color:#fff;font-weight:700;font-size:0.88rem;padding:0.75rem 1.5rem;border-radius:10px;border:none;cursor:pointer;transition:all 0.25s;box-shadow:0 4px 16px rgba(31,64,104,0.3);font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:0.5rem;"
                         onmouseover="if(!this.disabled){this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(31,64,104,0.4)';}"
                         onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(31,64,104,0.3)';">
-                        <svg style="width:15px;height:15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg id="sig-btn-icon" style="width:15px;height:15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                         </svg>
-                        Kirim Permintaan Tanda Tangan
+                        <span id="sig-btn-text">Kirim Permintaan Tanda Tangan</span>
                     </button>
                     <a href="{{ route('home') }}"
                        style="padding:0.75rem 1.25rem;border-radius:10px;border:1.5px solid var(--slate-200);background:transparent;color:var(--slate-600);font-size:0.85rem;font-weight:500;text-decoration:none;display:flex;align-items:center;transition:all 0.2s;"
@@ -160,5 +189,39 @@
         </div>
 
     </main>
+
+    <script>
+    function submitSigForm() {
+        const radio = document.querySelector('#sig-form input[name="official_id"]:checked');
+        if (!radio) {
+            // Shake the list to hint the user
+            const list = document.querySelector('#sig-form [style*="max-height:320px"]');
+            if (list) {
+                const shakes = [6, -6, 4, -4, 2, 0];
+                shakes.forEach(function(x, i) {
+                    setTimeout(function() { list.style.transform = 'translateX(' + x + 'px)'; }, i * 55);
+                });
+                setTimeout(function() { list.style.transform = ''; }, shakes.length * 55);
+            }
+            return;
+        }
+
+        const btn  = document.getElementById('sig-submit-btn');
+        const text = document.getElementById('sig-btn-text');
+        const icon = document.getElementById('sig-btn-icon');
+
+        btn.disabled = true;
+        btn.style.opacity = '0.8';
+        btn.style.cursor  = 'not-allowed';
+
+        // Swap icon to a small spinner SVG
+        icon.outerHTML = '<svg id="sig-btn-icon" style="width:15px;height:15px;animation:spin 0.75s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16 8 8 0 01-8-8z"/></svg>';
+        text.textContent = 'Mengirim...';
+
+        document.getElementById('sig-overlay').classList.add('active');
+        document.getElementById('sig-form').submit();
+    }
+    </script>
+
 </body>
 </html>
