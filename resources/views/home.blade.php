@@ -388,6 +388,29 @@
         </div>
     </div>
 
+    {{-- Tab bar --}}
+    <div
+        style="background:rgba(255,255,255,0.7);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.07);sticky top position handled by nav above">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex gap-1 pt-2">
+            <button onclick="switchTab('form')" id="tab-form"
+                style="padding:0.5rem 1rem;font-size:0.82rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid var(--navy-600);color:var(--navy-700);font-family:var(--font-body);">
+                Buat Dokumen
+            </button>
+            @auth
+                <button onclick="switchTab('requests')" id="tab-requests"
+                    style="padding:0.5rem 1rem;font-size:0.82rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;color:var(--slate-400);font-family:var(--font-body);">
+                    Permintaan TTD
+                    @if($signatureRequests->where('status', 'pending')->count() > 0)
+                        <span
+                            style="background:#7c3aed;color:#fff;border-radius:10px;padding:0.1rem 0.45rem;font-size:0.65rem;margin-left:0.3rem;">
+                            {{ $signatureRequests->where('status', 'pending')->count() }}
+                        </span>
+                    @endif
+                </button>
+            @endauth
+        </div>
+    </div>
+
     {{-- ── Main content ────────────────────────────────────── --}}
     <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
 
@@ -432,7 +455,7 @@
                     
                     @if (session('signature_log_id') && auth()->check())
                         @php
-                            $sigLog = \App\Models\DocumentLog::with('documentType')->find(session('signature_log_id'));
+        $sigLog = \App\Models\DocumentLog::with('documentType')->find(session('signature_log_id'));
                         @endphp
                         @if ($sigLog && $sigLog->documentType->signature_enabled)
                             <a href="{{ route('signature.create', $sigLog) }}"
@@ -465,37 +488,38 @@
             @endif
         @endauth
 
-        @if ($documentTypes->isEmpty())
-            <div class="form-card p-12 text-center fade-up" style="color:var(--slate-400);">
-                <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Tidak ada dokumen tersedia saat ini.
-            </div>
-        @else
+        <div id="panel-form">
+            @if ($documentTypes->isEmpty())
+                <div class="form-card p-12 text-center fade-up" style="color:var(--slate-400);">
+                    <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Tidak ada dokumen tersedia saat ini.
+                </div>
+            @else
 
-        <div class="flex flex-col lg:flex-row gap-5 items-start fade-up fade-up-2">
+            <div class="flex flex-col lg:flex-row gap-5 items-start fade-up fade-up-2">
 
-            {{-- ── Form Column ──────────────────────────────── --}}
-            <div class="flex-1 min-w-0 w-full">
-                <div class="form-card p-5 sm:p-6">
-                    <form action="{{ route('document.generate') }}" method="POST" id="main-form">
-                        @csrf
+                {{-- ── Form Column ──────────────────────────────── --}}
+                <div class="flex-1 min-w-0 w-full">
+                    <div class="form-card p-5 sm:p-6">
+                        <form action="{{ route('document.generate') }}" method="POST" id="main-form">
+                            @csrf
 
-                        {{-- Document type selector --}}
-                        <div class="doc-type-select-wrap mb-5">
-                            <label class="form-label" style="font-size:0.72rem;margin-bottom:0.5rem;">
-                                <span style="color:var(--navy-500);">▸</span> Jenis Surat / Dokumen
-                            </label>
-                            <select name="letter-type" id="letter-type-select"
-                                onchange="showForm(this.value)" class="w-full">
-                                @foreach ($documentTypes as $type)
-                                    <option value="{{ $type->key }}">{{ $type->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                            {{-- Document type selector --}}
+                            <div class="doc-type-select-wrap mb-5">
+                                <label class="form-label" style="font-size:0.72rem;margin-bottom:0.5rem;">
+                                    <span style="color:var(--navy-500);">▸</span> Jenis Surat / Dokumen
+                                </label>
+                                <select name="letter-type" id="letter-type-select"
+                                    onchange="showForm(this.value)" class="w-full">
+                                    @foreach ($documentTypes as $type)
+                                        <option value="{{ $type->key }}">{{ $type->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        {{-- ── Dynamic form sections ────────── --}}
-                        @foreach ($documentTypes as $docType)
-                            @php
+                            {{-- ── Dynamic form sections ────────── --}}
+                            @foreach ($documentTypes as $docType)
+                                @php
         $fields = $allFields[$docType->id] ?? collect();
         $topFields = $fields->where('is_group_child', false);
         $slots = $docType->slots;
@@ -519,92 +543,92 @@
                 }
             }
         }
-                            @endphp
+                                @endphp
 
-                            <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
+                                <div id="form-{{ $docType->key }}" class="{{ !$loop->first ? 'hidden' : '' }}">
 
-                                {{-- Autofill slots --}}
-                                @foreach ($slots as $slot)
-                                    <div class="autofill-panel mb-4">
-                                        <p style="font-size:0.74rem;font-weight:700;color:var(--navy-600);margin-bottom:0.6rem;letter-spacing:0.02em;">
-                                            Autofill — {{ $slot->slot_label }}
-                                        </p>
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            <div>
-                                                <label class="form-label" style="font-size:0.7rem;color:var(--navy-500);">Dari Data Staff</label>
-                                                <select onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
-                                                    class="staff-dropdown w-full" style="border:1.5px solid var(--navy-100);border-radius:7px;padding:0.5rem 0.75rem;font-size:0.8rem;background:#fff;color:var(--slate-700);outline:none;font-family:var(--font-body);">
-                                                    <option value="">— Pilih Staff —</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label class="form-label" style="font-size:0.7rem;color:var(--navy-500);">Dari Data Pejabat</label>
-                                                <select onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
-                                                    class="official-dropdown w-full" style="border:1.5px solid var(--navy-100);border-radius:7px;padding:0.5rem 0.75rem;font-size:0.8rem;background:#fff;color:var(--slate-700);outline:none;font-family:var(--font-body);">
-                                                    <option value="">— Pilih Pejabat —</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-
-                                {{-- Fields --}}
-                                @php $currentSection = null; @endphp
-                                @foreach ($chunks as $chunk)
-                                    @if ($chunk['type'] === 'single')
-                                        @php $field = $chunk['field']; @endphp
-                                        @if ($field->section_label && $field->section_label !== $currentSection)
-                                            @php $currentSection = $field->section_label; @endphp
-                                            <h3 class="form-section-heading">{{ $field->section_label }}</h3>
-                                        @endif
-                                        <div class="mb-3.5">
-                                            @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
-                                        </div>
-                                    @else
-                                        @php $firstField = $chunk['fields'][0]; @endphp
-                                        @if ($firstField->section_label && $firstField->section_label !== $currentSection)
-                                            @php $currentSection = $firstField->section_label; @endphp
-                                            <h3 class="form-section-heading">{{ $firstField->section_label }}</h3>
-                                        @endif
-                                        <div class="grid gap-3.5 mb-3.5 row-group-grid" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
-                                            @foreach ($chunk['fields'] as $field)
+                                    {{-- Autofill slots --}}
+                                    @foreach ($slots as $slot)
+                                        <div class="autofill-panel mb-4">
+                                            <p style="font-size:0.74rem;font-weight:700;color:var(--navy-600);margin-bottom:0.6rem;letter-spacing:0.02em;">
+                                                Autofill — {{ $slot->slot_label }}
+                                            </p>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
-                                                    @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                                    <label class="form-label" style="font-size:0.7rem;color:var(--navy-500);">Dari Data Staff</label>
+                                                    <select onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'staff', this.value)"
+                                                        class="staff-dropdown w-full" style="border:1.5px solid var(--navy-100);border-radius:7px;padding:0.5rem 0.75rem;font-size:0.8rem;background:#fff;color:var(--slate-700);outline:none;font-family:var(--font-body);">
+                                                        <option value="">— Pilih Staff —</option>
+                                                    </select>
                                                 </div>
-                                            @endforeach
+                                                <div>
+                                                    <label class="form-label" style="font-size:0.7rem;color:var(--navy-500);">Dari Data Pejabat</label>
+                                                    <select onchange="fillFromSource('{{ $docType->key }}', '{{ $slot->slot_key }}', 'official', this.value)"
+                                                        class="official-dropdown w-full" style="border:1.5px solid var(--navy-100);border-radius:7px;padding:0.5rem 0.75rem;font-size:0.8rem;background:#fff;color:var(--slate-700);outline:none;font-family:var(--font-body);">
+                                                        <option value="">— Pilih Pejabat —</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
-                                    @endif
-                                @endforeach
+                                    @endforeach
 
+                                    {{-- Fields --}}
+                                    @php $currentSection = null; @endphp
+                                    @foreach ($chunks as $chunk)
+                                        @if ($chunk['type'] === 'single')
+                                            @php $field = $chunk['field']; @endphp
+                                            @if ($field->section_label && $field->section_label !== $currentSection)
+                                                @php $currentSection = $field->section_label; @endphp
+                                                <h3 class="form-section-heading">{{ $field->section_label }}</h3>
+                                            @endif
+                                            <div class="mb-3.5">
+                                                @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                            </div>
+                                        @else
+                                            @php $firstField = $chunk['fields'][0]; @endphp
+                                            @if ($firstField->section_label && $firstField->section_label !== $currentSection)
+                                                @php $currentSection = $firstField->section_label; @endphp
+                                                <h3 class="form-section-heading">{{ $firstField->section_label }}</h3>
+                                            @endif
+                                            <div class="grid gap-3.5 mb-3.5 row-group-grid" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
+                                                @foreach ($chunk['fields'] as $field)
+                                                    <div>
+                                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    @endforeach
+
+                                </div>
+                            @endforeach
+
+                            {{-- Consent + Submit --}}
+                            <div class="mt-6 pt-4" style="border-top:1px solid var(--slate-200);">
+                                <div class="consent-area mb-4">
+                                    <input type="checkbox" name="consent" id="consent"
+                                        style="width:16px;height:16px;border-radius:4px;accent-color:var(--navy-600);flex-shrink:0;margin-top:0.1rem;cursor:pointer;" />
+                                    <label for="consent" style="font-size:0.8rem;color:var(--slate-600);cursor:pointer;line-height:1.45;">
+                                        Saya menyatakan bahwa informasi yang saya berikan adalah <strong>benar</strong> dan dapat dipertanggungjawabkan.
+                                    </label>
+                                </div>
+                                <button type="button" id="submit-btn" onclick="submitIfConsented()">
+                                    Buat Dokumen
+                                </button>
                             </div>
-                        @endforeach
 
-                        {{-- Consent + Submit --}}
-                        <div class="mt-6 pt-4" style="border-top:1px solid var(--slate-200);">
-                            <div class="consent-area mb-4">
-                                <input type="checkbox" name="consent" id="consent"
-                                    style="width:16px;height:16px;border-radius:4px;accent-color:var(--navy-600);flex-shrink:0;margin-top:0.1rem;cursor:pointer;" />
-                                <label for="consent" style="font-size:0.8rem;color:var(--slate-600);cursor:pointer;line-height:1.45;">
-                                    Saya menyatakan bahwa informasi yang saya berikan adalah <strong>benar</strong> dan dapat dipertanggungjawabkan.
-                                </label>
-                            </div>
-                            <button type="button" id="submit-btn" onclick="submitIfConsented()">
-                                Buat Dokumen
-                            </button>
-                        </div>
-
-                    </form>
+                        </form>
+                    </div>
                 </div>
-            </div>
 
-            {{-- ── Guide Column ─────────────────────────────── --}}
-            <div class="w-full lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-20 space-y-3">
+                {{-- ── Guide Column ─────────────────────────────── --}}
+                <div class="w-full lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-20 space-y-3">
 
-                {{-- Quick guide --}}
-                <div class="guide-card p-4 fade-up fade-up-2">
-                    <div class="guide-section-title">Cara Membuat Dokumen</div>
-                    <div class="space-y-0">
-                        @foreach([
+                    {{-- Quick guide --}}
+                    <div class="guide-card p-4 fade-up fade-up-2">
+                        <div class="guide-section-title">Cara Membuat Dokumen</div>
+                        <div class="space-y-0">
+                            @foreach([
         ['Pilih Jenis Dokumen', 'Gunakan dropdown untuk memilih template.'],
         ['Gunakan Autofill', 'Pilih nama dari panel biru untuk isi otomatis.'],
         ['Isi Form', 'Lengkapi semua field wajib (*).'],
@@ -612,22 +636,22 @@
         ['Klik Buat Dokumen', 'Sistem akan memproses dan menghasilkan file.'],
         ['Unduh / Preview', 'Tombol muncul setelah dokumen berhasil dibuat.'],
     ] as $i => [$t, $d])
-                        <div class="guide-step">
-                            <div class="guide-step-num {{ $i >= 4 ? 'done' : '' }}">{{ $i + 1 }}</div>
-                            <div>
-                                <div class="guide-step-title">{{ $t }}</div>
-                                <div class="guide-step-desc">{{ $d }}</div>
+                            <div class="guide-step">
+                                <div class="guide-step-num {{ $i >= 4 ? 'done' : '' }}">{{ $i + 1 }}</div>
+                                <div>
+                                    <div class="guide-step-title">{{ $t }}</div>
+                                    <div class="guide-step-desc">{{ $d }}</div>
+                                </div>
                             </div>
+                            @endforeach
                         </div>
-                        @endforeach
                     </div>
-                </div>
 
-                {{-- Field types --}}
-                <div class="guide-card p-4 fade-up fade-up-3">
-                    <div class="guide-section-title">Jenis Field</div>
-                    <div class="space-y-1.5">
-                        @foreach([
+                    {{-- Field types --}}
+                    <div class="guide-card p-4 fade-up fade-up-3">
+                        <div class="guide-section-title">Jenis Field</div>
+                        <div class="space-y-1.5">
+                            @foreach([
         ['Text / Textarea', 'Ketik teks bebas.'],
         ['Date', 'Pilih dari kalender — format Indonesia.'],
         ['Number', 'Ketik angka.'],
@@ -636,38 +660,109 @@
         ['Repeating Group', 'Tambah baris data dinamis.'],
         ['Staff / Pejabat Loop', 'Centang nama, drag ⠿ untuk urutkan.'],
     ] as [$t, $d])
-                        <div style="font-size:0.75rem;">
-                            <span style="font-weight:600;color:var(--slate-700);">{{ $t }}</span>
-                            <span style="color:var(--slate-400);"> — {{ $d }}</span>
+                            <div style="font-size:0.75rem;">
+                                <span style="font-weight:600;color:var(--slate-700);">{{ $t }}</span>
+                                <span style="color:var(--slate-400);"> — {{ $d }}</span>
+                            </div>
+                            @endforeach
                         </div>
-                        @endforeach
                     </div>
-                </div>
 
-                {{-- Tips --}}
-                <div class="tip-box tip-box-navy fade-up fade-up-4">
-                    <div class="guide-section-title" style="color:var(--navy-600);margin-bottom:0.5rem;">Tips Autofill</div>
-                    <ul class="space-y-1" style="font-size:0.73rem;">
-                        <li>• Setiap slot memiliki <strong>dua sumber</strong>: Data Staff dan Data Pejabat.</li>
-                        <li>• Field yang terisi otomatis masih <strong>bisa diedit manual</strong>.</li>
-                        <li>• Drag <strong>⠿</strong> untuk mengubah urutan peserta dalam dokumen.</li>
-                    </ul>
-                </div>
+                    {{-- Tips --}}
+                    <div class="tip-box tip-box-navy fade-up fade-up-4">
+                        <div class="guide-section-title" style="color:var(--navy-600);margin-bottom:0.5rem;">Tips Autofill</div>
+                        <ul class="space-y-1" style="font-size:0.73rem;">
+                            <li>• Setiap slot memiliki <strong>dua sumber</strong>: Data Staff dan Data Pejabat.</li>
+                            <li>• Field yang terisi otomatis masih <strong>bisa diedit manual</strong>.</li>
+                            <li>• Drag <strong>⠿</strong> untuk mengubah urutan peserta dalam dokumen.</li>
+                        </ul>
+                    </div>
 
-                {{-- Warning --}}
-                <div class="tip-box tip-box-gold fade-up fade-up-4">
-                    <div class="guide-section-title" style="color:#7a5f1a;margin-bottom:0.5rem;">Perhatian</div>
-                    <ul class="space-y-1" style="font-size:0.73rem;">
-                        <li>• File otomatis <strong>dihapus</strong> dari server setelah beberapa menit.</li>
-                        <li>• Segera unduh setelah dokumen berhasil dibuat.</li>
-                    </ul>
+                    {{-- Warning --}}
+                    <div class="tip-box tip-box-gold fade-up fade-up-4">
+                        <div class="guide-section-title" style="color:#7a5f1a;margin-bottom:0.5rem;">Perhatian</div>
+                        <ul class="space-y-1" style="font-size:0.73rem;">
+                            <li>• File otomatis <strong>dihapus</strong> dari server setelah beberapa menit.</li>
+                            <li>• Segera unduh setelah dokumen berhasil dibuat.</li>
+                        </ul>
+                    </div>
+
                 </div>
 
             </div>
-
+            @endif
         </div>
-        @endif
 
+        {{-- Requests panel --}}
+        @auth
+        <div id="panel-requests" style="display:none;">
+            @if ($signatureRequests->isEmpty())
+                <div class="form-card p-12 text-center fade-up" style="color:var(--slate-400);">
+                    <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                    Belum ada permintaan tanda tangan.
+                </div>
+            @else
+                <div class="form-card overflow-hidden fade-up">
+                    <table class="w-full text-sm">
+                        <thead style="background:linear-gradient(90deg,var(--navy-800),var(--navy-700));">
+                            <tr>
+                                <th style="padding:0.75rem 1rem;text-align:left;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">Dokumen</th>
+                                <th style="padding:0.75rem 1rem;text-align:left;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">Pejabat</th>
+                                <th style="padding:0.75rem 1rem;text-align:center;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">Status</th>
+                                <th style="padding:0.75rem 1rem;text-align:left;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">Diminta</th>
+                                <th style="padding:0.75rem 1rem;text-align:left;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">Ditinjau</th>
+                                <th style="padding:0.75rem 1rem;text-align:center;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($signatureRequests as $req)
+                            <tr style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
+                                onmouseover="this.style.background='rgba(42,82,152,0.03)'"
+                                onmouseout="this.style.background=''">
+                                <td style="padding:0.75rem 1rem;">
+                                    <p style="font-weight:600;color:var(--navy-800);font-size:0.83rem;">{{ $req->documentLog->documentType->name }}</p>
+                                    <p style="font-family:var(--font-mono);font-size:0.68rem;color:var(--slate-400);margin-top:0.1rem;">{{ $req->documentLog->output_filename }}</p>
+                                </td>
+                                <td style="padding:0.75rem 1rem;">
+                                    <p style="font-size:0.83rem;color:var(--slate-700);font-weight:500;">{{ $req->official?->staff_name ?? '—' }}</p>
+                                    <p style="font-size:0.72rem;color:var(--slate-400);margin-top:0.1rem;">{{ $req->official?->position ?? '' }}</p>
+                                </td>
+                                <td style="padding:0.75rem 1rem;text-align:center;">
+                                    @if ($req->status === 'pending')
+                                        <span style="background:#fef9c3;color:#854d0e;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Menunggu</span>
+                                    @elseif ($req->status === 'approved')
+                                        <span style="background:#dcfce7;color:#15803d;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">✓ Disetujui</span>
+                                    @else
+                                        <span style="background:#fee2e2;color:#b91c1c;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">✕ Ditolak</span>
+                                    @endif
+                                </td>
+                                <td style="padding:0.75rem 1rem;font-size:0.78rem;color:var(--slate-500);">
+                                    {{ $req->requested_at?->locale('id')->translatedFormat('d M Y, H:i') ?? '—' }}
+                                </td>
+                                <td style="padding:0.75rem 1rem;font-size:0.78rem;color:var(--slate-500);">
+                                    {{ $req->reviewed_at?->locale('id')->translatedFormat('d M Y, H:i') ?? '—' }}
+                                    @if ($req->notes)
+                                        <p style="font-size:0.7rem;color:var(--slate-400);font-style:italic;margin-top:0.15rem;">"{{ Str::limit($req->notes, 40) }}"</p>
+                                    @endif
+                                </td>
+                                <td style="padding:0.75rem 1rem;text-align:center;">
+                                    <a href="{{ route('signature.verify', $req->token) }}"
+                                        style="font-size:0.75rem;color:var(--navy-600);text-decoration:none;font-weight:500;padding:0.3rem 0.7rem;border:1px solid var(--navy-200);border-radius:6px;transition:all 0.15s;"
+                                        onmouseover="this.style.background='var(--navy-100)'"
+                                        onmouseout="this.style.background=''">
+                                        Detail
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+        @endauth
     </main>
 
     {{-- ── Preview Modal ───────────────────────────────────── --}}
@@ -993,6 +1088,22 @@
 
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePreview(); });
 
+        function switchTab(tab) {
+            const isForm = tab === 'form';
+            document.getElementById('panel-form').style.display = isForm ? '' : 'none';
+            const reqPanel = document.getElementById('panel-requests');
+            if (reqPanel) reqPanel.style.display = isForm ? 'none' : '';
+
+            const tabForm = document.getElementById('tab-form');
+            const tabReq  = document.getElementById('tab-requests');
+            tabForm.style.borderBottomColor = isForm ? 'var(--navy-600)' : 'transparent';
+            tabForm.style.color = isForm ? 'var(--navy-700)' : 'var(--slate-400)';
+            if (tabReq) {
+                tabReq.style.borderBottomColor = !isForm ? 'var(--navy-600)' : 'transparent';
+                tabReq.style.color = !isForm ? 'var(--navy-700)' : 'var(--slate-400)';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             loadAllData();
             const select = document.getElementById('letter-type-select');
@@ -1011,6 +1122,11 @@
             const btn = document.getElementById('submit-btn');
             if (btn) { btn.disabled = false; btn.textContent = 'Buat Dokumen'; }
         });
+
+        // auto-switch to requests tab if redirected after a signature action
+        @if (session('switch_tab') === 'requests')
+            document.addEventListener('DOMContentLoaded', () => switchTab('requests'));
+        @endif
     </script>
 
 </body>

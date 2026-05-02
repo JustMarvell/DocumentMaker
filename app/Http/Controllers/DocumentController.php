@@ -31,7 +31,16 @@ class DocumentController extends Controller
             ->get()
             ->groupBy('document_type_id');
 
-        return view('home', compact('documentTypes', 'allFields'));
+        $signatureRequests = collect();
+        if (auth()->check()) {
+            $signatureRequests = \App\Models\SignatureRequest::with(['documentLog.documentType', 'official'])
+                ->where('user_id', auth()->id())
+                ->latest('requested_at')
+                ->take(20)
+                ->get();
+        }
+
+        return view('home', compact('documentTypes', 'allFields', 'signatureRequests'));
     }
 
     public function generate(Request $request) {
