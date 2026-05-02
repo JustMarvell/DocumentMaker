@@ -7,6 +7,7 @@ use App\Models\DocumentLog;
 use App\Models\DocumentType;
 use App\Models\User;
 use App\Models\StaffData;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -99,6 +100,10 @@ class AdminController extends Controller
     public function toggleDocumentType(DocumentType $documentType) {
         $documentType->update(['is_active' => !$documentType->is_active]);
         $status = $documentType->is_active ? 'diaktifkan' : 'dinonaktifkan';
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'isActive' => $documentType->is_active, 'message' => "{$documentType->name} berhasil {$status}."]);
+        }
 
         return back()->with('success', "{$documentType->name} berhasil {$status}.");
     }
@@ -221,7 +226,7 @@ class AdminController extends Controller
  
         $maxOrder = $documentType->fields()->max('sort_order') ?? 0;
 
-        DocumentField::create([
+        $field = DocumentField::create([
             'document_type_id'      => $documentType->id,
             'field_key'             => $request->field_key,
             'label'                 => $request->label,
@@ -237,6 +242,10 @@ class AdminController extends Controller
             'autofill_role'         => $request->autofill_role ?? 'none',
             'icon'                  => $request->icon ?: null,
         ]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'field' => $field]);
+        }
  
         return back()->with('success', "Field '{$request->label}' berhasil ditambahkan.");
     }
@@ -273,6 +282,10 @@ class AdminController extends Controller
             'autofill_role'         => $request->autofill_role ?? 'none',
             'icon'                  => $request->icon ?: null,
         ]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'field' => $field->fresh()]);
+        }
  
         return back()->with('success', "Field '{$field->label}' berhasil diperbarui.");
     }
@@ -282,6 +295,11 @@ class AdminController extends Controller
     {
         $label = $field->label;
         $field->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => "Field '{$label}' berhasil di hapus."]);
+        }
+
         return back()->with('success', "Field '{$label}' berhasil dihapus.");
     }
 
@@ -414,6 +432,11 @@ class AdminController extends Controller
     {
         $documentType->update(['preview_enabled' => !$documentType->preview_enabled]);
         $status = $documentType->preview_enabled ? 'diaktifkan' : 'dinonaktifkan';
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'preview_enabled' => $documentType->preview_enabled]);
+        }
+
         return back()->with('success', "Preview untuk {$documentType->name} berhasil {$status}.");
     }
 
@@ -435,12 +458,22 @@ class AdminController extends Controller
     {
         $documentType->update(['signature_enabled' => !$documentType->signature_enabled]);
         $status = $documentType->signature_enabled ? 'diaktifkan' : 'dinonaktifkan';
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'signature_enabled' => $documentType->signature_enabled]);
+        }
+
         return back()->with('success', "Fitur tanda tangan untuk {$documentType->name} berhasil {$status}.");
     }
 
     public function toggleSignatureImage(DocumentType $documentType) {
         $documentType->update(['signature_use_image' => !$documentType->signature_use_image]);
         $status = $documentType->signature_use_image ? 'diaktifkan' : 'dinonaktifkan';
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'signature_use_image' => $documentType->signature_use_image]);
+        }
+
         return back()->with('succes', "Embed gambar untuk {$documentType->name} berhasil {$status}.");
     }
 
@@ -448,6 +481,11 @@ class AdminController extends Controller
     {
         $documentType->update(['signature_use_qr' => !$documentType->signature_use_qr]);
         $status = $documentType->signature_use_qr ? 'diaktifkan' : 'dinonaktifkan';
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'signature_use_qr' => $documentType->signature_use_qr]);
+        }
+
         return back()->with('succes', "Embed QR untuk {$documentType->name} berhasil {$status}.");
     }
 }

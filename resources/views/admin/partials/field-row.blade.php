@@ -22,9 +22,9 @@
     <td class="px-3 py-3">
         <span class="px-1.5 py-0.5 rounded text-xs font-medium
             {{ in_array($field->field_type, ['staff_loop', 'official_loop']) ? 'bg-green-100 text-green-700' :
-    ($field->field_type === 'repeating_group' ? 'bg-purple-100 text-purple-700' :
-        ($field->field_type === 'select' ? 'bg-yellow-100 text-yellow-700' :
-            'bg-gray-100 text-gray-600')) }}">
+                ($field->field_type === 'repeating_group' ? 'bg-purple-100 text-purple-700' :
+                    ($field->field_type === 'select' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-gray-100 text-gray-600')) }}">
             {{ $field->field_type }}
         </span>
     </td>
