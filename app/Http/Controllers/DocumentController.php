@@ -224,6 +224,13 @@ class DocumentController extends Controller
 
         $context = array_merge($signaturePlaceholders, $context);
 
+        $counter = $documentType->numberCounter;
+        $previewNum = null;
+        if ($counter && $counter->enabled) {
+            $previewNum = $counter->previewNext();
+            $context[$counter->field_key] = $previewNum;
+        }
+
         $pythonBin = base_path('venv/bin/python');
         $scriptPath = base_path("scripts/{$documentType->script_name}");
         $extension = pathinfo($documentType->template_filename, PATHINFO_EXTENSION);
@@ -240,22 +247,15 @@ class DocumentController extends Controller
             json_encode($context, JSON_UNESCAPED_UNICODE),
         ];
 
-        $counter = $documentType->numberCounter;
-        if ($counter && $counter->enabled) {
-            $nextNumber = $counter->generateNext();
-
-            if (isset($context[$counter->field_key]) && $context[$counter->field_key] === '') {
-                $context[$counter->field_key] = $nextNumber;
-            } elseif (!array_key_exists($counter->field_key, $context)) {
-                $context[$counter->field_key] = $nextNumber;
-            }
-        }
-
         $process = new Process($cmd);
         $process->setTimeout(60);
         $process->run();
 
         $status = $process->isSuccessful() ? 'success' : 'failed';
+
+        if ($counter && $counter->enabled && $status === 'success') {
+            $counter->generateNext();
+        }
 
         $log = DocumentLog::create([
             'user_id' => auth()->id(),
