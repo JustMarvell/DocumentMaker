@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class DocumentType extends Model
 {
@@ -11,11 +12,11 @@ class DocumentType extends Model
         'name', 'key', 'script_name', 'template_filename', 
         'output_filename', 'access_level', 'is_active',
         'file_type', 'preview_enabled', 'signature_enabled',
-        'signature_use_image', 'signature_use_qr'
+        'signature_use_image', 'signature_use_qr',
+
     ];
 
-    protected function casts() : array
-    {
+    protected function casts() : array {
         return [
             'is_active' => 'boolean',
             'preview_enabled' => 'boolean',
@@ -26,8 +27,7 @@ class DocumentType extends Model
     }
 
     // relationship type shii
-    public function documentLogs() : HasMany
-    {
+    public function documentLogs() : HasMany {
         return $this->hasMany(DocumentLog::class);
     }
 
@@ -42,15 +42,12 @@ class DocumentType extends Model
     }
 
     // scopessldkfjlsdfjs
-    public function scopeActive($query)
-    {
+    public function scopeActive($query) {
         return $query->where('is_active', true);
     }
 
-    public function scopeAccessibleBy($query, string $role)
-    {
-        if (in_array($role, ['staff', 'admin']))
-        {
+    public function scopeAccessibleBy($query, string $role) {
+        if (in_array($role, ['staff', 'admin'])) {
             return $query;
         }
         return $query->where('access_level', 'guest');
@@ -58,5 +55,9 @@ class DocumentType extends Model
 
     public function slots() : HasMany {
         return $this->hasMany(DocumentAutofillSlot::class)->orderBy('sort_order');  
+    }
+
+    public function numberCounter(): HasOne {
+        return $this->hasOne(DocumentNumberCounter::class);
     }
 }
