@@ -7,9 +7,9 @@ use App\Models\DocumentLog;
 use App\Models\DocumentType;
 use App\Models\User;
 use App\Models\StaffData;
-use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\DocumentNumberCounter;
 
 class AdminController extends Controller
 {
@@ -487,5 +487,60 @@ class AdminController extends Controller
         }
 
         return back()->with('succes', "Embed QR untuk {$documentType->name} berhasil {$status}.");
+    }
+
+    public function numberCounter(DocumentType $documentType) {
+        $counter = $documentType->numberCounter;
+        $fields = $documentType->fields()->where('is_group_child', false)->get();
+        return view('admin.document-type-number-counter', compact('documentType', 'counter', 'fields'));
+    }
+
+    public function saveNumberCounter(Request $request, DocumentType $documentType) {
+        $request->validate([
+            'enabled' => 'boolean',
+            'format' => 'required|string|max:255',
+            'number_padding' => 'required|string|max:10',
+            'reset_on' => 'required|in:never,yearly,monthly',
+            'field_key' => 'required|string|max:100',
+        ]);
+
+        DocumentNumberCounter::updateOrCreate(
+            ['document_type_id' => $documentType->id],
+            [
+                'enabled' => $request->boolean('enabled'),
+                'format' => $request->format,
+                'number_padding' => $request->number_padding,
+                'reset_on' => $request->reset_on,
+                'field_key' => $request->field_key,
+            ]
+        );
+
+        return back()->with('success', 'Konfigurasi Nomor surat berhasil disimpan.');
+    }
+
+    public function setNumberCounter(Request $request, DocumentType $documentType) {
+        $request->validate(['current_number' => 'required|integer|min:0']);
+
+        $counter = DocumentNumberCounter::firstOrCreate(
+            ['document_type_id' => $documentType->id],
+            ['format' => '{number}/DPUPR/{roman_month}/{year}', 'field_key' => 'letter_number']
+        );
+
+        $counter->update(['current_number' => $request->current_number]);
+
+        return back()->with('success', "Nomor surat disetel ke {$request->current_number}.");
+    }
+
+    public function resetNumberCounter(DocumentType $documentType) {
+        $counter = $documentType->numberCounter;
+        if ($counter) {
+            $counter->update([
+                'current_number' => 0,
+                'last_reset_year' => null,
+                'last_reset_month' => null,
+            ]);
+        }
+
+        return back()->with('success', 'Nomor surat direset ke 0, Nomor berikutnya: 001 (atau sesuai padding).');
     }
 }
