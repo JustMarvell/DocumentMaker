@@ -236,6 +236,17 @@ class DocumentController extends Controller
             json_encode($context, JSON_UNESCAPED_UNICODE),
         ];
 
+        $counter = $documentType->numberCounter;
+        if ($counter && $counter->enabled) {
+            $nextNumber = $counter->generateNext();
+
+            if (isset($context[$counter->field_key]) && $context[$counter->field_key] === '') {
+                $context[$counter->field_key] = $nextNumber;
+            } elseif (!array_key_exists($counter->field_key, $context)) {
+                $context[$counter->field_key] = $nextNumber;
+            }
+        }
+
         $process = new Process($cmd);
         $process->setTimeout(60);
         $process->run();
