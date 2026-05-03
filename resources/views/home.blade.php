@@ -523,6 +523,7 @@
         $fields = $allFields[$docType->id] ?? collect();
         $topFields = $fields->where('is_group_child', false);
         $slots = $docType->slots;
+        $autoNumberField = $numberCounters[$docType->id] ?? null;
 
         $chunks = [];
         foreach ($topFields as $field) {
@@ -592,7 +593,7 @@
                                                 <h3 class="form-section-heading">{{ $field->section_label }}</h3>
                                             @endif
                                             <div class="mb-3.5">
-                                                @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                                @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields, 'autoNumberField' => $autoNumberField,])
                                             </div>
                                         @else
                                             @php $firstField = $chunk['fields'][0]; @endphp
@@ -603,7 +604,7 @@
                                             <div class="grid gap-3.5 mb-3.5 row-group-grid" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
                                                 @foreach ($chunk['fields'] as $field)
                                                     <div>
-                                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields])
+                                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields, 'autoNumberField' => $autoNumberField, ])
                                                     </div>
                                                 @endforeach
                                             </div>
