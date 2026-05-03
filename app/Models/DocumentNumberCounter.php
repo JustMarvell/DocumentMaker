@@ -47,11 +47,11 @@ class DocumentNumberCounter extends Model
             $counter->current_number += 1;
             $counter->save();
 
-            return $counter->format($counter->current_number);
+            return $counter->buildNumber($counter->current_number);
         });
     }
 
-    public function format(int $number): string {
+    public function buildNumber(int $number): string {
         $now = Carbon::now();
         $padded = str_pad($number, $this->number_padding, '0', STR_PAD_LEFT);
 
@@ -73,6 +73,6 @@ class DocumentNumberCounter extends Model
     }
 
     public function previewNext(): string {
-        return $this->format($this->current_number + 1);
+        return $this->buildNumber($this->current_number + 1);
     }
 }
