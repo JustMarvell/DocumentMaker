@@ -43,6 +43,10 @@
                class="text-sm px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50">
                 ↑ Re-upload Template
             </a>
+            <a href="{{ route('admin.document-types.number-counter', $documentType) }}"
+                class="text-sm px-4 py-2 rounded-lg border border-purple-400 text-purple-600 hover:bg-purple-50">
+                # Nomor Surat
+            </a>
         </div>
     </div>
 
