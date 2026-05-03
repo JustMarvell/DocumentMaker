@@ -630,8 +630,8 @@
     function esc(str) { return String(str ?? '').replace(/'/g,"\\'"); }
 
     // ── Field cache for the edit modal ────────────────────────────────
-    const fieldCache = @json(
-        $fields->keyBy('id')->map(fn($f) => [
+    @php
+        $fieldCacheData = $fields->keyBy('id')->map(fn($f) => [
             'id' => $f->id,
             'label' => $f->label,
             'field_type' => $f->field_type,
@@ -642,8 +642,10 @@
             'autofill_role' => $f->autofill_role ?? 'none',
             'row_group' => $f->row_group,
             'icon' => $f->icon ?? '',
-        ])
-    );
+        ]);
+    @endphp
+
+    const fieldCache = @json($fieldCacheData);
 
     function openEditField(id) {
         const f = fieldCache[id];
@@ -696,7 +698,7 @@
         fd.append('autofill_role', document.getElementById('edit-field-autofill-role').value.trim() || 'none');
         fd.append('is_required', document.getElementById('edit-field-required').checked ? '1' : '0');
         fd.append('icon', document.getElementById('edit-icon-value').value);
-        
+
 
         try {
             const res = await fetch(UPDATE_BASE + '/' + id, {
