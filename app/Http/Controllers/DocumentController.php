@@ -31,6 +31,10 @@ class DocumentController extends Controller
             ->get()
             ->groupBy('document_type_id');
 
+        $numberCounters = \App\Models\DocumentNumberCounter::whereIn('document_type_id', $documentTypes->pluck('id'))
+            ->where('enabled', true)
+            ->pluck('field_key', 'document_type_id');
+
         $signatureRequests = collect();
         if (auth()->check()) {
             $signatureRequests = \App\Models\SignatureRequest::with(['documentLog.documentType', 'official'])
@@ -40,7 +44,7 @@ class DocumentController extends Controller
                 ->get();
         }
 
-        return view('home', compact('documentTypes', 'allFields', 'signatureRequests'));
+        return view('home', compact('documentTypes', 'allFields', 'numberCounters', 'signatureRequests'));
     }
 
     public function generate(Request $request) {
@@ -220,6 +224,13 @@ class DocumentController extends Controller
 
         $context = array_merge($signaturePlaceholders, $context);
 
+        $counter = $documentType->numberCounter;
+        $previewNum = null;
+        if ($counter && $counter->enabled) {
+            $previewNum = $counter->previewNext();
+            $context[$counter->field_key] = $previewNum;
+        }
+
         $pythonBin = base_path('venv/bin/python');
         $scriptPath = base_path("scripts/{$documentType->script_name}");
         $extension = pathinfo($documentType->template_filename, PATHINFO_EXTENSION);
@@ -241,6 +252,10 @@ class DocumentController extends Controller
         $process->run();
 
         $status = $process->isSuccessful() ? 'success' : 'failed';
+
+        if ($counter && $counter->enabled && $status === 'success') {
+            $counter->generateNext();
+        }
 
         $log = DocumentLog::create([
             'user_id' => auth()->id(),

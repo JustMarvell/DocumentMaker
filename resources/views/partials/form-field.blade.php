@@ -13,6 +13,9 @@ $old = old($key);
 $icon = $field->icon ?? null;
 $inputWithIconClass = $icon ? 'w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500
     transition-colors' : $inputClass;
+
+$isAutoNumber = isset($autoNumberField) && $autoNumberField === $field->field_key;
+$isAutofillable = !$isAutoNumber && $field->staff_autofill_column && $field->autofill_role !== 'none';
 @endphp
 
 <div data-field-key="{{ $field->field_key }}" class="field-wrapper">
@@ -20,12 +23,36 @@ $inputWithIconClass = $icon ? 'w-full border border-gray-300 rounded-lg pl-9 pr-
     {{-- ── Label ─────────────────────────────────────────────── --}}
     @if(!in_array($type, ['loop_staff', 'loop_official', 'repeating_group', 'checkbox', 'heading']))
         <label class="form-label" for="{{ $key }}">
-        @if ($icon)
-            <i class="{{ $icon }} text-gray-400 text-sm w-4 text-center flex-shrink-0"></i>
-        @endif
+            @if ($icon)
+                <i class="{{ $icon }} text-gray-400 text-sm w-4 text-center flex-shrink-0"></i>
+            @endif
             {{ $label }}
             @if($required)
                 <span style="color:#dc2626;margin-left:0.15rem;">*</span>
+            @endif
+            @if($isAutoNumber) {{-- <- add badge --}} <span style="
+                            display:inline-flex;align-items:center;gap:0.25rem;
+                            margin-left:0.4rem;padding:0.1rem 0.45rem;
+                            background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.25);
+                            border-radius:20px;font-size:0.62rem;font-weight:600;
+                            color:#6d28d9;letter-spacing:0.03em;vertical-align:middle;">
+                <svg style="width:9px;height:9px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                </svg>
+                Otomatis
+                </span>
+            @elseif($isAutofillable) {{-- <- add badge --}} <span style="
+                            display:inline-flex;align-items:center;gap:0.25rem;
+                            margin-left:0.4rem;padding:0.1rem 0.45rem;
+                            background:rgba(42,82,152,0.08);border:1px solid rgba(42,82,152,0.2);
+                            border-radius:20px;font-size:0.62rem;font-weight:600;
+                            color:var(--navy-600);letter-spacing:0.03em;vertical-align:middle;">
+                    <svg style="width:9px;height:9px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Autofill
+                    </span>
             @endif
             @if($field->helper_text)
                 <span style="font-weight:400;color:var(--slate-400);font-size:0.72rem;margin-left:0.35rem;">
@@ -37,14 +64,31 @@ $inputWithIconClass = $icon ? 'w-full border border-gray-300 rounded-lg pl-9 pr-
 
     {{-- ── TEXT ────────────────────────────────────────────────── --}}
     @if($type === 'text')
-        <input type="text"
-               id="{{ $key }}"
-               name="{{ $key }}"
-               value="{{ $old ?? '' }}"
-               class="form-input"
-               placeholder="{{ $field->placeholder ?? '' }}"
-               {{ $required ? 'required' : '' }}
-               {{ $field->maxlength ? "maxlength={$field->maxlength}" : '' }}>
+        <div style="position:relative;">
+            <input type="text"
+                id="{{ $key }}"
+                name="{{ $key }}"
+                value="{{ $old ?? '' }}"
+                class="form-input"
+                placeholder="{{ $isAutoNumber ? 'Digenerate otomatis...' : ($field->placeholder ?? '') }}"
+                {{ $required ? 'required' : '' }}
+                {{ $field->maxlength ? "maxlength={$field->maxlength}" : '' }}
+                @if($isAutoNumber)                             {{-- <- lock if auto-number --}}
+                    readonly
+                    style="background:rgba(124,58,237,0.04);border-color:rgba(124,58,237,0.25);
+                            color:rgba(109,40,217,0.6);cursor:not-allowed;padding-right:2.5rem;"
+                @endif
+            >
+            @if($isAutoNumber)                                    {{-- <- lock icon --}}
+                <div style="position:absolute;right:0.65rem;top:50%;transform:translateY(-50%);
+                            color:rgba(124,58,237,0.4);pointer-events:none;">
+                    <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+            @endif
+        </div>
 
     {{-- ── TEXTAREA ────────────────────────────────────────────── --}}
     @elseif($type === 'textarea')

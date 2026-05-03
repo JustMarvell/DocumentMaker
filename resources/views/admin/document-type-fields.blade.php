@@ -43,6 +43,10 @@
                class="text-sm px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50">
                 ↑ Re-upload Template
             </a>
+            <a href="{{ route('admin.document-types.number-counter', $documentType) }}"
+                class="text-sm px-4 py-2 rounded-lg border border-purple-400 text-purple-600 hover:bg-purple-50">
+                # Nomor Surat
+            </a>
         </div>
     </div>
 
@@ -626,22 +630,22 @@
     function esc(str) { return String(str ?? '').replace(/'/g,"\\'"); }
 
     // ── Field cache for the edit modal ────────────────────────────────
-    const fieldCache = {};
+    @php
+        $fieldCacheData = $fields->keyBy('id')->map(fn($f) => [
+            'id' => $f->id,
+            'label' => $f->label,
+            'field_type' => $f->field_type,
+            'field_options' => implode(', ', $f->field_options ?? []),
+            'is_required' => (bool) $f->is_required,
+            'section_label' => $f->section_label ?? '',
+            'staff_autofill_column' => $f->staff_autofill_column ?? '',
+            'autofill_role' => $f->autofill_role ?? 'none',
+            'row_group' => $f->row_group,
+            'icon' => $f->icon ?? '',
+        ]);
+    @endphp
 
-    @foreach ($fields as $field)
-    fieldCache[{{ $field->id }}] = {
-        id: {{ $field->id }},
-        label: {{ json_encode($field->label) }},
-        field_type: {{ json_encode($field->field_type) }},
-        field_options: {{ json_encode(implode(', ', $field->field_options ?? [])) }},
-        is_required: {{ $field->is_required ? 'true' : 'false' }},
-        section_label: {{ json_encode($field->section_label ?? '') }},
-        staff_autofill_column: {{ json_encode($field->staff_autofill_column ?? '') }},
-        autofill_role: {{ json_encode($field->autofill_role ?? 'none') }},
-        row_group: {{ $field->row_group ?? 'null' }},
-        icon: {{ json_encode($field->icon ?? '') }},
-    };
-    @endforeach
+    const fieldCache = {!! $fieldCacheData !!}
 
     function openEditField(id) {
         const f = fieldCache[id];
@@ -682,25 +686,27 @@
         btn.disabled = true;
         btn.textContent = 'Menyimpan...';
 
-        const body = {
-            label:                 document.getElementById('edit-field-label').value.trim(),
-            field_type:            document.getElementById('edit-field-type').value,
-            field_options:         document.getElementById('edit-field-options-input').value.trim(),
-            section_label:         document.getElementById('edit-field-section').value.trim(),
-            row_group:             document.getElementById('edit-field-row-group').value.trim(),
-            staff_autofill_column: document.getElementById('edit-field-autofill').value,
-            autofill_role:         document.getElementById('edit-field-autofill-role').value.trim() || 'none',
-            is_required:           document.getElementById('edit-field-required').checked ? '1' : '0',
-            icon:                  document.getElementById('edit-icon-value').value,
-            _method:               'PATCH',
-        };
+        const fd = new FormData();
+        fd.append('_token', CSRF);
+        fd.append('_method', 'PATCH');
+        fd.append('label', document.getElementById('edit-field-label').value.trim());
+        fd.append('field_type', document.getElementById('edit-field-type').value);
+        fd.append('field_options', document.getElementById('edit-field-options-input').value.trim());
+        fd.append('section_label', document.getElementById('edit-field-section').value.trim());
+        fd.append('row_group', document.getElementById('edit-field-row-group').value.trim());
+        fd.append('staff_autofill_column', document.getElementById('edit-field-autofill').value);
+        fd.append('autofill_role', document.getElementById('edit-field-autofill-role').value.trim() || 'none');
+        fd.append('is_required', document.getElementById('edit-field-required').checked ? '1' : '0');
+        fd.append('icon', document.getElementById('edit-icon-value').value);
+
 
         try {
             const res = await fetch(UPDATE_BASE + '/' + id, {
                 method: 'POST',
-                headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(body),
+                headers: { 'Accept': 'application/json' },
+                body: fd,
             });
+
             const data = await res.json();
 
             if (!res.ok) {
@@ -710,7 +716,14 @@
 
             // Update cache
             const f = data.field;
-            fieldCache[f.id] = f;
+            fieldCache[f.id] = {
+                id: f.id, label: f.label, field_type: f.field_type,
+                field_options: Array.isArray(f.field_options) ? f.field_options.join(', ') : (f.field_options || ''),
+                is_required: f.is_required, section_label: f.section_label ?? '',
+                staff_autofill_column: f.staff_autofill_column ?? '',
+                autofill_role: f.autofill_role ?? 'none',
+                row_group: f.row_group, icon: f.icon ?? '',
+            };
 
             // Update the row in DOM
             const tr = document.querySelector('#fields-sortable tr[data-id="' + f.id + '"]');
