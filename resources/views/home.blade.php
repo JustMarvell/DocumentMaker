@@ -572,6 +572,16 @@
                                         </div>
                                     @endforeach
 
+                                    {{-- Auto-number badge --}}
+                                    @if(isset($numberCounters[$docType->id]))
+                                        @php $autoField = $numberCounters[$docType->id]; @endphp
+                                        <div class="tip-box tip-box-navy mb-3" style="font-size:0.75rem;">
+                                            <strong>Nomor Surat Otomatis:</strong>
+                                            Field <code class="bg-blue-100 px-1 rounded">{{ $autoField }}</code>
+                                            akan diisi otomatis saat dokumen dibuat.
+                                        </div>
+                                    @endif
+
                                     {{-- Fields --}}
                                     @php $currentSection = null; @endphp
                                     @foreach ($chunks as $chunk)
