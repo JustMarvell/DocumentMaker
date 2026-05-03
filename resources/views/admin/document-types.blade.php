@@ -200,9 +200,12 @@
 
     async function ajaxToggle(url, id, type) {
         try {
+            const fd = new FormData();
+            fd.append('_token', CSRF);
+            fd.append('_method', 'PATCH');
             const res = await fetch(url, {
                 method: 'POST',
-                headers: { 'X-CSRF-TOKEN': CSRF, 'X-HTTP-Method-Override': 'PATCH', 'Accept': 'application/json' },
+                body: fd,
             });
             if (!res.ok) throw new Error('Server error');
             applyToggleUI(id, type);
