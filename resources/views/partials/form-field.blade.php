@@ -15,7 +15,7 @@ $inputWithIconClass = $icon ? 'w-full border border-gray-300 rounded-lg pl-9 pr-
     transition-colors' : $inputClass;
 
 $isAutoNumber = isset($autoNumberField) && $autoNumberField === $field->field_key;
-$isAutoFillable = !$isAutoNumber && $field->staff_autofill_column && $field->autofill_role !== 'none';
+$isAutofillable = !$isAutoNumber && $field->staff_autofill_column && $field->autofill_role !== 'none';
 @endphp
 
 <div data-field-key="{{ $field->field_key }}" class="field-wrapper">
