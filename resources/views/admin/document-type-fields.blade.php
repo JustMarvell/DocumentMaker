@@ -645,7 +645,7 @@
         ]);
     @endphp
 
-    const fieldCache = @json($fieldCacheData);
+    const fieldCache = {!! $fieldCacheData !!}
 
     function openEditField(id) {
         const f = fieldCache[id];
@@ -694,7 +694,7 @@
         fd.append('field_options', document.getElementById('edit-field-options-input').value.trim());
         fd.append('section_label', document.getElementById('edit-field-section').value.trim());
         fd.append('row_group', document.getElementById('edit-field-row-group').value.trim());
-        fd.append('staff_autofill_column', .getElementById('edit-field-autofill').value);
+        fd.append('staff_autofill_column', document.getElementById('edit-field-autofill').value);
         fd.append('autofill_role', document.getElementById('edit-field-autofill-role').value.trim() || 'none');
         fd.append('is_required', document.getElementById('edit-field-required').checked ? '1' : '0');
         fd.append('icon', document.getElementById('edit-icon-value').value);

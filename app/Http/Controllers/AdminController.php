@@ -191,7 +191,23 @@ class AdminController extends Controller
         $slots = $documentType->slots()->orderBy('sort_order')->get();
         $staffColumns = DocumentField::staffColumns();
 
-        return view('admin.document-type-fields', compact('documentType', 'fields', 'slots', 'staffColumns'));
+        $fieldCacheJson = json_encode(
+            $fields->keyBy('id')->map(fn($f) => [
+                'id' => $f->id,
+                'label' => $f->label,
+                'field_type' => $f->field_type,
+                'field_options' => implode(', ', $f->field_options ?? []),
+                'is_required' => (bool) $f->is_required,
+                'section_label' => $f->section_label ?? '',
+                'staff_autofill_column' => $f->staff_autofill_column ?? '',
+                'autofill_role' => $f->autofill_role ?? 'none',
+                'row_group' => $f->row_group,
+                'icon' => $f->icon ?? '',
+            ]),
+            JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE
+        );
+
+        return view('admin.document-type-fields', compact('documentType', 'fields', 'slots', 'staffColumns', 'fieldCacheJson'));
     }
 
     public function storeField(Request $request, DocumentType $documentType)
