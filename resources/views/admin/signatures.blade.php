@@ -32,6 +32,20 @@
         <a href="{{ route('admin.signatures') }}" class="text-sm text-gray-500 hover:underline">Reset</a>
     </form>
 
+    {{-- Email Waring Flash --}}
+    @if (session('email_warning'))
+        <div
+            class="bg-yellow-50 border border-yellow-300 rounded-lg px-4 py-3 mb-4 flex items-center justify-between text-sm text-yellow-800">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {{ session('email_warning') }}
+            </div>
+        </div>
+    @endif
+
     {{-- Table --}}
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <table class="w-full text-sm">
@@ -88,23 +102,42 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-center">
-                            @if ($req->isPending())
-                                {{-- Approve form --}}
-                                <div class="flex flex-col gap-1 items-stretch min-w-[120px]">
-                                    <button type="button"
-                                        onclick="openActionModal({{ $req->id }}, 'approve', '{{ addslashes($req->documentLog->documentType->name) }}', '{{ addslashes($req->user?->name ?? 'Guest') }}')"
-                                        class="text-xs px-3 py-1 rounded border border-green-400 text-green-700 hover:bg-green-50 font-medium">
-                                        ✓ Setujui
+                        @if ($req->isPending())
+                            <div class="flex flex-col gap-1 items-stretch min-w-[120px]">
+                                <button type="button"
+                                    onclick="openActionModal({{ $req->id }}, 'approve', '{{ addslashes($req->documentLog->documentType->name) }}', '{{ addslashes($req->user?->name ?? 'Guest') }}')"
+                                    class="text-xs px-3 py-1 rounded border border-green-400 text-green-700 hover:bg-green-50 font-medium">
+                                    ✓ Setujui
+                                </button>
+                                <button type="button"
+                                    onclick="openActionModal({{ $req->id }}, 'reject', '{{ addslashes($req->documentLog->documentType->name) }}', '{{ addslashes($req->user?->name ?? 'Guest') }}')"
+                                    class="text-xs px-3 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50 font-medium">
+                                    ✕ Tolak
+                                </button>
+                                {{-- <- ADD resend to official --}}
+                                <form method="POST" action="{{ route('admin.signatures.resend-result', $req) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit"
+                                        class="w-full text-xs px-3 py-1 rounded border border-blue-300 text-blue-500 hover:bg-blue-50">
+                                        ↺ Kirim Ulang ke Pejabat
                                     </button>
-                                    <button type="button"
-                                        onclick="openActionModal({{ $req->id }}, 'reject', '{{ addslashes($req->documentLog->documentType->name) }}', '{{ addslashes($req->user?->name ?? 'Guest') }}')"
-                                        class="text-xs px-3 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50 font-medium">
-                                        ✕ Tolak
-                                    </button>
-                                </div>
-                            @else
+                                </form>
+                            </div>
+                        @else
+                            <div class="flex flex-col gap-1 items-center">
                                 <span class="text-xs text-gray-400">Selesai</span>
-                            @endif
+                                {{-- <- ADD resend result to user --}}
+                                <form method="POST" action="{{ route('admin.signatures.resend-result', $req) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit"
+                                        class="text-xs px-3 py-1 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 mt-1">
+                                        ↺ Kirim Ulang ke Pemohon
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
                         </td>
                     </tr>
                 @empty

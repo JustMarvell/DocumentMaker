@@ -50,7 +50,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('/signature/request/{documentLog}', [SignatureRequestController::class, 'create'])->name('signature.create');
         Route::post('/signature/request/{documentLog}', [SignatureRequestController::class, 'store'])->name('signature.store');
-
+        Route::post('/signature/resend/{signatureRequest}', [SignatureRequestController::class, 'resendRequestEmail'])->name('signature.resend');
     });
 
     Route::middleware('role:staff,admin')->group(function(){
@@ -111,6 +111,9 @@ Route::middleware('auth')->group(function() {
         Route::get('/signatures', [SignatureRequestController::class, 'adminIndex'])->name('signatures');
         Route::patch('/signatures/{signatureRequest}/approve', [SignatureRequestController::class, 'adminApprove'])->name('signatures.approve');
         Route::patch('/signatures/{signatureRequest}/reject', [SignatureRequestController::class, 'adminReject'])->name('signatures.reject');
+        Route::patch('/signatures/{signatureRequest}/resend-result', [SignatureRequestController::class, 'resendResultEmail'])->name('signatures.resend-result');
+        
+        Route::post('/test-email', [SignatureRequestController::class, 'testEmail'])->name('test-email');
     });
 
     Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');

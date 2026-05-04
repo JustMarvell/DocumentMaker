@@ -76,6 +76,10 @@ class SignatureRequestController extends Controller
             $official->notify(new SignatureRequestedNotification($signatureRequest));
         } catch (\Exception $e) {
             Log::error('Failed to send signature request email: ' . $e->getMessage());
+
+            return redirect()->route('home')
+                ->with('success', "Permintaan tanda tangan berhasil dikirimkan ke {$official->staff_name}.")
+                ->with('email_warning', 'Notifikasi email gagal dikirim ke pejabat. Gunakan tombol kirim ulang jika diperlukan.');
         }
 
         return redirect()->route('home')
@@ -207,6 +211,9 @@ class SignatureRequestController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Admin approve email failed: ' . $e->getMessage());
+            return back()
+                ->with('success', 'Permintaan berhasil disetujui')
+                ->with('email_warning', 'Email notifikasi gagal dikirim ke pemohon. Gunakan tombol kirim ulang.');
         }
 
         return back()->with('success', 'Permintaan berhasil disetujui dan notifikasi dikirim ke pemohon.');
@@ -233,9 +240,77 @@ class SignatureRequestController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Admin reject email failed: ' . $e->getMessage());
+            return back()
+                ->with('success', 'Permintaan berhasil ditolak.')
+                ->with('email_warning', 'Email notifikasi gagal dikirim ke pemohon. Gunakan tombol kirim ulang.');
         }
 
         return back()->with('success', 'Permintaan berhasil ditolak dan notifikasi dikirim ke pemohon.');
+    }
+
+    public function resendRequestEmail(SignatureRequest $signatureRequest) {
+        $this->authorizeDocumentLog($signatureRequest->documentLog);
+
+        if (!$signatureRequest->isPending()) {
+            return back()->with('error', 'Hanya permintaan dengan status menunggu yang bisa dikirim ulang');
+        }
+
+        try {
+            $signatureRequest->official->notify(new SignatureRequestedNotification($signatureRequest));
+            return back()->with('success', 'Email berhasil dikirim ulang ke ' . $signatureRequest->official->staff_name . '.');
+        } catch (\Exception $e) {
+            Log::error('Resend Request Email Failed: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengirim ulang email: '. $e->getMessage());
+        }
+    }
+
+    public function resendResultEmail(SignatureRequest $signatureRequest) {
+        if (!auth()->user()->isAdmin())
+            abort(403);
+
+        if ($signatureRequest->isPending()) {
+            return back()->with('error', 'Hasil tinjauan belum ada. Selesaikan tinjauan terlebih dahulu.');
+        }
+
+        try {
+            $user = $signatureRequest->user;
+            if (!$user) {
+                return back()->with('error', 'Pengguna tidak ditemukan.');
+            }
+
+            if ($signatureRequest->isApproved()) {
+                $user->notify(new SignatureApprovedNotification($signatureRequest));
+            } else {
+                $user->notify(new SignatureRejectedNotification($signatureRequest));
+            }
+
+            return back()->with('success', 'Email berhasil dikirim ulang ke ' . $user->name . '.');
+        } catch (\Exception $e) {
+            Log::error('Resend result email failed: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengirim ulang email: ' . $e->getMessage());
+        }
+    }
+
+    public function testEmail(Request $request)
+    {
+        if (!auth()->user()->isAdmin())
+            abort(403);
+
+        $request->validate(['test_email' => 'required|email']);
+
+        try {
+            \Illuminate\Support\Facades\Mail::raw(
+                'Ini adalah email uji koneksi dari sistem eDokPUPRD. Jika Anda menerima email ini, konfigurasi email berjalan dengan baik.',
+                function ($message) use ($request) {
+                    $message->to($request->test_email)
+                        ->subject('[eDokPUPRD] Test Email Koneksi — ' . now()->format('d/m/Y H:i'));
+                }
+            );
+            return back()->with('success', 'Email uji berhasil dikirim ke ' . $request->test_email . '.');
+        } catch (\Exception $e) {
+            Log::error('Test email failed: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengirim email uji: ' . $e->getMessage());
+        }
     }
 
     // helper
