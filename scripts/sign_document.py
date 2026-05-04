@@ -83,45 +83,51 @@ def make_qr_png(url: str) -> bytes:
 # sign this doc shii
 def sign_docx(input_path: str, output_path: str, args: argparse.Namespace) -> None:
     docxtpl = require("docxtpl")
-    from docxtpl import DocxTemplate, InlineImage
-    from docx.shared import Mm
-    
-    doc = DocxTemplate(input_path)
-    
-    context: dict = {
-        "nama_pejabat" : args.official_name,
-        "jabatan_pejabat" : args.official_position,
-        "tgl_ttd" : args.approval_date,
-    }
-    
-    use_image = args.use_image == "1"
-    use_qr = args.use_qr == "1"
-    
-    IMAGE_SIZE_MM = 35
-    
-    if use_image:
-        if args.sig_image and os.path.exists(args.sig_image):
-            context['ttd_pejabat'] = InlineImage(doc, args.sig_image, width=Mm(IMAGE_SIZE_MM), height=Mm(IMAGE_SIZE_MM))
-        else:
-            context['ttd_pejabat'] = f"[TTD {args.official_name}]"
-    else:
-        context['ttd_pejabat'] = '' #empety
+    from docxtpl import DocxTemplate
 
-    qr_bytes = make_qr_png(args.verify_url)
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-        tmp.write(qr_bytes)
-        qr_tmp_path = tmp.name
-        
+    doc = DocxTemplate(input_path)
+
+    context: dict = {
+        "nama_pejabat":    args.official_name,
+        "jabatan_pejabat": args.official_position,
+        "tgl_ttd":         args.approval_date,
+    }
+
+    use_image = args.use_image == "1"
+    use_qr    = args.use_qr    == "1"
+
+    base_dir   = Path(__file__).resolve().parent.parent
+    dummy_path = str(base_dir / "resources" / "img" / "transparent35mm.png")  # <- dummy source
+
+    # -- signature image --
+    if use_image:
+        sig_src = args.sig_image if (args.sig_image and os.path.exists(args.sig_image)) else dummy_path
+        try:
+            doc.replace_media(dummy_path, sig_src)  # <- swaps dummy_sig slot
+        except Exception:
+            pass  # image not in template, skip silently
+
+    # -- QR code --
+    qr_tmp_path = None
+    if use_qr and args.verify_url:
+        qr_bytes = make_qr_png(args.verify_url)
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            tmp.write(qr_bytes)
+            qr_tmp_path = tmp.name
+
+        # dummy_qr.png is a copy of the transparent image placed separately in the template
+        dummy_qr = str(base_dir / "resources" / "img" / "dummy_qr.png")
+        try:
+            doc.replace_media(dummy_qr, qr_tmp_path)  # <- swaps dummy_qr slot
+        except Exception:
+            pass
+
     try:
-        if use_qr:
-            context["qr_code"] = InlineImage(doc, qr_tmp_path, width=Mm(IMAGE_SIZE_MM), height=Mm(IMAGE_SIZE_MM))
-        else:
-            context["qr_code"] = ''
-            
         doc.render(context)
         doc.save(output_path)
     finally:
-        os.unlink(qr_tmp_path)
+        if qr_tmp_path and os.path.exists(qr_tmp_path):
+            os.unlink(qr_tmp_path)
 
 # sign this shiiii for excel
 def _col_letter(col: int) -> str:
@@ -315,27 +321,23 @@ def _render_drawing_xml(xml_bytes: bytes, context: dict) -> bytes:
     return xml.encode("utf-8")
 
 def sign_xlsx(input_path: str, output_path: str, args: argparse.Namespace) -> None:
-    require("openpyxl")
+    base_dir   = Path(__file__).resolve().parent.parent
+    dummy_sig_name = "transparent35mm.png"  
+    dummy_qr_name  = "dummy_qr.png"         
 
-    IMAGE_SIZE_EMU = 3_200_000  # ~35mm
+    use_image = args.use_image == "1"
+    use_qr    = args.use_qr    == "1"
 
-    text_ctx = {
-        "{{nama_pejabat}}": args.official_name,
-        "{{jabatan_pejabat}}": args.official_position,
-        "{{tgl_ttd}}": args.approval_date,
-    }
-
-    inserts = []  # (img_bytes, placeholder)
-    if args.use_image == "1" and args.sig_image and os.path.exists(args.sig_image):
-        inserts.append((open(args.sig_image, "rb").read(), "{{ttd_pejabat}}"))
-    if args.use_qr == "1" and args.verify_url:
-        inserts.append((make_qr_png(args.verify_url), "{{qr_code}}"))
-
-    # Load entire zip into memory
     with zipfile.ZipFile(input_path, "r") as z:
         zip_files = {name: z.read(name) for name in z.namelist()}
 
-    # Render text placeholders in sharedStrings + drawing textboxes
+    # render text placeholders in sharedStrings + drawings (nama_pejabat, etc.)
+    text_ctx = {
+        "{{nama_pejabat}}":    args.official_name,
+        "{{jabatan_pejabat}}": args.official_position,
+        "{{tgl_ttd}}":         args.approval_date,
+    }
+
     if "xl/sharedStrings.xml" in zip_files:
         ss_xml = zip_files["xl/sharedStrings.xml"].decode("utf-8", errors="replace")
         for ph, val in text_ctx.items():
@@ -346,35 +348,22 @@ def sign_xlsx(input_path: str, output_path: str, args: argparse.Namespace) -> No
         if re.match(r"xl/drawings/.*\.xml$", name, re.IGNORECASE) and not name.endswith(".rels"):
             zip_files[name] = _render_drawing_xml(zip_files[name], text_ctx)
 
-    # Inject images per sheet
-    for name in list(zip_files.keys()):
-        m = re.match(r"xl/worksheets/sheet(\d+)\.xml$", name)
-        if not m:
-            continue
-        sheet_idx = int(m.group(1))
-        ss_bytes = zip_files.get("xl/sharedStrings.xml", b"")
+    # replace dummy images by swapping bytes inside the zip
+    def swap_image(dummy_name: str, new_bytes: bytes):
+        for zip_path in list(zip_files.keys()):
+            if zip_path.startswith("xl/media/") and Path(zip_path).name == dummy_name:
+                zip_files[zip_path] = new_bytes  # <- swap in place
+                return True
+        return False
 
-        for img_bytes, placeholder in inserts:
-            coords = _find_placeholder_cell_coords(zip_files[name], ss_bytes, placeholder)
-            if coords is None:
-                continue
+    if use_image:
+        sig_path = args.sig_image if (args.sig_image and os.path.exists(args.sig_image)) else None
+        if sig_path:
+            swap_image(dummy_sig_name, open(sig_path, "rb").read())
 
-            col, row = coords
+    if use_qr and args.verify_url:
+        swap_image(dummy_qr_name, make_qr_png(args.verify_url))
 
-            _, ss_bytes = _find_placeholder_in_shared_strings(ss_bytes, placeholder)
-            zip_files["xl/sharedStrings.xml"] = ss_bytes
-
-            img_zip_path = f"xl/media/img_{placeholder.strip('{}')}.png"
-            zip_files[img_zip_path] = img_bytes
-
-            drawing_path, drawing_rels_path = _ensure_drawing_for_sheet(zip_files, sheet_idx)
-
-            new_rels, rel_id = _add_image_rel(zip_files[drawing_rels_path], img_zip_path, drawing_path)
-            zip_files[drawing_rels_path] = new_rels
-
-            zip_files[drawing_path] = _inject_image_anchor(zip_files[drawing_path], rel_id, col, row, IMAGE_SIZE_EMU)
-
-    # Write final zip — all original entries preserved
     with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as out:
         for name, data in zip_files.items():
             out.writestr(name, data)
