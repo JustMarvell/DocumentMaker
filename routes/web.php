@@ -113,7 +113,7 @@ Route::middleware('auth')->group(function() {
         Route::patch('/signatures/{signatureRequest}/reject', [SignatureRequestController::class, 'adminReject'])->name('signatures.reject');
         Route::patch('/signatures/{signatureRequest}/resend-result', [SignatureRequestController::class, 'resendResultEmail'])->name('signatures.resend-result');
         
-        Route::post('/test-email', [SignatureRequestController::class, 'testEmail'])->name('admin.test-email');
+        Route::post('/test-email', [SignatureRequestController::class, 'testEmail'])->name('test-email');
     });
 
     Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');
