@@ -251,7 +251,7 @@ class SignatureRequestController extends Controller
     public function resendRequestEmail(SignatureRequest $signatureRequest) {
         $this->authorizeDocumentLog($signatureRequest->documentLog);
 
-        if ($signatureRequest->isPending()) {
+        if (!$signatureRequest->isPending()) {
             return back()->with('error', 'Hanya permintaan dengan status menunggu yang bisa dikirim ulang');
         }
 

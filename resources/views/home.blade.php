@@ -707,6 +707,11 @@
         {{-- Requests panel --}}
         @auth
         <div id="panel-requests" style="display:none;">
+            @if (session('email_warning')) 
+                <div class="alert alert-warning mb-4 fade-up" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:0.85rem 1rem;font-size:0.82rem;color:#854d0e;">
+                    ⚠ {{ session('email_warning') }}
+                </div>
+            @endif
             @if ($signatureRequests->isEmpty())
                 <div class="form-card p-12 text-center fade-up" style="color:var(--slate-400);">
                     <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -759,12 +764,25 @@
                                     @endif
                                 </td>
                                 <td style="padding:0.75rem 1rem;text-align:center;">
-                                    <a href="{{ route('signature.verify', $req->token) }}"
-                                        style="font-size:0.75rem;color:var(--navy-600);text-decoration:none;font-weight:500;padding:0.3rem 0.7rem;border:1px solid var(--navy-200);border-radius:6px;transition:all 0.15s;"
-                                        onmouseover="this.style.background='var(--navy-100)'"
-                                        onmouseout="this.style.background=''">
-                                        Detail
-                                    </a>
+                                    <div class="flex flex-col gap-1 items-center">
+                                        <a href="{{ route('signature.verify', $req->token) }}"
+                                            style="font-size:0.75rem;color:var(--navy-600);text-decoration:none;font-weight:500;padding:0.3rem 0.7rem;border:1px solid var(--navy-200);border-radius:6px;transition:all 0.15s;"
+                                            onmouseover="this.style.background='var(--navy-100)'"
+                                            onmouseout="this.style.background=''">
+                                            Detail
+                                        </a>
+                                        @if ($req->isPending())
+                                            <form method="POST" action="{{ route('signature.resend', $req) }}">
+                                                @csrf
+                                                <button type="submit"
+                                                    style="font-size:0.72rem;color:var(--slate-500);padding:0.25rem 0.6rem;border:1px solid var(--slate-200);border-radius:6px;background:transparent;cursor:pointer;font-family:var(--font-body);margin-top:0.2rem;transition:all 0.15s;"
+                                                    onmouseover="this.style.background='var(--slate-100)'"
+                                                    onmouseout="this.style.background='transparent'">
+                                                    ↺ Kirim Ulang Email
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach
