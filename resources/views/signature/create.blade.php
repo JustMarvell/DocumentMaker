@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minta Tanda Tangan — SIPADU</title>
+    <title>Minta Tanda Tangan — eDokPUPRD</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body {
@@ -55,7 +55,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </div>
-                <div class="nav-brand-title" style="font-size:0.9rem;">SIPADU</div>
+                <div class="nav-brand-title" style="font-size:0.9rem;">eDokPUPRD</div>
             </div>
             <a href="{{ route('home') }}" class="sipadu-nav-link" style="font-size:0.78rem;">← Kembali ke Aplikasi</a>
         </div>

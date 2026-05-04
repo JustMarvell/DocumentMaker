@@ -308,10 +308,10 @@
                     </svg>
                 </div>
                 <div class="hidden sm:block">
-                    <div class="nav-brand-title">SIPADU</div>
+                    <div class="nav-brand-title">eDokPUPRD</div>
                     <div class="nav-brand-sub">DINAS PUPRD · Kota Tomohon</div>
                 </div>
-                <div class="sm:hidden nav-brand-title" style="font-size:0.9rem;">SIPADU</div>
+                <div class="sm:hidden nav-brand-title" style="font-size:0.9rem;">eDokPUPRD</div>
             </div>
 
             {{-- Desktop nav --}}

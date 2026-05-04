@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIPADU — {{ config('app.name') }}</title>
+    <title>eDokPUPRD — {{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { background: #0d1526; font-family: var(--font-body); }
@@ -153,7 +153,7 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="nav-brand-title text-sm">SIPADU</div>
+                    <div class="nav-brand-title text-sm">eDokPUPRD</div>
                     <div class="nav-brand-sub" style="font-size:0.55rem;">DINAS PUPRD · Kota Tomohon</div>
                 </div>
             </div>
@@ -189,10 +189,10 @@
                 </div>
 
                 <h1 class="fade-up fade-up-2 display-heading text-white mb-3" style="font-size:clamp(2.2rem,5vw,3.4rem);">
-                    SIPADU
+                    eDokPUPRD
                 </h1>
                 <p class="fade-up fade-up-3 mb-2" style="font-size:0.95rem;color:rgba(255,255,255,0.5);letter-spacing:0.05em;text-transform:uppercase;font-weight:500;">
-                    Sistem Generasi Administrasi Persuratan
+                    Sistem Pembuatan Dokumen Digital
                 </p>
                 <p class="fade-up fade-up-3 mb-8" style="font-size:0.82rem;color:var(--gold-400);letter-spacing:0.06em;text-transform:uppercase;">
                     Dinas Pekerjaan Umum dan Penataan Ruang Daerah
@@ -327,7 +327,7 @@
 
     <!-- Footer -->
     <footer class="welcome-footer mt-10 py-5 text-center" style="color:rgba(255,255,255,0.25);font-size:0.73rem;letter-spacing:0.04em;">
-        SIPADU © {{ date('Y') }} — Dinas Pekerjaan Umum dan Penataan Ruang Daerah · Kota Tomohon
+        eDokPUPRD © {{ date('Y') }} — Dinas Pekerjaan Umum dan Penataan Ruang Daerah · Kota Tomohon
     </footer>
 
 </body>

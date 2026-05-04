@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tinjau Permintaan Tanda Tangan — SIPADU</title>
+    <title>Tinjau Permintaan Tanda Tangan — eDokPUPRD</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body {
@@ -160,7 +160,7 @@
                 Tangan Digital</h1>
             <p
                 style="color:var(--gold-400);font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;margin-top:0.3rem;">
-                SIPADU — Dinas PUPRD Kota Tomohon</p>
+                eDokPUPRD — Dinas PUPRD Kota Tomohon</p>
         </div>
 
         {{-- Body --}}

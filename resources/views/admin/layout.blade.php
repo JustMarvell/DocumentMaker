@@ -118,7 +118,7 @@
                 </svg>
             </div>
             <div>
-                <div style="font-family:var(--font-display);color:#fff;font-size:0.95rem;line-height:1;">SIPADU</div>
+                <div style="font-family:var(--font-display);color:#fff;font-size:0.95rem;line-height:1;">eDokPUPRD</div>
                 <div style="color:var(--gold-400);font-size:0.55rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;">Admin Panel</div>
             </div>
         </div>

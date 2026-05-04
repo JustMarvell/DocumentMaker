@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifikasi Dokumen — SIPADU</title>
+    <title>Verifikasi Dokumen — eDokPUPRD</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body {
@@ -82,7 +82,7 @@
             @endif
 
             <p style="color:var(--gold-400);font-size:0.65rem;letter-spacing:0.07em;text-transform:uppercase;margin-top:0.5rem;">
-                SIPADU — Dinas PUPRD Kota Tomohon
+                eDocPUPRD — Dinas PUPRD Kota Tomohon
             </p>
         </div>
 
@@ -166,7 +166,7 @@
 
             <p style="font-size:0.68rem;color:rgba(255,255,255,0.2);text-align:center;margin-top:1rem;line-height:1.5;">
                 Halaman ini dapat diakses oleh siapapun yang memindai QR code pada dokumen.<br>
-                Verifikasi dilakukan oleh sistem SIPADU — Dinas PUPRD Kota Tomohon.
+                Verifikasi dilakukan oleh sistem eDokPUPRD — Dinas PUPRD Kota Tomohon.
             </p>
         </div>
     </div>
