@@ -50,7 +50,7 @@
             <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Pengenalan Sistem</h2>
 
             <p class="text-sm text-gray-700 mb-4">
-                <strong>eDokPUPRD</strong> (Sistem Pembuatan Dokumen Digital) adalah aplikasi web berbasis Laravel yang dirancang khusus untuk
+                <strong>{{ config('app.name') }}</strong> (Sistem Pembuatan Dokumen Digital) adalah aplikasi web berbasis Laravel yang dirancang khusus untuk
                 <strong>DINAS PEKERJAAN UMUM DAN PENATAAN RUANG DAERAH KOTA TOMOHON</strong>.
                 Sistem ini memungkinkan pegawai untuk membuat surat dan dokumen resmi secara otomatis berdasarkan template yang telah disiapkan oleh administrator.
             </p>

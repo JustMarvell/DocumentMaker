@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eDokPUPRD — {{ config('app.name') }}</title>
+    <title>{{ config('app.name') }} - Selamat Datang</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { background: #0d1526; font-family: var(--font-body); }

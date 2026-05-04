@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Automatisasi Surat — DINAS PUPRD</title>
+    <title>{{ config('app.name') }} - Buat Dokumen</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
         integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -378,7 +378,7 @@
                 <div style="width:3px;height:32px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
                 <div>
                     <h1 style="font-family:var(--font-display);color:#fff;font-size:1.2rem;line-height:1.1;" class="fade-up">
-                        Sistem Automatisasi Surat
+                        Sistem Pembuatan Dokumen Digital
                     </h1>
                     <p style="color:rgba(255,255,255,0.4);font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;margin-top:0.15rem;" class="fade-up fade-up-1">
                         Pilih jenis dokumen dan isi form yang tersedia
@@ -604,7 +604,7 @@
                                             <div class="grid gap-3.5 mb-3.5 row-group-grid" style="grid-template-columns: repeat({{ count($chunk['fields']) }}, 1fr)">
                                                 @foreach ($chunk['fields'] as $field)
                                                     <div>
-                                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields, 'autoNumberField' => $autoNumberField, ])
+                                                        @include('partials.form-field', ['field' => $field, 'docType' => $docType, 'fields' => $fields, 'autoNumberField' => $autoNumberField,])
                                                     </div>
                                                 @endforeach
                                             </div>

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'eDokPUPRD') }}</title>
+    <title>{{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -145,9 +145,9 @@
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
         </div>
-        <div style="font-family:var(--font-display);color:#fff;font-size:1.4rem;letter-spacing:0.02em;line-height:1;">SIPADU</div>
+        <div style="font-family:var(--font-display);color:#fff;font-size:1.4rem;letter-spacing:0.02em;line-height:1;">{{ config('app.name') }}</div>
         <div style="color:var(--gold-400);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-top:0.3rem;">
-            Sistem Administrasi Persuratan
+            Sistem Pembuatan Dokumen Digital
         </div>
         <div style="color:rgba(255,255,255,0.35);font-size:0.65rem;letter-spacing:0.06em;text-transform:uppercase;margin-top:0.2rem;">
             Dinas PUPRD · Kota Tomohon
