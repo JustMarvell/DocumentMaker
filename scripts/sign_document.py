@@ -279,6 +279,41 @@ def _inject_image_anchor(drawing_xml_bytes: bytes, rel_id: str, col: int, row: i
     xml = xml.replace(close, anchor + close) if close in xml else xml + anchor
     return xml.encode("utf-8")
 
+def _render_drawing_xml(xml_bytes: bytes, context: dict) -> bytes:
+    """
+    Render {{ }} placeholders inside drawing textboxes.
+    Excel often splits a single placeholder across multiple <a:t> runs,
+    so we must first merge all <a:t> text within each <a:r> paragraph run,
+    do the replacement on the merged text, then rewrite it back into one <a:t>.
+    """
+    try:
+        xml = xml_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        return xml_bytes
+
+    # Step 1: collapse all <a:t> fragments within each <a:r> run into one <a:t>
+    def merge_run(m):
+        run = m.group(0)
+        texts = re.findall(r"<a:t[^>]*>(.*?)</a:t>", run, re.DOTALL)
+        merged = "".join(texts)
+        # replace all <a:t>...</a:t> occurrences with a single one
+        run = re.sub(r"<a:t[^>]*>.*?</a:t>", "", run, flags=re.DOTALL)
+        run = run.replace("</a:r>", f"<a:t>{merged}</a:t></a:r>")
+        return run
+
+    xml = re.sub(r"<a:r\b[^>]*>.*?</a:r>", merge_run, xml, flags=re.DOTALL)
+
+    # Step 2: replace placeholders inside <a:t> tags
+    def replace_t(m):
+        attrs = m.group(1)
+        content = m.group(2)
+        for ph, val in context.items():
+            content = content.replace(ph, val)
+        return f"<a:t{attrs}>{content}</a:t>"
+
+    xml = re.sub(r"<a:t([^>]*)>(.*?)</a:t>", replace_t, xml, flags=re.DOTALL)
+    return xml.encode("utf-8")
+
 def sign_xlsx(input_path: str, output_path: str, args: argparse.Namespace) -> None:
     require("openpyxl")
 
@@ -309,10 +344,7 @@ def sign_xlsx(input_path: str, output_path: str, args: argparse.Namespace) -> No
 
     for name in list(zip_files.keys()):
         if re.match(r"xl/drawings/.*\.xml$", name, re.IGNORECASE) and not name.endswith(".rels"):
-            xml = zip_files[name].decode("utf-8", errors="replace")
-            for ph, val in text_ctx.items():
-                xml = xml.replace(ph, val)
-            zip_files[name] = xml.encode("utf-8")
+            zip_files[name] = _render_drawing_xml(zip_files[name], text_ctx)
 
     # Inject images per sheet
     for name in list(zip_files.keys()):
