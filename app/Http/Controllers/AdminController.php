@@ -559,4 +559,55 @@ class AdminController extends Controller
 
         return back()->with('success', 'Nomor surat direset ke 0, Nomor berikutnya: 001 (atau sesuai padding).');
     }
+
+    public function scanFields(Request $request, DocumentType $documentType)
+    {
+        $scanner = new \App\Services\TemplateScanner();
+        $detected = $scanner->scan($documentType->template_filename);
+
+        // Filter out already-defined field keys
+        $existingKeys = $documentType->fields()->pluck('field_key')->toArray();
+        $newVars = array_filter($detected, fn($v) => !in_array($v, $existingKeys));
+
+        return response()->json([
+            'detected' => array_values($newVars),
+            'existing' => $existingKeys,
+            'all' => $detected,
+        ]);
+    }
+
+    public function bulkStoreFields(Request $request, DocumentType $documentType)
+    {
+        $request->validate([
+            'fields' => 'required|array|min:1',
+            'fields.*.field_key' => 'required|string|regex:/^[a-z0-9_]+$/',
+            'fields.*.label' => 'required|string|max:255',
+            'fields.*.field_type' => 'required|in:text,textarea,date,number,select,checkbox,repeating_group,staff_loop,official_loop',
+            'fields.*.section_label' => 'nullable|string|max:255',
+            'fields.*.is_required' => 'boolean',
+        ]);
+
+        $maxOrder = $documentType->fields()->max('sort_order') ?? 0;
+        $created = 0;
+
+        foreach ($request->fields as $i => $fieldData) {
+            $exists = $documentType->fields()->where('field_key', $fieldData['field_key'])->exists();
+            if ($exists)
+                continue;
+
+            DocumentField::create([
+                'document_type_id' => $documentType->id,
+                'field_key' => $fieldData['field_key'],
+                'label' => $fieldData['label'],
+                'field_type' => $fieldData['field_type'],
+                'is_required' => $fieldData['is_required'] ?? false,
+                'sort_order' => $maxOrder + $i + 1,
+                'section_label' => $fieldData['section_label'] ?? null,
+                'autofill_role' => 'none',
+            ]);
+            $created++;
+        }
+
+        return response()->json(['success' => true, 'created' => $created]);
+    }
 }
