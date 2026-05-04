@@ -91,6 +91,8 @@ Route::middleware('auth')->group(function() {
         Route::post('/document-types/{documentType}/number-counter', [AdminController::class, 'saveNumberCounter'])->name('document-types.number-counter.save');
         Route::patch('/document-types/{documentType}/number-counter/set', [AdminController::class, 'setNumberCounter'])->name('document-types.number-counter.set');
         Route::patch('/document-types/{documentType}/number-counter/reset', [AdminController::class, 'resetNumberCounter'])->name('document-types.number-counter.reset');
+        Route::post('/document-types/{documentType}/scan-fields', [AdminController::class,'scanFields'])->name('document-types.fields.scan');
+        Route::post('/document-types/{documentType}/fields/bulk-store', [AdminController::class, 'bulkStoreFields'])->name('document-types.fields.bulk-store');
 
         Route::get('/staff-data', [AdminController::class,'staffData'])->name('staff-data');
         Route::post('/staff-data', [StaffDataController::class, 'store'])->name('staff-data.store');

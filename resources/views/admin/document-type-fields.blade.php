@@ -47,6 +47,13 @@
                 class="text-sm px-4 py-2 rounded-lg border border-purple-400 text-purple-600 hover:bg-purple-50">
                 # Nomor Surat
             </a>
+            <button type="button" onclick="openScanModal()"
+            class="text-sm px-4 py-2 rounded-lg border border-green-500 text-green-700 hover:bg-green-50 flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                Scan Template
+            </button>
         </div>
     </div>
 
@@ -821,6 +828,217 @@
             });
         }
     })();
+    </script>
+
+    {{-- Scan Modal --}}
+    <div id="scan-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-screen overflow-y-auto">
+
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h2 class="text-lg font-semibold text-gray-800">Scan Template — Deteksi Field Otomatis</h2>
+                <button onclick="closeScanModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">✕</button>
+            </div>
+
+            {{-- Loading state --}}
+            <div id="scan-loading" class="px-6 py-12 text-center hidden">
+                <div class="sipadu-spinner mx-auto mb-3"></div>
+                <p class="text-sm text-gray-500">Memindai template...</p>
+            </div>
+
+            {{-- Results --}}
+            <div id="scan-results" class="hidden">
+                <div class="px-6 pt-4 pb-2">
+                    <div id="scan-summary" class="text-sm text-gray-600 mb-3"></div>
+                    <div id="scan-existing-warning" class="hidden bg-yellow-50 border border-yellow-200 rounded px-3 py-2 text-xs text-yellow-800 mb-3"></div>
+                </div>
+
+                <div id="scan-fields-list" class="px-6 space-y-2 pb-4 max-h-96 overflow-y-auto"></div>
+
+                <div class="px-6 py-4 border-t flex items-center justify-between">
+                    <p class="text-xs text-gray-400">Field yang sudah ada tidak akan ditambah duplikat.</p>
+                    <div class="flex gap-2">
+                        <button onclick="closeScanModal()" class="px-4 py-2 rounded-lg border text-sm text-gray-600 hover:bg-gray-50">Batal</button>
+                        <button onclick="confirmScanFields()" id="scan-confirm-btn"
+                            class="bg-green-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-green-700 font-medium">
+                            Tambahkan Field Terpilih
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Empty --}}
+            <div id="scan-empty" class="px-6 py-12 text-center hidden">
+                <p class="text-gray-400 text-sm">Tidak ada placeholder <code>@verbatim{{ '{{' }} variable {{ '}}' }}@endverbatim</code> yang ditemukan dalam template.</p>
+            </div>
+
+            {{-- Error --}}
+            <div id="scan-error" class="px-6 py-6 hidden">
+                <div class="bg-red-50 border border-red-200 rounded px-4 py-3 text-sm text-red-700" id="scan-error-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCAN_URL       = '{{ route('admin.document-types.fields.scan', $documentType) }}';
+        const BULK_STORE_URL = '{{ route('admin.document-types.fields.bulk-store', $documentType) }}';
+
+        const FIELD_TYPE_OPTIONS = @json(\App\Models\DocumentField::fieldTypes());
+
+        // Heuristics to guess field type from variable name
+        function guessFieldType(key) {
+            if (/date|tanggal|tgl|periode/.test(key))    return 'date';
+            if (/jumlah|total|count|number|hari|lama|angka|nomor/.test(key)) return 'number';
+            if (/keterangan|deskripsi|catatan|alasan|uraian/.test(key)) return 'textarea';
+            if (/peserta|participant|anggota|daftar/.test(key)) return 'staff_loop';
+            return 'text';
+        }
+
+        function guessLabel(key) {
+            return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        async function openScanModal() {
+            document.getElementById('scan-modal').classList.remove('hidden');
+            document.getElementById('scan-loading').classList.remove('hidden');
+            ['scan-results','scan-empty','scan-error'].forEach(id => document.getElementById(id).classList.add('hidden'));
+
+            try {
+                const fd = new FormData();
+                fd.append('_token', CSRF);
+                const res  = await fetch(SCAN_URL, { method: 'POST', body: fd });
+                const data = await res.json();
+
+                document.getElementById('scan-loading').classList.add('hidden');
+
+                if (!data.detected || data.detected.length === 0) {
+                    document.getElementById('scan-empty').classList.remove('hidden');
+                    return;
+                }
+
+                renderScanResults(data);
+            } catch(e) {
+                document.getElementById('scan-loading').classList.add('hidden');
+                document.getElementById('scan-error').classList.remove('hidden');
+                document.getElementById('scan-error-msg').textContent = 'Gagal memindai template: ' + e.message;
+            }
+        }
+
+        function renderScanResults(data) {
+            const { detected, existing, all } = data;
+            const results = document.getElementById('scan-results');
+            results.classList.remove('hidden');
+
+            document.getElementById('scan-summary').innerHTML =
+                `Ditemukan <strong>${all.length}</strong> variabel di template. ` +
+                `<strong class="text-green-700">${detected.length}</strong> baru, ` +
+                `<strong class="text-gray-500">${existing.length}</strong> sudah ada.`;
+
+            if (existing.length > 0) {
+                const warn = document.getElementById('scan-existing-warning');
+                warn.classList.remove('hidden');
+                warn.textContent = 'Field berikut sudah ada dan akan dilewati: ' + existing.join(', ');
+            }
+
+            const list = document.getElementById('scan-fields-list');
+            list.innerHTML = '';
+
+            if (detected.length === 0) {
+                list.innerHTML = '<p class="text-sm text-gray-400 py-4 text-center">Semua variabel yang ditemukan sudah terdaftar sebagai field.</p>';
+                document.getElementById('scan-confirm-btn').disabled = true;
+                return;
+            }
+
+            detected.forEach((key, idx) => {
+                const guessedType  = guessFieldType(key);
+                const guessedLabel = guessLabel(key);
+
+                const typeOptions = Object.entries(FIELD_TYPE_OPTIONS)
+                    .map(([v, l]) => `<option value="${v}" ${v === guessedType ? 'selected' : ''}>${l}</option>`)
+                    .join('');
+
+                const row = document.createElement('div');
+                row.className = 'scan-field-row border border-gray-200 rounded-lg p-3 bg-gray-50';
+                row.dataset.key = key;
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" class="scan-field-check w-4 h-4 accent-green-600" checked data-idx="${idx}">
+                        <code class="text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-mono">${key}</code>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="col-span-1">
+                            <label class="text-xs text-gray-500 mb-0.5 block">Label</label>
+                            <input type="text" class="scan-label w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                value="${guessedLabel}">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="text-xs text-gray-500 mb-0.5 block">Tipe Field</label>
+                            <select class="scan-type w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400">
+                                ${typeOptions}
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="text-xs text-gray-500 mb-0.5 block">Label Seksi</label>
+                            <input type="text" class="scan-section w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                placeholder="(opsional)">
+                        </div>
+                    </div>
+                    <div class="mt-1.5 flex items-center gap-2">
+                        <input type="checkbox" class="scan-required w-3.5 h-3.5 accent-red-500">
+                        <label class="text-xs text-gray-500">Wajib diisi</label>
+                    </div>`;
+                list.appendChild(row);
+            });
+        }
+
+        async function confirmScanFields() {
+            const rows = document.querySelectorAll('.scan-field-row');
+            const fields = [];
+
+            rows.forEach(row => {
+                const checked = row.querySelector('.scan-field-check').checked;
+                if (!checked) return;
+                fields.push({
+                    field_key:     row.dataset.key,
+                    label:         row.querySelector('.scan-label').value.trim() || row.dataset.key,
+                    field_type:    row.querySelector('.scan-type').value,
+                    section_label: row.querySelector('.scan-section').value.trim() || null,
+                    is_required:   row.querySelector('.scan-required').checked,
+                });
+            });
+
+            if (fields.length === 0) { showToast('Pilih minimal satu field.', false); return; }
+
+            const btn = document.getElementById('scan-confirm-btn');
+            btn.disabled = true;
+            btn.textContent = 'Menyimpan...';
+
+            try {
+                const res  = await fetch(BULK_STORE_URL, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ fields }),
+                });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.message || 'Gagal menyimpan.');
+
+                closeScanModal();
+                showToast(`${data.created} field berhasil ditambahkan. Halaman akan dimuat ulang...`);
+                setTimeout(() => location.reload(), 1500);
+            } catch(e) {
+                showToast(e.message, false);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Tambahkan Field Terpilih';
+            }
+        }
+
+        function closeScanModal() {
+            document.getElementById('scan-modal').classList.add('hidden');
+        }
+        document.getElementById('scan-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeScanModal();
+        });
     </script>
 
 @endsection
