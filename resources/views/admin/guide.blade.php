@@ -3,7 +3,7 @@
 @section('content')
 <div class="flex items-start justify-between mb-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-800">Panduan Sistem SIPADU</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Panduan Sistem eDocPUPRD</h1>
         <p class="text-sm text-gray-500 mt-1">
             Panduan penggunaan dan administrasi — Versi 1.0 | 2026 | by. Marvelous Makaluwu
         </p>
@@ -50,7 +50,7 @@
             <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Pengenalan Sistem</h2>
 
             <p class="text-sm text-gray-700 mb-4">
-                <strong>SIPADU</strong> (Sistem Generasi Administrasi Persuratan) adalah aplikasi web berbasis Laravel yang dirancang khusus untuk
+                <strong>{{ config('app.name') }}</strong> (Sistem Pembuatan Dokumen Digital) adalah aplikasi web berbasis Laravel yang dirancang khusus untuk
                 <strong>DINAS PEKERJAAN UMUM DAN PENATAAN RUANG DAERAH KOTA TOMOHON</strong>.
                 Sistem ini memungkinkan pegawai untuk membuat surat dan dokumen resmi secara otomatis berdasarkan template yang telah disiapkan oleh administrator.
             </p>
@@ -594,8 +594,8 @@ Sel A3: {% endfor %}</pre>
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">2. Clone dan setup project</p>
                     <x-code>
-git clone https://github.com/JustMarvell/DocumentMaker.git /var/www/sipadu
-cd /var/www/sipadu
+git clone https://github.com/JustMarvell/DocumentMaker.git /var/www/eDocPUPRD
+cd /var/www/eDocPUPRD
 composer install --no-dev
 cp .env.example .env && php artisan key:generate
 python3 -m venv venv && venv/bin/pip install docxtpl openpyxl jinja2
@@ -606,9 +606,9 @@ touch database/database.sqlite && php artisan migrate --seed
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">3. Set permission</p>
                     <x-code>
-sudo chown -R www-data:www-data /var/www/SIPADU
-sudo chmod -R 775 /var/www/sipadu/storage
-sudo chmod -R 775 /var/www/sipadu/public/cached_result
+sudo chown -R www-data:www-data /var/www/eDocPUPRD
+sudo chmod -R 775 /var/www/eDocPUPRD/storage
+sudo chmod -R 775 /var/www/eDocPUPRD/public/cached_result
                     </x-code>
                 </div>
                 <div>
@@ -616,7 +616,7 @@ sudo chmod -R 775 /var/www/sipadu/public/cached_result
                     <x-code>
                         sudo crontab -u www-data -e
 # Tambahkan baris berikut:
-* * * * * cd /var/www/sipadu && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/eDocPUPRD && php artisan schedule:run >> /dev/null 2>&1
 </x-code>
                 </div>
                 <div>
@@ -723,7 +723,7 @@ UPDATE users SET role = 'admin' WHERE email = 'admin@dinas.go.id';
         </section>
 
         <div class="text-center text-xs text-gray-400 py-4 border-t border-gray-200">
-            SIPADU — Sistem Generasi Administrasi Persuratan &nbsp;|&nbsp;
+            eDocPUPRD — Sistem Pembuatan Dokumen Digital &nbsp;|&nbsp;
             DINAS PUPRD KOTA TOMOHON &nbsp;|&nbsp;
             Panduan Versi 1.0 | 2026 | by. Marvelous Makaluwu
         </div>
