@@ -78,7 +78,6 @@ class SignatureRequestController extends Controller
             Log::error('Failed to send signature request email: ' . $e->getMessage());
 
             return redirect()->route('home')
-                ->with('success', "Permintaan tanda tangan berhasil dikirimkan ke {$official->staff_name}.")
                 ->with('email_warning', 'Notifikasi email gagal dikirim ke pejabat. Gunakan tombol kirim ulang jika diperlukan.');
         }
 
@@ -212,7 +211,6 @@ class SignatureRequestController extends Controller
         } catch (\Exception $e) {
             Log::error('Admin approve email failed: ' . $e->getMessage());
             return back()
-                ->with('success', 'Permintaan berhasil disetujui')
                 ->with('email_warning', 'Email notifikasi gagal dikirim ke pemohon. Gunakan tombol kirim ulang.');
         }
 
@@ -241,7 +239,6 @@ class SignatureRequestController extends Controller
         } catch (\Exception $e) {
             Log::error('Admin reject email failed: ' . $e->getMessage());
             return back()
-                ->with('success', 'Permintaan berhasil ditolak.')
                 ->with('email_warning', 'Email notifikasi gagal dikirim ke pemohon. Gunakan tombol kirim ulang.');
         }
 
