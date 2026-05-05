@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('/users', [AdminController::class,'users'])->name('users');
         Route::patch('/users/{user}/role', [AdminController::class,'updateUserRole'])->name('users.updateRole');
+        Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
 
         Route::get('/document-types', [AdminController::class,'documentTypes'])->name('document-types');
         Route::patch('/document-types/{documentType}/toggle', [AdminController::class,'toggleDocumentType'])->name('document-types.toggle');
