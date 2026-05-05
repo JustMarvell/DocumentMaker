@@ -647,7 +647,7 @@
                         <div class="space-y-0">
                             @foreach([
         ['Pilih Jenis Dokumen', 'Gunakan dropdown untuk memilih template.'],
-        ['Gunakan Autofill', 'Pilih nama dari panel biru untuk isi otomatis.'],
+        ['Gunakan Autofill', 'Pilih nama dari panel autofill untuk isi otomatis.'],
         ['Isi Form', 'Lengkapi semua field wajib (*).'],
         ['Centang Persetujuan', 'Konfirmasi kebenaran data.'],
         ['Klik Buat Dokumen', 'Sistem akan memproses dan menghasilkan file.'],
