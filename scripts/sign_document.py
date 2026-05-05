@@ -321,9 +321,9 @@ def _render_drawing_xml(xml_bytes: bytes, context: dict) -> bytes:
     return xml.encode("utf-8")
 
 def sign_xlsx(input_path: str, output_path: str, args: argparse.Namespace) -> None:
-    base_dir   = Path(__file__).resolve().parent.parent
-    dummy_sig_name = "transparent35mm.png"  
-    dummy_qr_name  = "dummy_qr.png"         
+    base_dir      = Path(__file__).resolve().parent.parent
+    dummy_sig_src = base_dir / "resources" / "img" / "transparent35mm.png"
+    dummy_qr_src  = base_dir / "resources" / "img" / "dummy_qr.png"
 
     use_image = args.use_image == "1"
     use_qr    = args.use_qr    == "1"
@@ -331,7 +331,6 @@ def sign_xlsx(input_path: str, output_path: str, args: argparse.Namespace) -> No
     with zipfile.ZipFile(input_path, "r") as z:
         zip_files = {name: z.read(name) for name in z.namelist()}
 
-    # render text placeholders in sharedStrings + drawings (nama_pejabat, etc.)
     text_ctx = {
         "{{nama_pejabat}}":    args.official_name,
         "{{jabatan_pejabat}}": args.official_position,
@@ -348,21 +347,24 @@ def sign_xlsx(input_path: str, output_path: str, args: argparse.Namespace) -> No
         if re.match(r"xl/drawings/.*\.xml$", name, re.IGNORECASE) and not name.endswith(".rels"):
             zip_files[name] = _render_drawing_xml(zip_files[name], text_ctx)
 
-    # replace dummy images by swapping bytes inside the zip
-    def swap_image(dummy_name: str, new_bytes: bytes):
+    # match by content, not filename <- fix
+    def swap_by_content(dummy_src: Path, new_bytes: bytes) -> bool:
+        if not dummy_src.exists():
+            return False
+        dummy_bytes = dummy_src.read_bytes()
         for zip_path in list(zip_files.keys()):
-            if zip_path.startswith("xl/media/") and Path(zip_path).name == dummy_name:
-                zip_files[zip_path] = new_bytes  # <- swap in place
+            if zip_path.startswith("xl/media/") and zip_files[zip_path] == dummy_bytes:
+                zip_files[zip_path] = new_bytes  # <- swap
                 return True
         return False
 
     if use_image:
         sig_path = args.sig_image if (args.sig_image and os.path.exists(args.sig_image)) else None
         if sig_path:
-            swap_image(dummy_sig_name, open(sig_path, "rb").read())
+            swap_by_content(dummy_sig_src, open(sig_path, "rb").read())
 
     if use_qr and args.verify_url:
-        swap_image(dummy_qr_name, make_qr_png(args.verify_url))
+        swap_by_content(dummy_qr_src, make_qr_png(args.verify_url))
 
     with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as out:
         for name, data in zip_files.items():
