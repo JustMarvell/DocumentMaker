@@ -89,6 +89,18 @@ class AdminController extends Controller
         return back()->with('success', "Role {$user->name} berhasil diubah menjadi {$request->role}.");
     }
 
+    public function destroyUser(User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        }
+
+        $name = $user->name;
+        $user->delete();
+
+        return back()->with('success', "Pengguna {$name} berhasil dihapus.");
+    }
+
     public function documentTypes() {
         $documentTypes = DocumentType::withCount('documentLogs')
             ->orderBy('name')
