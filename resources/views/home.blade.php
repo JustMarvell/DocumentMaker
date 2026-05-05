@@ -474,6 +474,12 @@
             </div>
         @endif
 
+        @if (session('email_warning'))
+            <div class="alert alert-warning mb-4 fade-up"
+                style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:0.85rem 1rem;font-size:0.82rem;color:#854d0e;">
+                ⚠ {{ session('email_warning') }}
+            </div>
+        @endif
 
         @if (session('error'))
             <div class="alert alert-error mb-4 fade-up">{{ session('error') }}</div>
@@ -707,11 +713,6 @@
         {{-- Requests panel --}}
         @auth
         <div id="panel-requests" style="display:none;">
-            @if (session('email_warning')) 
-                <div class="alert alert-warning mb-4 fade-up" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:0.85rem 1rem;font-size:0.82rem;color:#854d0e;">
-                    ⚠ {{ session('email_warning') }}
-                </div>
-            @endif
             @if ($signatureRequests->isEmpty())
                 <div class="form-card p-12 text-center fade-up" style="color:var(--slate-400);">
                     <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
