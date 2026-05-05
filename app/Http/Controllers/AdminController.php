@@ -619,10 +619,19 @@ class AdminController extends Controller
         $deleted = 0;
 
         foreach ($logs as $log) {
-            $path = public_path('cached_result/' . $log->output_filename);
-            if (file_exists($path)) {
+            $dir = public_path('cached_result/');
+            $base = pathinfo($log->output_filename, PATHINFO_FILENAME);
+
+            // delete the original file
+            $path = $dir . $log->output_filename;
+            if (file_exists($path))
                 unlink($path);
-            }
+
+            // delete the pdf preview if it exists
+            $pdfPath = $dir . $base . '.pdf';
+            if (file_exists($pdfPath))
+                unlink($pdfPath);
+
             if (is_null($log->deleted_at)) {
                 $log->update(['deleted_at' => now()]);
             }
