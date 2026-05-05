@@ -65,7 +65,7 @@ Route::middleware('auth')->group(function() {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
         Route::get('/logs', [AdminController::class,'logs'])->name('logs');
-        Route::delete('/logs/bulk-delete', [AdminController::class, 'bulkDeleteLogs'])->name('logs.bulk-delete'); // <- add
+        Route::delete('/logs/bulk-delete', [AdminController::class, 'bulkDeleteLogs'])->name('logs.bulk-delete');
 
         Route::get('/users', [AdminController::class,'users'])->name('users');
         Route::patch('/users/{user}/role', [AdminController::class,'updateUserRole'])->name('users.updateRole');
