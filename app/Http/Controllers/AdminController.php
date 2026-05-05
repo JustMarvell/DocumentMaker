@@ -610,4 +610,25 @@ class AdminController extends Controller
 
         return response()->json(['success' => true, 'created' => $created]);
     }
+
+    public function bulkDeleteLogs(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer|exists:document_logs,id']);
+
+        $logs = DocumentLog::whereIn('id', $request->ids)->get();
+        $deleted = 0;
+
+        foreach ($logs as $log) {
+            $path = public_path('cached_result/' . $log->output_filename);
+            if (file_exists($path)) {
+                unlink($path);
+            }
+            if (is_null($log->deleted_at)) {
+                $log->update(['deleted_at' => now()]);
+            }
+            $deleted++;
+        }
+
+        return back()->with('success', "{$deleted} dokumen berhasil dihapus.");
+    }
 }
