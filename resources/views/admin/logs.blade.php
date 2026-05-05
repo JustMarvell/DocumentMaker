@@ -93,7 +93,14 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3">{{ $log->documentType->name }}</td>
-                            <td class="px-4 py-3 text-xs text-gray-400 font-mono">{{ $log->output_filename }}</td>
+                            <td class="px-4 py-3 text-xs text-gray-400 font-mono">
+                                {{ $log->output_filename }}
+                                @if($log->signatureRequest?->signed_filename)
+                                    <span class="block text-purple-500 mt-0.5">
+                                        ✎ {{ $log->signatureRequest->signed_filename }}
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-4 py-3">
                                 @if ($log->status === 'success')
                                     <span
