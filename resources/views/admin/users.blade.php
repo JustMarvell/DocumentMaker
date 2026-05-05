@@ -15,6 +15,7 @@
                     <th class="px-4 py-3">Role</th>
                     <th class="px-4 py-3">Total Dokumen</th>
                     <th class="px-4 py-3">Ubah Role</th>
+                    <th class="px-4 py-3">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -47,6 +48,20 @@
                                     <button type="submit"
                                         class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">
                                         Simpan
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-xs text-gray-400">—</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3">
+                            @if ($user->id !== auth()->id())
+                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
+                                    onsubmit="return confirm('Hapus pengguna {{ addslashes($user->name) }}? Semua riwayat dokumen terkait akan ikut terhapus.')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">
+                                        Hapus
                                     </button>
                                 </form>
                             @else
