@@ -562,7 +562,7 @@
                                     @foreach ($slots as $slot)
                                         <div class="autofill-panel mb-4">
                                             <p style="font-size:0.74rem;font-weight:700;color:var(--navy-600);margin-bottom:0.6rem;letter-spacing:0.02em;">
-                                                Autofill — {{ $slot->slot_label }}
+                                                Autofill (Pilih Satu) — {{ $slot->slot_label }}
                                             </p>
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
