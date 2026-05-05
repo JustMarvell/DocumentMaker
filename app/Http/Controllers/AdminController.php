@@ -43,7 +43,7 @@ class AdminController extends Controller
 
     public function logs(Request $request) { 
 
-        $query = DocumentLog::with('user', 'documentType', 'status')
+        $query = DocumentLog::with('user', 'documentType', 'status' , 'signatureRequest')
             ->latest('generated_at');
         
         if ($request->filled('type')) {

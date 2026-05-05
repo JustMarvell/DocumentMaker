@@ -41,6 +41,8 @@
         <a href="{{ route('admin.logs') }}" class="text-sm text-gray-500 hover:underline">Reset</a>
     </form>
 
+    <div id="log-toast" style="display:none;position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9999;padding:0.55rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:500;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.22);transition:opacity 0.3s ease;white-space:nowrap;"></div>
+
     {{-- Bulk delete form --}}
     <form method="POST" action="{{ route('admin.logs.bulk-delete') }}" id="bulk-form">
         @csrf
@@ -73,6 +75,7 @@
                         <th class="px-4 py-3">Pengguna</th>
                         <th class="px-4 py-3">Jenis Dokumen</th>
                         <th class="px-4 py-3">File</th>
+                        <th class="px-4 py-3">Unduh</th>
                         <th class="px-4 py-3">Status</th>
                         <th class="px-4 py-3">Dibuat</th>
                         <th class="px-4 py-3">Diunduh</th>
@@ -87,13 +90,53 @@
                                     class="log-checkbox w-4 h-4 accent-red-500 cursor-pointer" onchange="updateCount()" />
                             </td>
                             <td class="px-4 py-3">
-                                {{ $log->user?->name ?? 'Guest' }}
+                                {{ $log->user?->name ?? 'Nama Tidak ada / Dihapus' }}
                                 @if($log->user?->nip)
                                     <span class="block text-xs text-gray-400">{{ $log->user->nip }}</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3">{{ $log->documentType->name }}</td>
-                            <td class="px-4 py-3 text-xs text-gray-400 font-mono">{{ $log->output_filename }}</td>
+                            <td class="px-4 py-3 text-xs text-gray-400 font-mono">
+                                {{ $log->output_filename }}
+                                @if($log->signatureRequest?->signed_filename)
+                                    <span class="block text-purple-500 mt-0.5">
+                                        ✎ {{ $log->signatureRequest->signed_filename }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-col gap-1">
+                                    {{-- Original file --}}
+                                    @php $origExists = file_exists(public_path('cached_result/' . $log->output_filename)); @endphp
+                                    @if($origExists)
+                                        <a href="{{ route('document.download', $log->output_filename) }}"
+                                            class="text-xs px-2 py-1 rounded border border-blue-400 text-blue-600 hover:bg-blue-50 text-center whitespace-nowrap">
+                                            ⬇ Dokumen
+                                        </a>
+                                    @else
+                                        <button type="button" onclick="showLogToast('File dokumen sudah dihapus.')"
+                                            class="text-xs px-2 py-1 rounded border border-gray-300 text-gray-400 cursor-pointer text-center whitespace-nowrap">
+                                            ⬇ Dokumen
+                                        </button>
+                                    @endif
+
+                                    {{-- Signed file --}}
+                                    @if($log->signatureRequest?->signed_filename)
+                                        @php $signedExists = file_exists(public_path('cached_result/' . $log->signatureRequest->signed_filename)); @endphp
+                                        @if($signedExists)
+                                            <a href="{{ route('document.download', $log->signatureRequest->signed_filename) }}"
+                                                class="text-xs px-2 py-1 rounded border border-purple-400 text-purple-600 hover:bg-purple-50 text-center whitespace-nowrap">
+                                                ✎ Signed
+                                            </a>
+                                        @else
+                                            <button type="button" onclick="showLogToast('File signed sudah dihapus.')"
+                                                class="text-xs px-2 py-1 rounded border border-gray-300 text-gray-400 cursor-pointer text-center whitespace-nowrap">
+                                                ✎ Signed
+                                            </button>
+                                        @endif
+                                    @endif
+                                </div>
+                            </td>
                             <td class="px-4 py-3">
                                 @if ($log->status === 'success')
                                     <span
@@ -156,6 +199,16 @@
             if (count === 0) return;
             if (!confirm(`Hapus ${count} dokumen terpilih? File fisik yang masih ada di server juga akan ikut dihapus.`)) return;
             document.getElementById('bulk-form').submit();
+        }
+
+        function showLogToast(msg) {
+            const t = document.getElementById('log-toast');
+            t.textContent = msg;
+            t.style.background = '#b91c1c';
+            t.style.display = 'block';
+            t.style.opacity = '1';
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.style.display = 'none', 300); }, 3000);
         }
     </script>
 
