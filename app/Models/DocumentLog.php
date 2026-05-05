@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\SignatureRequest;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DocumentLog extends Model
 {
@@ -29,4 +30,5 @@ class DocumentLog extends Model
     public function documentType(): BelongsTo { return $this->belongsTo(DocumentType::class); }
     public function status(): BelongsTo { return $this->belongsTo(DocumentLog::class); }
     public function signatureRequest(): HasOne { return $this->hasOne(SignatureRequest::class); }
+    public function signatureRequests(): HasMany { return $this->hasMany(SignatureRequest::class); }
 }
