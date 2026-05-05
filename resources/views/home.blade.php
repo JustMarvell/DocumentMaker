@@ -407,6 +407,10 @@
                         </span>
                     @endif
                 </button>
+                <button onclick="switchTab('history')" id="tab-history"
+                    style="padding:0.5rem 1rem;font-size:0.82rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;color:var(--slate-400);font-family:var(--font-body);">
+                    Riwayat Dokumen
+                </button>
             @endauth
         </div>
     </div>
@@ -792,6 +796,104 @@
                 </div>
             @endif
         </div>
+
+        <div id="panel-history" style="display:none;">
+    @if ($documentHistory->isEmpty())
+        <div class="form-card p-12 text-center fade-up" style="color:var(--slate-400);">
+            <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Belum ada riwayat dokumen.
+        </div>
+    @else
+        <div class="form-card overflow-hidden fade-up">
+            <table class="w-full text-sm">
+                <thead style="background:linear-gradient(90deg,var(--navy-800),var(--navy-700));">
+                    <tr>
+                        <th style="padding:0.75rem 1rem;text-align:left;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">Jenis Dokumen</th>
+                        <th style="padding:0.75rem 1rem;text-align:left;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">File</th>
+                        <th style="padding:0.75rem 1rem;text-align:center;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">Status</th>
+                        <th style="padding:0.75rem 1rem;text-align:center;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">TTD</th>
+                        <th style="padding:0.75rem 1rem;text-align:left;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">Dibuat</th>
+                        <th style="padding:0.75rem 1rem;text-align:center;color:rgba(255,255,255,0.85);font-size:0.72rem;letter-spacing:0.05em;font-weight:600;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($documentHistory as $log)
+                    @php
+                        $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
+                        $fileExists = file_exists(public_path('cached_result/' . $log->output_filename));
+                        $signedExists = $sigReq?->signed_filename && file_exists(public_path('cached_result/' . $sigReq->signed_filename));
+                    @endphp
+                    <tr style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
+                        onmouseover="this.style.background='rgba(42,82,152,0.03)'"
+                        onmouseout="this.style.background=''">
+                        <td style="padding:0.75rem 1rem;">
+                            <p style="font-weight:600;color:var(--navy-800);font-size:0.83rem;">{{ $log->documentType->name }}</p>
+                        </td>
+                        <td style="padding:0.75rem 1rem;">
+                            <p style="font-family:var(--font-mono);font-size:0.68rem;color:var(--slate-400);">{{ $log->output_filename }}</p>
+                            @if (!$fileExists && !$signedExists)
+                                <p style="font-size:0.68rem;color:#b91c1c;margin-top:0.15rem;">⚠ File dihapus</p>
+                            @endif
+                        </td>
+                        <td style="padding:0.75rem 1rem;text-align:center;">
+                            @if ($log->status === 'success')
+                                <span style="background:#dcfce7;color:#15803d;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Berhasil</span>
+                            @else
+                                <span style="background:#fee2e2;color:#b91c1c;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Gagal</span>
+                            @endif
+                        </td>
+                        <td style="padding:0.75rem 1rem;text-align:center;">
+                            @if (!$sigReq)
+                                <span style="color:var(--slate-300);font-size:0.72rem;">—</span>
+                            @elseif ($sigReq->status === 'approved')
+                                <span style="background:#dcfce7;color:#15803d;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Ditandatangani</span>
+                            @elseif ($sigReq->status === 'pending')
+                                <span style="background:#fef9c3;color:#854d0e;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Menunggu</span>
+                            @else
+                                <span style="background:#fee2e2;color:#b91c1c;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Ditolak</span>
+                            @endif
+                        </td>
+                        <td style="padding:0.75rem 1rem;font-size:0.78rem;color:var(--slate-500);">
+                            {{ $log->generated_at->locale('id')->translatedFormat('d M Y, H:i') }}
+                        </td>
+                        <td style="padding:0.75rem 1rem;text-align:center;">
+                            <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:center;">
+                                @if ($signedExists)
+                                    <a href="{{ route('document.download', $sigReq->signed_filename) }}"
+                                        style="font-size:0.75rem;color:#fff;background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.3rem;">
+                                        ⬇ Bertanda Tangan
+                                    </a>
+                                @endif
+                                @if ($fileExists)
+                                    <a href="{{ route('document.download', $log->output_filename) }}"
+                                        style="font-size:0.75rem;color:#fff;background:linear-gradient(135deg,#15803d,#16a34a);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.3rem;">
+                                        ⬇ Unduh
+                                    </a>
+                                @elseif (!$signedExists)
+                                    <button onclick="showToast('File telah dihapus dari server.', 'error')"
+                                        style="font-size:0.75rem;color:var(--slate-400);background:transparent;border:1px solid var(--slate-200);padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;font-family:var(--font-body);">
+                                        Tidak Tersedia
+                                    </button>
+                                @endif
+                                @if ($log->documentType->signature_enabled && !$sigReq && $fileExists)
+                                    <a href="{{ route('signature.create', $log) }}"
+                                        style="font-size:0.72rem;color:var(--navy-600);padding:0.25rem 0.6rem;border:1px solid var(--navy-200);border-radius:6px;text-decoration:none;transition:all 0.15s;"
+                                        onmouseover="this.style.background='var(--navy-100)'"
+                                        onmouseout="this.style.background=''">
+                                        Minta TTD
+                                    </a>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
+</div>
         @endauth
     </main>
 
@@ -1119,19 +1221,18 @@
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePreview(); });
 
         function switchTab(tab) {
-            const isForm = tab === 'form';
-            document.getElementById('panel-form').style.display = isForm ? '' : 'none';
-            const reqPanel = document.getElementById('panel-requests');
-            if (reqPanel) reqPanel.style.display = isForm ? 'none' : '';
+            const panels = { form: 'panel-form', requests: 'panel-requests', history: 'panel-history' };
+            const tabs   = { form: 'tab-form',   requests: 'tab-requests',   history: 'tab-history'   };
 
-            const tabForm = document.getElementById('tab-form');
-            const tabReq  = document.getElementById('tab-requests');
-            tabForm.style.borderBottomColor = isForm ? 'var(--navy-600)' : 'transparent';
-            tabForm.style.color = isForm ? 'var(--navy-700)' : 'var(--slate-400)';
-            if (tabReq) {
-                tabReq.style.borderBottomColor = !isForm ? 'var(--navy-600)' : 'transparent';
-                tabReq.style.color = !isForm ? 'var(--navy-700)' : 'var(--slate-400)';
-            }
+            Object.keys(panels).forEach(function(key) {
+                const panel = document.getElementById(panels[key]);
+                const tabEl = document.getElementById(tabs[key]);
+                if (panel) panel.style.display = key === tab ? '' : 'none';
+                if (tabEl) {
+                    tabEl.style.borderBottomColor = key === tab ? 'var(--navy-600)' : 'transparent';
+                    tabEl.style.color = key === tab ? 'var(--navy-700)' : 'var(--slate-400)';
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function() {

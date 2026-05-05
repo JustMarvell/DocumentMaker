@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 use App\Services\PdfConverter;
-
+use App\Models\DocumentNumberCounter;
+use App\Models\SignatureRequest;
 
 class DocumentController extends Controller
 {
@@ -31,20 +32,27 @@ class DocumentController extends Controller
             ->get()
             ->groupBy('document_type_id');
 
-        $numberCounters = \App\Models\DocumentNumberCounter::whereIn('document_type_id', $documentTypes->pluck('id'))
+        $numberCounters = DocumentNumberCounter::whereIn('document_type_id', $documentTypes->pluck('id'))
             ->where('enabled', true)
             ->pluck('field_key', 'document_type_id');
 
         $signatureRequests = collect();
+        $documentHistory = collect();
         if (auth()->check()) {
-            $signatureRequests = \App\Models\SignatureRequest::with(['documentLog.documentType', 'official'])
+            $signatureRequests = SignatureRequest::with(['documentLog.documentType', 'official'])
                 ->where('user_id', auth()->id())
                 ->latest('requested_at')
                 ->take(20)
                 ->get();
+
+            $documentHistory = DocumentLog::with(['documentType', 'signatureRequests.official'])
+                ->where('user_id', auth()->id())
+                ->latest('generated_at')
+                ->take(50)
+                ->get();
         }
 
-        return view('home', compact('documentTypes', 'allFields', 'numberCounters', 'signatureRequests'));
+        return view('home', compact('documentTypes', 'allFields', 'numberCounters', 'signatureRequests', 'documentHistory'));
     }
 
     public function generate(Request $request) {
