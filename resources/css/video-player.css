@@ -1,0 +1,242 @@
+.sipadu-video-player {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 1.5rem;
+}
+
+.vp-title-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.9rem;
+    background: linear-gradient(90deg, var(--navy-800), var(--navy-700));
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.vp-wrap {
+    position: relative;
+    background: #000;
+    /* aspect-ratio keeps the player 16:9 */
+    aspect-ratio: 16 / 9;
+    width: 100%;
+}
+
+.vp-video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+}
+
+/* big play overlay */
+.vp-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.vp-overlay.hide {
+    opacity: 0;
+}
+
+.vp-overlay.clickable {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.vp-big-play {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(201, 168, 76, 0.85);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0d1526;
+    transition: transform 0.15s, background 0.15s;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.vp-big-play svg {
+    width: 32px;
+    height: 32px;
+    margin-left: 4px;
+}
+
+.vp-big-play:hover {
+    transform: scale(1.1);
+    background: var(--gold-400);
+}
+
+/* controls bar */
+.vp-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 0.5rem 0.4rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.vp-wrap:hover .vp-controls,
+.vp-wrap.paused .vp-controls {
+    opacity: 1;
+}
+
+/* progress bar */
+.vp-progress-wrap {
+    position: relative;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 2px;
+}
+
+.vp-buffered,
+.vp-played {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 3px;
+    border-radius: 3px;
+    pointer-events: none;
+    transition: width 0.1s linear;
+}
+
+.vp-buffered {
+    background: rgba(255, 255, 255, 0.25);
+    width: 0;
+}
+
+.vp-played {
+    background: var(--gold-400);
+    width: 0;
+}
+
+.vp-seek {
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+}
+
+.vp-progress-wrap:hover .vp-buffered,
+.vp-progress-wrap:hover .vp-played {
+    height: 5px;
+}
+
+.vp-tooltip {
+    position: absolute;
+    bottom: 22px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    font-size: 0.68rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    pointer-events: none;
+    white-space: nowrap;
+    display: none;
+    transform: translateX(-50%);
+}
+
+.vp-progress-wrap:hover .vp-tooltip {
+    display: block;
+}
+
+/* bottom row */
+.vp-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vp-left,
+.vp-right {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.vp-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 0.3rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, background 0.15s;
+}
+
+.vp-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.vp-btn:hover {
+    color: var(--gold-400);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* volume */
+.vp-volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.vp-volume {
+    width: 60px;
+    accent-color: var(--gold-400);
+    cursor: pointer;
+}
+
+.vp-time {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: var(--font-mono);
+    padding-left: 0.25rem;
+    white-space: nowrap;
+}
+
+/* speed */
+.vp-speed {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.7rem;
+    padding: 0.15rem 0.25rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+
+.vp-speed option {
+    background: #1e2a3a;
+    color: #fff;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────────── */
