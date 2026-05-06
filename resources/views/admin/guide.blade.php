@@ -355,6 +355,10 @@
         </section>
         <section id="template" class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Panduan Membuat Template Dokumen</h2>
+            @include('components.video-player', [
+                'src'    => 'videos/test1.mp4',
+                'title'  => '1. Cara Menambah Template Baru',
+            ])
 
             <div class="bg-red-50 border border-red-200 rounded px-3 py-2 text-sm text-red-800 mb-4">
                 <strong>Aturan Terpenting:</strong> Nama variabel dalam template HARUS PERSIS SAMA dengan Field Key yang didefinisikan di panel admin.
