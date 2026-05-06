@@ -82,7 +82,7 @@
             @endif
 
             <p style="color:var(--gold-400);font-size:0.65rem;letter-spacing:0.07em;text-transform:uppercase;margin-top:0.5rem;">
-                eDocPUPRD — Dinas PUPRD Kota Tomohon
+                {{ config('app.name') }} — Dinas PUPRD Kota Tomohon
             </p>
         </div>
 
@@ -125,14 +125,14 @@
                             <span class="info-value">{{ $signatureRequest->official->position }}</span>
                         </div>
                     @endif
-                    @if ($signatureRequest->official?->nip)
+                    <!-- @if ($signatureRequest->official?->nip)
                         <div class="info-row">
                             <span class="info-label">NIP</span>
                             <span class="info-value" style="font-family:var(--font-mono);font-size:0.75rem;">
                                 {{ $signatureRequest->official->nip }}
                             </span>
                         </div>
-                    @endif
+                    @endif -->
                     <div class="info-row">
                         <span class="info-label">Status</span>
                         <span class="info-value" style="color:{{ $signatureRequest->isApproved() ? '#4ade80' : '#f87171' }};">
