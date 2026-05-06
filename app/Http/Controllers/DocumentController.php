@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 use App\Services\IlovePdfConverter;
+use App\Models\PdfConversionSetting;
 use App\Models\DocumentNumberCounter;
 use App\Models\SignatureRequest;
 
@@ -196,23 +197,34 @@ class DocumentController extends Controller
         $filename = basename($filename);
         $sourcePath = public_path("cached_result/{$filename}");
 
-        abort_unless(file_exists($sourcePath), 404);
+        if (!file_exists($sourcePath)) {
+            return response()->json(['error' => 'File dokumen tidak ditemukan. Mungkin sudah terhapus otomatis.'], 404);
+        }
 
-        // PDF filename: same UUID base, .pdf extension
         $pdfFilename = pathinfo($filename, PATHINFO_FILENAME) . '.pdf';
         $pdfPath = public_path("cached_result/{$pdfFilename}");
 
-        // Generate PDF if it doesn't exist yet
         if (!file_exists($pdfPath)) {
+            $setting = PdfConversionSetting::instance();
+
+            if (!$setting->hasQuota()) {
+                return response()->json(['error' => 'Kuota konversi PDF bulan ini telah habis. Hubungi administrator.'], 503);
+            }
+
+            if (!$setting->iloveapi_public_key || !$setting->iloveapi_secret_key) {
+                return response()->json(['error' => 'API key iLoveAPI belum dikonfigurasi. Hubungi administrator.'], 500);
+            }
+
             $converter = new IlovePdfConverter();
             $pdfFilename = $converter->convert($filename);
 
             if (!$pdfFilename) {
-                abort(500, 'Gagal membuat preview. Pastikan LibreOffice terinstall di server.');
+                return response()->json(['error' => 'Konversi PDF gagal. Periksa log server atau konfigurasi iLoveAPI.'], 500);
             }
+
+            $pdfPath = public_path("cached_result/{$pdfFilename}");
         }
 
-        // Stream the PDF directly to the browser for iframe display
         return response()->file($pdfPath, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="preview.pdf"',
@@ -282,13 +294,9 @@ class DocumentController extends Controller
         $downloadUrl = route('document.download', ['filename' => $uniqueFilename]);
         $previewUrl = null;
 
-        // Generate PDF preview immediately if preview is enabled for this type
+        // Generate PDF preview
         if ($documentType->preview_enabled) {
-            $converter = new IlovePdfConverter();
-            $pdfFilename = $converter->convert($uniqueFilename);
-            if ($pdfFilename) {
-                $previewUrl = route('document.preview', ['filename' => $uniqueFilename]);
-            }
+            $previewUrl = route('document.preview', ['filename' => $uniqueFilename]);
         }
 
         return back()
