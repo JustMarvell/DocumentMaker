@@ -33,10 +33,16 @@
             Browser Anda tidak mendukung video HTML5.
         </video>
 
-        {{-- Big play overlay --}}
+        {{-- Buffering spinner --}}
+        <div class="vp-buffering" data-buffering style="display:none;">
+            <div class="vp-spin"></div>
+        </div>
+
+        {{-- Big play/pause overlay --}}
         <div class="vp-overlay" data-overlay>
             <button class="vp-big-play" data-play-btn aria-label="Play">
-                <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="icon-big-play" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="icon-big-pause hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             </button>
         </div>
 
