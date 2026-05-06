@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
-use App\Services\PdfConverter;
+use App\Services\IlovePdfConverter;
 use App\Models\DocumentNumberCounter;
 use App\Models\SignatureRequest;
 
@@ -204,7 +204,7 @@ class DocumentController extends Controller
 
         // Generate PDF if it doesn't exist yet
         if (!file_exists($pdfPath)) {
-            $converter = new PdfConverter();
+            $converter = new IlovePdfConverter();
             $pdfFilename = $converter->convert($filename);
 
             if (!$pdfFilename) {
@@ -284,7 +284,7 @@ class DocumentController extends Controller
 
         // Generate PDF preview immediately if preview is enabled for this type
         if ($documentType->preview_enabled) {
-            $converter = new PdfConverter();
+            $converter = new IlovePdfConverter();
             $pdfFilename = $converter->convert($uniqueFilename);
             if ($pdfFilename) {
                 $previewUrl = route('document.preview', ['filename' => $uniqueFilename]);
