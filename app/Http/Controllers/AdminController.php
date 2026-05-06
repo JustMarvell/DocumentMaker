@@ -652,4 +652,36 @@ class AdminController extends Controller
 
         return back()->with('success', "{$deleted} dokumen berhasil dihapus.");
     }
+
+    public function pdfSettings()
+    {
+        $setting = \App\Models\PdfConversionSetting::instance();
+        return view('admin.pdf-settings', compact('setting'));
+    }
+
+    public function savePdfSettings(Request $request)
+    {
+        $request->validate([
+            'monthly_limit' => 'required|integer|min:1',
+            'reset_on' => 'required|in:monthly,manual',
+            'iloveapi_public_key' => 'nullable|string|max:255',
+            'iloveapi_secret_key' => 'nullable|string|max:255',
+        ]);
+
+        $setting = \App\Models\PdfConversionSetting::instance();
+        $setting->update($request->only([
+            'monthly_limit',
+            'reset_on',
+            'iloveapi_public_key',
+            'iloveapi_secret_key',
+        ]));
+
+        return back()->with('success', 'Pengaturan PDF berhasil disimpan.');
+    }
+
+    public function resetPdfCounter()
+    {
+        \App\Models\PdfConversionSetting::instance()->resetNow();
+        return back()->with('success', 'Counter konversi PDF direset ke 0.');
+    }
 }
