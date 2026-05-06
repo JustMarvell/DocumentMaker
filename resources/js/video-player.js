@@ -24,9 +24,11 @@
         const fsBtn = root.querySelector('[data-fullscreen]');
         const wrap = root.querySelector('.vp-wrap');
 
-        // icons helpers
         const iconPlay = ppBtn.querySelector('.icon-play');
         const iconPause = ppBtn.querySelector('.icon-pause');
+        const iconBigPlay = root.querySelector('.icon-big-play');
+        const iconBigPause = root.querySelector('.icon-big-pause');
+        const bufferingEl = root.querySelector('[data-buffering]');
         const iconVolOn = mute.querySelector('.icon-vol-on');
         const iconVolOff = mute.querySelector('.icon-vol-off');
         const iconFsIn = fsBtn.querySelector('.icon-fs-enter');
@@ -35,10 +37,20 @@
         function setPlayIcons(playing) {
             iconPlay.classList.toggle('hidden', playing);
             iconPause.classList.toggle('hidden', !playing);
-            overlay.classList.toggle('hide', playing);
-            overlay.classList.toggle('clickable', !playing);
-            wrap.classList.toggle('paused', !playing);
+            iconBigPlay.classList.toggle('hidden', playing);
+            iconBigPause.classList.toggle('hidden', !playing);
+            wrap.classList.toggle('playing', playing);
         }
+
+        // buffering indicator
+        function showBuffering(show) {
+            bufferingEl.style.display = show ? 'flex' : 'none';
+        }
+        video.addEventListener('waiting', () => showBuffering(true));
+        video.addEventListener('playing', () => showBuffering(false));
+        video.addEventListener('canplay', () => showBuffering(false));
+        video.addEventListener('stalled', () => showBuffering(true));
+        video.addEventListener('suspend', () => { if (!video.paused) showBuffering(true); });
 
         function setVolIcons() {
             const muted = video.muted || video.volume === 0;
@@ -59,10 +71,7 @@
             }
         }
 
-        bigPlay.addEventListener('click', togglePlay);
-        overlay.addEventListener('click', function (e) {
-            if (e.target === overlay) togglePlay();
-        });
+        overlay.addEventListener('click', togglePlay);
         ppBtn.addEventListener('click', togglePlay);
 
         video.addEventListener('play', () => setPlayIcons(true));
