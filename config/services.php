@@ -38,5 +38,6 @@ return [
     'iloveapi' => [
         'public_key' => env('SERVICES_ILOVEAPI_PUBLIC_KEY'),
         'secret_key' => env('SERVICES_ILOVEAPI_SECRET_KEY'),
+        'base_url' => env('API_BASE_URL'),
     ]
 ];
