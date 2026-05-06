@@ -60,7 +60,7 @@ class IlovePdfConverter
             // 2. Start task
             $startRes = Http::timeout(15)
                 ->withToken($token)
-                ->post(self::BASE . '/start/officetopdf');
+                ->post(self::BASE . '/start/officepdf');
             if (!$startRes->successful()) {
                 Log::error('IlovePdfConverter: start failed', ['body' => $startRes->body()]);
                 return null;
@@ -84,7 +84,7 @@ class IlovePdfConverter
                 ->withToken($token)
                 ->post("https://{$server}/v1/process", [
                     'task' => $taskId,
-                    'tool' => 'officetopdf',
+                    'tool' => 'officepdf',
                     'files' => [
                         [
                             'server_filename' => $serverFilename,
@@ -110,7 +110,6 @@ class IlovePdfConverter
             $pdfPath = $sourceDir . DIRECTORY_SEPARATOR . $pdfFilename;
             file_put_contents($pdfPath, $downloadRes->body());
 
-            // Increment usage
             $setting->incrementUsage();
 
             return $pdfFilename;
