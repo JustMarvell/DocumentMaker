@@ -35,7 +35,7 @@ class PdfConversionSetting extends Model
         return max(0, $this->monthly_limit - $this->used_count);
     }
  
-    public function increment(): void
+    public function incrementUsage(): void
     {
         $this->autoReset();
         $this->increment('used_count');

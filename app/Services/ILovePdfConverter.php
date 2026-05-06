@@ -111,7 +111,7 @@ class IlovePdfConverter
             file_put_contents($pdfPath, $downloadRes->body());
 
             // Increment usage
-            $setting->increment();
+            $setting->incrementUsage();
 
             return $pdfFilename;
 
