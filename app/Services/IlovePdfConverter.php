@@ -19,8 +19,6 @@ use Illuminate\Support\Facades\Log;
  */
 class IlovePdfConverter
 {
-    private const BASE = 'https://api.ilovepdf.com/v1';
-
     public function convert(string $sourceFilename): ?string
     {
         $setting = PdfConversionSetting::instance();
@@ -48,7 +46,7 @@ class IlovePdfConverter
 
         try {
             // 1. Auth
-            $authRes = Http::timeout(15)->post(self::BASE . '/auth', [
+            $authRes = Http::timeout(15)->post(config('services.iloveapi.base_url') . '/auth', [
                 'public_key' => $publicKey,
             ]);
             if (!$authRes->successful()) {
@@ -58,9 +56,9 @@ class IlovePdfConverter
             $token = $authRes->json('token');
 
             // 2. Start task
-            $startRes = Http::timeout(15)
+            $startRes = Http::timeout(60)
                 ->withToken($token)
-                ->post(self::BASE . '/start/officepdf');
+                ->get(config('services.iloveapi.base_url') . '/start/officepdf');
             if (!$startRes->successful()) {
                 Log::error('IlovePdfConverter: start failed', ['body' => $startRes->body()]);
                 return null;
