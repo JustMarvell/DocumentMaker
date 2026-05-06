@@ -21,7 +21,6 @@
 .vp-wrap {
     position: relative;
     background: #000;
-    /* aspect-ratio keeps the player 16:9 */
     aspect-ratio: 16 / 9;
     width: 100%;
 }
@@ -33,26 +32,18 @@
     object-fit: contain;
 }
 
-/* big play overlay */
+/* big play overlay — always covers the video so clicks are captured */
 .vp-overlay {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.2s;
-    pointer-events: none;
-}
-
-.vp-overlay.hide {
-    opacity: 0;
-}
-
-.vp-overlay.clickable {
     pointer-events: auto;
     cursor: pointer;
 }
 
+/* big play button — visible when paused OR when hovering while playing */
 .vp-big-play {
     width: 64px;
     height: 64px;
@@ -64,19 +55,61 @@
     align-items: center;
     justify-content: center;
     color: #0d1526;
-    transition: transform 0.15s, background 0.15s;
+    transition: transform 0.15s, background 0.15s, opacity 0.2s;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .vp-big-play svg {
     width: 32px;
     height: 32px;
+}
+
+.vp-big-play .icon-big-play {
     margin-left: 4px;
 }
 
 .vp-big-play:hover {
     transform: scale(1.1);
     background: var(--gold-400);
+}
+
+.vp-wrap.playing .vp-big-play {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.vp-wrap.playing:hover .vp-big-play {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* buffering spinner */
+.vp-buffering {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.vp-spin {
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--gold-400);
+    border-radius: 50%;
+    animation: vp-spin 0.75s linear infinite;
+}
+
+@keyframes vp-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* controls bar */
@@ -89,10 +122,11 @@
     background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
     opacity: 0;
     transition: opacity 0.25s;
+    z-index: 5;
 }
 
 .vp-wrap:hover .vp-controls,
-.vp-wrap.paused .vp-controls {
+.vp-wrap:not(.playing) .vp-controls {
     opacity: 1;
 }
 
