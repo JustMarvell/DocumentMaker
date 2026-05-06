@@ -821,9 +821,9 @@
                 <tbody>
                     @foreach ($documentHistory as $log)
                     @php
-                        $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
-                        $fileExists = file_exists(public_path('cached_result/' . $log->output_filename));
-                        $signedExists = $sigReq?->signed_filename && file_exists(public_path('cached_result/' . $sigReq->signed_filename));
+            $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
+            $fileExists = file_exists(public_path('cached_result/' . $log->output_filename));
+            $signedExists = $sigReq?->signed_filename && file_exists(public_path('cached_result/' . $sigReq->signed_filename));
                     @endphp
                     <tr style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
                         onmouseover="this.style.background='rgba(42,82,152,0.03)'"
@@ -1228,6 +1228,12 @@
                 errMsg.textContent = e.message;
             }
         }
+
+        function closePreview() {
+            document.getElementById('preview-modal').style.display = 'none';
+            document.getElementById('preview-iframe').src = '';
+            document.body.style.overflow = '';
+        }       
 
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePreview(); });
 
