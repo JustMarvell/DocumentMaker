@@ -821,9 +821,9 @@
                 <tbody>
                     @foreach ($documentHistory as $log)
                     @php
-                        $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
-                        $fileExists = file_exists(public_path('cached_result/' . $log->output_filename));
-                        $signedExists = $sigReq?->signed_filename && file_exists(public_path('cached_result/' . $sigReq->signed_filename));
+            $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
+            $fileExists = file_exists(public_path('cached_result/' . $log->output_filename));
+            $signedExists = $sigReq?->signed_filename && file_exists(public_path('cached_result/' . $sigReq->signed_filename));
                     @endphp
                     <tr style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
                         onmouseover="this.style.background='rgba(42,82,152,0.03)'"
@@ -1192,31 +1192,48 @@
             setTimeout(() => row.remove(), 160);
         }
 
-        function openPreview(previewUrl) {
+        async function openPreview(previewUrl) {
             const modal   = document.getElementById('preview-modal');
             const iframe  = document.getElementById('preview-iframe');
             const loading = document.getElementById('preview-loading');
             const error   = document.getElementById('preview-error');
+            const errMsg  = document.getElementById('preview-error-msg');
+
             iframe.classList.add('hidden');
-            loading.classList.remove('hidden');
             error.classList.add('hidden');
+            loading.classList.remove('hidden');
             iframe.src = '';
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            iframe.onload = function() { loading.classList.add('hidden'); iframe.classList.remove('hidden'); };
-            iframe.onerror = function() {
+
+            try {
+                // fetch first to check for errors before loading into iframe
+                const res = await fetch(previewUrl);
+
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.error || `Server error ${res.status}`);
+                }
+
+                // success — load into iframe
+                iframe.onload = function () {
+                    loading.classList.add('hidden');
+                    iframe.classList.remove('hidden');
+                };
+                iframe.src = previewUrl;
+
+            } catch (e) {
                 loading.classList.add('hidden');
                 error.classList.remove('hidden');
-                document.getElementById('preview-error-msg').textContent = 'Pastikan LibreOffice terinstall di server.';
-            };
-            iframe.src = previewUrl;
+                errMsg.textContent = e.message;
+            }
         }
 
         function closePreview() {
             document.getElementById('preview-modal').style.display = 'none';
             document.getElementById('preview-iframe').src = '';
             document.body.style.overflow = '';
-        }
+        }       
 
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePreview(); });
 

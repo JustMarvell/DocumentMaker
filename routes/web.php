@@ -118,6 +118,10 @@ Route::middleware('auth')->group(function() {
         Route::patch('/signatures/{signatureRequest}/resend-result', [SignatureRequestController::class, 'resendResultEmail'])->name('signatures.resend-result');
         
         Route::post('/test-email', [SignatureRequestController::class, 'testEmail'])->name('test-email');
+
+        Route::get('/pdf-settings', [AdminController::class, 'pdfSettings'])->name('pdf-settings');
+        Route::post('/pdf-settings', [AdminController::class, 'savePdfSettings'])->name('pdf-settings.save');
+        Route::patch('/pdf-settings/reset', [AdminController::class, 'resetPdfCounter'])->name('pdf-settings.reset');
     });
 
     Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');
