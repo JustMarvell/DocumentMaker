@@ -43,7 +43,7 @@ def main() -> None:
     # Resolve paths
     base_dir      = Path(__file__).resolve().parent.parent
     template_path = base_dir / "document_templates" / args.template
-    output_dir    = base_dir / "public" / "cached_result"
+    output_dir    = base_dir / "storage" / "app" / "cached_result"
     output_path   = output_dir / args.output_filename
 
     if not template_path.exists():
