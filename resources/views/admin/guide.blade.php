@@ -40,6 +40,12 @@
                 <a href="#preview"         class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Fitur Preview</a>
                 <a href="#scheduler"       class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Pembersihan Otomatis</a>
                 <a href="#deployment"      class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Deployment</a>
+                <a href="#digital-signature" class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Tanda Tangan Digital</a>
+                <a href="#ttd-flow"          class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Alur TTD</a>
+                <a href="#ttd-template"      class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700 pl-5">↳ Template TTD</a>
+                <a href="#nomor-surat"       class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Nomor Surat Otomatis</a>
+                <a href="#scan-template"     class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Scan Template</a>
+                <a href="#pdf-preview"       class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Preview PDF (iLoveAPI)</a>
                 <a href="#troubleshooting" class="toc-link block py-1 px-2 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-700">Troubleshooting</a>
             </nav>
         </div>
@@ -462,74 +468,124 @@
 
             <h3 id="contoh" class="text-sm font-semibold text-gray-700 mb-3">Contoh Template Lengkap</h3>
 
-            <div class="space-y-4">
-                <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 1: Surat Tugas (Word)</p>
-                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
-                        <pre>SURAT TUGAS
-Nomor: @verbatim{{ letter_number }}@endverbatim
+            {{-- PDF Viewer --}}
+            <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm" id="pdf-viewer-container">
 
-Yang bertanda tangan di bawah ini menerangkan bahwa:
-Nama     : @verbatim{{ employee_name }}@endverbatim
-NIP      : @verbatim{{ employee_nip }}@endverbatim
-Jabatan  : @verbatim{{ employee_position }}@endverbatim
-Unit     : @verbatim{{ employee_work_unit }}@endverbatim
+                {{-- Tab bar --}}
+                <div class="flex gap-0 border-b border-gray-200 bg-gray-50 overflow-x-auto" id="pdf-tab-bar">
+                    @foreach([
+                        ['surat-tugas', 'Surat Tugas'],
+                        ['daftar-hadir', 'Daftar Hadir (Loop)'],
+                        ['kondisional', 'Kondisional'],
+                        ['loop-excel', 'Loop di Excel'],
+                    ] as $i => [$key, $label])
+                    <button
+                        onclick="switchPdfTab('{{ $key }}')"
+                        id="pdf-tab-{{ $key }}"
+                        class="pdf-tab-btn px-4 py-2.5 text-xs font-semibold whitespace-nowrap border-b-2 transition-colors
+                            {{ $i === 0 ? 'border-blue-600 text-blue-700 bg-white' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-white' }}">
+                        {{ $label }}
+                    </button>
+                    @endforeach
+                </div>
 
-Ditugaskan melaksanakan perjalanan dinas ke:
-@verbatim{{ destination_agency }}@endverbatim
+                {{-- Toolbar --}}
+                <div class="flex items-center justify-between px-3 py-2 bg-gray-800 gap-2">
 
-Pada tanggal @verbatim{{ departure_date }}@endverbatim s.d. @verbatim{{ return_date }}@endverbatim
+                    {{-- Page nav --}}
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="pdfPrevPage()" id="pdf-prev"
+                            class="w-7 h-7 rounded flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition disabled:opacity-30"
+                            title="Halaman sebelumnya">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <span class="text-xs text-gray-300 font-mono min-w-[70px] text-center">
+                            <span id="pdf-page-current">1</span>
+                            <span class="text-gray-500">/</span>
+                            <span id="pdf-page-total">—</span>
+                        </span>
+                        <button onclick="pdfNextPage()" id="pdf-next"
+                            class="w-7 h-7 rounded flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition disabled:opacity-30"
+                            title="Halaman berikutnya">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
 
-Tomohon, @verbatim{{ letter_date }}@endverbatim
-Kepala Dinas,
+                    {{-- Current tab label --}}
+                    <span id="pdf-tab-label" class="text-xs text-gray-400 flex-1 text-center truncate px-2">Surat Tugas</span>
 
-@verbatim{{ head_of_office_name }}@endverbatim
-NIP. @verbatim{{ head_of_office_nip }}@endverbatim</pre>
+                    {{-- Zoom + fullscreen --}}
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="pdfZoomOut()"
+                            class="w-7 h-7 rounded flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition"
+                            title="Perkecil">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/>
+                            </svg>
+                        </button>
+                        <span id="pdf-zoom-label" class="text-xs text-gray-400 font-mono w-10 text-center">100%</span>
+                        <button onclick="pdfZoomIn()"
+                            class="w-7 h-7 rounded flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition"
+                            title="Perbesar">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                            </svg>
+                        </button>
+                        <div class="w-px h-4 bg-gray-600 mx-0.5"></div>
+                        <button onclick="pdfFullscreen()"
+                            class="w-7 h-7 rounded flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition"
+                            title="Layar penuh">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
-                <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 2: Daftar Hadir (Excel/Word dengan Loop)</p>
-                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
-                        <pre>DAFTAR HADIR RAPAT
-Perihal : @verbatim{{ meeting_subject }}@endverbatim
-Tanggal : @verbatim{{ meeting_date }}@endverbatim
-Tempat  : @verbatim{{ meeting_location }}@endverbatim
+                {{-- Canvas area --}}
+                <div class="relative bg-gray-700" style="height:1040px;overflow:auto;" id="pdf-scroll-area">
+                    <div id="pdf-canvas-wrap" class="flex items-start justify-center py-4 min-h-full"
+                        style="transform-origin:top center;">
+                        <canvas id="pdf-canvas" class="shadow-xl rounded"></canvas>
+                    </div>
 
-NO | NAMA              | NIP       | JABATAN    | TTD
-{% for peserta in participants %}
-@verbatim{{ loop.index }}@endverbatim  | @verbatim{{ peserta.staff_name }}@endverbatim | @verbatim{{ peserta.nip }}@endverbatim | @verbatim{{ peserta.position }}@endverbatim |
-{% endfor %}</pre>
+                    {{-- Loading --}}
+                    <div id="pdf-loading"
+                        class="absolute inset-0 flex flex-col items-center justify-center bg-gray-700 gap-3">
+                        <div class="sipadu-spinner" style="border-top-color:var(--gold-400);"></div>
+                        <p class="text-xs text-gray-400">Memuat PDF...</p>
+                    </div>
+
+                    {{-- Error / placeholder --}}
+                    <div id="pdf-placeholder"
+                        class="absolute inset-0 flex flex-col items-center justify-center bg-gray-700 gap-3 hidden">
+                        <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p class="text-sm text-gray-400" id="pdf-placeholder-msg">
+                            File PDF contoh belum tersedia.
+                        </p>
+                        <p class="text-xs text-gray-500 text-center max-w-xs">
+                            Letakkan file PDF di <code class="bg-gray-800 px-1 rounded">public/guide-examples/</code>
+                            dengan nama sesuai tab, lalu refresh halaman.
+                        </p>
                     </div>
                 </div>
 
-                <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contoh 3: Dengan Kondisional</p>
-                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
-                        <pre>{% if employee_rank %}
-Pangkat/Gol. Ruang: @verbatim{{ employee_rank }}@endverbatim
-{% else %}
-Pangkat/Gol. Ruang: -
-{% endif %}
-
-{% if is_approved %}
-Status: DISETUJUI
-{% else %}
-Status: MENUNGGU PERSETUJUAN
-{% endif %}</pre>
-                    </div>
-                </div>
-
-                <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Loop di Excel — Penempatan Sel</p>
-                    <div class="bg-gray-200 text-black-400 rounded-lg p-4 font-mono text-xs overflow-x-auto">
-                        <pre>Sel A1: {% for peserta in daftar_peserta %}
-Sel A2: @verbatim{{ loop.index }}@endverbatim
-Sel B2: @verbatim{{ peserta.staff_name }}@endverbatim
-Sel C2: @verbatim{{ peserta.nip }}@endverbatim
-Sel D2: @verbatim{{ peserta.position }}@endverbatim
-Sel A3: {% endfor %}</pre>
-                    </div>
+                {{-- Footer hint --}}
+                <div class="px-4 py-2 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                    <p class="text-xs text-gray-400">
+                        Scroll untuk melihat seluruh halaman. Gunakan toolbar untuk zoom dan navigasi.
+                    </p>
+                    <a id="pdf-download-link" href="#" download
+                    class="text-xs text-blue-600 hover:underline hidden">
+                        ⬇ Unduh PDF
+                    </a>
                 </div>
             </div>
         </section>
@@ -631,6 +687,212 @@ UPDATE users SET role = 'admin' WHERE email = 'admin@dinas.go.id';
 .quit
                     </x-code>
                 </div>
+            </div>
+        </section>
+
+        {{-- Digital Signature --}}
+        <section id="digital-signature" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Tanda Tangan Digital</h2>
+            <p class="text-sm text-gray-700 mb-4">
+                Fitur TTD Digital memungkinkan pengguna meminta tanda tangan pejabat secara elektronik.
+                Pejabat menerima email berisi dokumen terlampir dan tautan persetujuan sekali pakai.
+                Setelah disetujui, sistem menyisipkan gambar tanda tangan dan QR code verifikasi ke dalam dokumen.
+            </p>
+
+            <div id="ttd-flow" class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Alur TTD</h3>
+                <div class="overflow-x-auto mb-3">
+                    <table class="w-full text-sm">
+                        <thead class="bg-blue-700 text-white">
+                            <tr><th class="px-3 py-2 text-left font-medium">Langkah</th><th class="px-3 py-2 text-left font-medium">Pelaku</th><th class="px-3 py-2 text-left font-medium">Aksi</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            @foreach([
+                                ['1','User','Buat dokumen → klik "Minta Tanda Tangan" → pilih pejabat → kirim'],
+                                ['2','Sistem','Kirim email ke pejabat dengan dokumen terlampir dan tautan review'],
+                                ['3','Pejabat','Buka tautan, tinjau dokumen, klik Setujui atau Tolak'],
+                                ['4','Sistem','Jika disetujui: sisipkan gambar TTD + QR code → simpan file signed'],
+                                ['5','Sistem','Kirim notifikasi email ke pemohon beserta dokumen bertanda tangan'],
+                                ['6','User','Unduh dokumen dari tab Riwayat Dokumen atau email'],
+                                ['7','Siapapun','Scan QR code → halaman verifikasi publik membuktikan keaslian dokumen'],
+                            ] as $row)
+                            <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}">
+                                <td class="px-3 py-2 font-bold text-blue-600">{{ $row[0] }}</td>
+                                <td class="px-3 py-2 font-medium text-gray-700">{{ $row[1] }}</td>
+                                <td class="px-3 py-2 text-gray-600">{{ $row[2] }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="text-sm font-medium text-gray-700 mb-1">Mengaktifkan TTD untuk Jenis Dokumen:</p>
+                <ol class="text-sm text-gray-700 space-y-1 list-decimal list-inside mb-3">
+                    <li>Admin Panel → Jenis Dokumen</li>
+                    <li>Toggle kolom <strong>TTD Digital</strong> → biru = aktif</li>
+                    <li>Opsional: toggle <strong>Gambar TTD</strong> (embed foto tanda tangan) dan <strong>QR Code</strong> (embed kode QR verifikasi)</li>
+                </ol>
+
+                <div class="bg-yellow-50 border border-yellow-200 rounded px-3 py-2 text-xs text-yellow-800 mb-3">
+                    <strong>Catatan:</strong> Tombol "Minta Tanda Tangan" hanya muncul jika TTD Digital diaktifkan untuk jenis dokumen tersebut <em>dan</em> file dokumen masih ada di server (belum dihapus otomatis).
+                </div>
+
+                <p class="text-sm font-medium text-gray-700 mb-1">Kelola Antrian dari Admin:</p>
+                <p class="text-sm text-gray-700 mb-1">Admin Panel → <strong>Antrian TTD</strong> — admin dapat menyetujui/menolak langsung tanpa melalui email pejabat, serta mengirim ulang email ke pejabat atau pemohon.</p>
+            </div>
+
+            <div id="ttd-template" class="mb-4">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Template untuk TTD — Placeholder Wajib</h3>
+                <p class="text-sm text-gray-700 mb-2">
+                    Agar gambar TTD dan QR code disisipkan dengan benar, template harus menyertakan dummy image sebagai placeholder.
+                    Sistem mengganti dummy image tersebut dengan gambar asli saat penandatanganan.
+                </p>
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Placeholder Teks (DOCX & XLSX)</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs">
+                                <thead class="bg-blue-700 text-white"><tr><th class="px-2 py-1.5 text-left">Placeholder</th><th class="px-2 py-1.5 text-left">Isi Saat Signed</th></tr></thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    @foreach([
+                                        [@verbatim'{{ nama_pejabat }}'@endverbatim,'Nama lengkap pejabat'],
+                                        [@verbatim'{{ jabatan_pejabat }}'@endverbatim,'Jabatan pejabat'],
+                                        [@verbatim'{{ tgl_ttd }}'@endverbatim,'Tanggal persetujuan (format: 30 April 2026)'],
+                                    ] as $row)
+                                    <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}"><td class="px-2 py-1.5 font-mono text-blue-700">{{ $row[0] }}</td><td class="px-2 py-1.5 text-gray-600">{{ $row[1] }}</td></tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Placeholder Gambar</p>
+                        <ul class="text-xs text-gray-700 space-y-2">
+                            <li>
+                                <code class="bg-gray-100 px-1 rounded">transparent35mm.png</code> — dummy untuk gambar tanda tangan.
+                                Letakkan di template sebagai gambar inline/text box.
+                                Sistem swap gambar ini dengan foto TTD pejabat.
+                            </li>
+                            <li>
+                                <code class="bg-gray-100 px-1 rounded">dummy_qr.png</code> — dummy untuk QR code verifikasi.
+                                Sama seperti di atas, sistem swap gambar ini dengan QR yang di-generate otomatis.
+                            </li>
+                        </ul>
+                        <div class="bg-blue-50 border border-blue-200 rounded px-2 py-1.5 mt-2 text-xs text-blue-800">
+                            File dummy tersedia di <code class="bg-blue-100 px-1 rounded">resources/img/</code>. Gunakan sebagai gambar placeholder di template.
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Upload Gambar Tanda Tangan Pejabat</p>
+                <ol class="text-xs text-gray-700 space-y-1 list-decimal list-inside">
+                    <li>Admin Panel → Data Pejabat</li>
+                    <li>Klik Edit pada pejabat yang dituju</li>
+                    <li>Upload gambar TTD (PNG transparan disarankan, maks 2MB)</li>
+                    <li>Simpan — gambar akan otomatis digunakan saat dokumen ditandatangani</li>
+                </ol>
+            </div>
+        </section>
+
+        {{-- Nomor Surat --}}
+        <section id="nomor-surat" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Nomor Surat Otomatis</h2>
+            <p class="text-sm text-gray-700 mb-4">
+                Setiap jenis dokumen dapat dikonfigurasi agar nomor surat digenerate otomatis dan bertambah 1 setiap dokumen berhasil dibuat.
+                Field yang dipilih sebagai target akan diisi otomatis — input user diabaikan.
+            </p>
+
+            <div class="grid grid-cols-2 gap-6 mb-4">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Token Format</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-blue-700 text-white"><tr><th class="px-3 py-2 text-left font-medium">Token</th><th class="px-3 py-2 text-left font-medium">Nilai</th></tr></thead>
+                            <tbody class="divide-y divide-gray-100 text-sm">
+                                @foreach([['{number}','Nomor urut (zero-padded)'],['{year}','Tahun 4 digit (2026)'],['{month}','Bulan 2 digit (05)'],['{roman_month}','Bulan romawi (V)']] as $row)
+                                <tr class="{{ $loop->even ? 'bg-gray-50' : '' }}"><td class="px-3 py-2 font-mono text-xs text-blue-700">{{ $row[0] }}</td><td class="px-3 py-2 text-gray-600">{{ $row[1] }}</td></tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Contoh Format</p>
+                    <div class="font-mono text-xs space-y-2">
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-gray-500">{number}/DPUPR/{roman_month}/{year}</p>
+                            <p class="text-blue-600 font-bold">→ 045/DPUPR/V/2026</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-gray-500">B-{number}/PUPRD/{roman_month}/{year}</p>
+                            <p class="text-blue-600 font-bold">→ B-045/PUPRD/V/2026</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-sm font-medium text-gray-700 mb-1">Konfigurasi:</p>
+            <ol class="text-sm text-gray-700 space-y-1 list-decimal list-inside mb-3">
+                <li>Kelola Field → klik <strong># Nomor Surat</strong></li>
+                <li>Centang "Aktifkan Nomor Surat Otomatis"</li>
+                <li>Atur format, zero-padding, reset otomatis, dan field key tujuan</li>
+                <li>Simpan — counter mulai berjalan pada dokumen berikutnya</li>
+            </ol>
+            <div class="bg-blue-50 border border-blue-200 rounded px-3 py-2 text-xs text-blue-800">
+                Counter bisa di-set ke angka tertentu atau di-reset ke 0 dari halaman yang sama. Reset otomatis tersedia per tahun atau per bulan.
+            </div>
+        </section>
+
+        {{-- Scan Template --}}
+        <section id="scan-template" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Scan Template — Deteksi Field Otomatis</h2>
+            <p class="text-sm text-gray-700 mb-4">
+                Daripada menambah field satu per satu, fitur Scan Template membaca file template dan mendeteksi semua placeholder
+                <code class="bg-gray-100 px-1 rounded">@verbatim{{ variable }}@endverbatim</code> secara otomatis.
+            </p>
+            <ol class="text-sm text-gray-700 space-y-1 list-decimal list-inside mb-3">
+                <li>Kelola Field → klik <strong>Scan Template</strong></li>
+                <li>Sistem memindai template dan menampilkan variabel yang belum terdaftar sebagai field</li>
+                <li>Sistem menebak tipe field berdasarkan nama variabel (misal: <code class="bg-gray-100 px-1 rounded">tanggal_*</code> → date)</li>
+                <li>Edit label, tipe, dan seksi sesuai kebutuhan</li>
+                <li>Centang field yang ingin ditambahkan → klik "Tambahkan Field Terpilih"</li>
+            </ol>
+            <div class="bg-yellow-50 border border-yellow-200 rounded px-3 py-2 text-xs text-yellow-800">
+                Field yang sudah terdaftar dilewati otomatis. Tipe field hasil tebakan mungkin perlu disesuaikan manual.
+            </div>
+        </section>
+
+        {{-- PDF Preview --}}
+        <section id="pdf-preview" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Preview PDF via iLoveAPI</h2>
+            <p class="text-sm text-gray-700 mb-4">
+                Sistem menggunakan <strong>iLoveAPI</strong> untuk mengkonversi dokumen ke PDF dan menampilkannya langsung di browser.
+                Setiap konversi mengkonsumsi 1 kuota dari batas yang dikonfigurasi admin.
+            </p>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-gray-50 rounded p-3">
+                    <p class="text-xs font-semibold text-gray-600 mb-2">Konfigurasi (Admin)</p>
+                    <ol class="text-xs text-gray-700 space-y-1 list-decimal list-inside">
+                        <li>Daftar di <a href="https://developer.ilovepdf.com" target="_blank" class="text-blue-500 underline">developer.ilovepdf.com</a></li>
+                        <li>Salin Public Key dan Secret Key</li>
+                        <li>Admin Panel → <strong>Pengaturan PDF</strong> → paste key</li>
+                        <li>Set batas konversi dan mode reset</li>
+                        <li>Aktifkan preview per template di halaman Jenis Dokumen (toggle Preview)</li>
+                    </ol>
+                </div>
+                <div class="bg-gray-50 rounded p-3">
+                    <p class="text-xs font-semibold text-gray-600 mb-2">Batas Konversi</p>
+                    <ul class="text-xs text-gray-700 space-y-1">
+                        <li>• Tier gratis iLoveAPI: <strong>250 konversi/bulan</strong></li>
+                        <li>• Admin dapat set batas custom dan mode reset (bulanan/manual)</li>
+                        <li>• Counter dapat di-reset manual kapan saja</li>
+                        <li>• Jika kuota habis, tombol preview tidak berfungsi</li>
+                        <li>• File PDF hasil konversi ikut dihapus bersama dokumen asli</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="bg-red-50 border border-red-200 rounded px-3 py-2 text-sm text-red-800">
+                <strong>Penting:</strong> Preview hanya tersedia jika API key iLoveAPI sudah dikonfigurasi dan toggle Preview diaktifkan untuk jenis dokumen tersebut.
             </div>
         </section>
 
@@ -753,6 +1015,178 @@ function highlightToc() {
         }
     });
 }
+
+(function() {
+    // Map tab key → PDF path + label
+    const PDF_FILES = {
+        'surat-tugas':  { path: '/guides/guide_1.pdf',  label: 'Surat Tugas' },
+        'daftar-hadir': { path: '/guides/guide_1.pdf', label: 'Daftar Hadir (Loop)' },
+        'kondisional':  { path: '/guides/guide_1.pdf',  label: 'Kondisional' },
+        'loop-excel':   { path: '/guides/guide_1.pdf',   label: 'Loop di Excel' },
+    };
+
+    let pdfjsLib = null;
+    let pdfDoc   = null;
+    let curPage  = 1;
+    let curZoom  = 1.0;
+    let curTab   = 'surat-tugas';
+    let renderTask = null;
+
+    // Load pdf.js lazily
+    function loadPdfJs(cb) {
+        if (pdfjsLib) { cb(); return; }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        script.onload = function() {
+            pdfjsLib = window.pdfjsLib;
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            cb();
+        };
+        document.head.appendChild(script);
+    }
+
+    function showLoading(yes) {
+        document.getElementById('pdf-loading').classList.toggle('hidden', !yes);
+        document.getElementById('pdf-placeholder').classList.add('hidden');
+    }
+
+    function showPlaceholder(msg) {
+        document.getElementById('pdf-loading').classList.add('hidden');
+        document.getElementById('pdf-placeholder').classList.remove('hidden');
+        document.getElementById('pdf-placeholder-msg').textContent = msg || 'File PDF contoh belum tersedia.';
+        document.getElementById('pdf-download-link').classList.add('hidden');
+    }
+
+    function renderPage(num) {
+        if (!pdfDoc) return;
+        if (renderTask) { renderTask.cancel(); }
+
+        pdfDoc.getPage(num).then(function(page) {
+            const canvas  = document.getElementById('pdf-canvas');
+            const ctx     = canvas.getContext('2d');
+            const vp      = page.getViewport({ scale: curZoom * 1.5 }); // 1.5 base DPI boost
+            canvas.width  = vp.width;
+            canvas.height = vp.height;
+
+            renderTask = page.render({ canvasContext: ctx, viewport: vp });
+            renderTask.promise.then(function() {
+                renderTask = null;
+            }).catch(function() {});
+
+            document.getElementById('pdf-page-current').textContent = num;
+            document.getElementById('pdf-page-total').textContent   = pdfDoc.numPages;
+            document.getElementById('pdf-prev').disabled = num <= 1;
+            document.getElementById('pdf-next').disabled = num >= pdfDoc.numPages;
+        });
+    }
+
+    function loadPdf(tabKey) {
+        const info = PDF_FILES[tabKey];
+        showLoading(true);
+        pdfDoc  = null;
+        curPage = 1;
+        document.getElementById('pdf-page-current').textContent = '1';
+        document.getElementById('pdf-page-total').textContent   = '—';
+        document.getElementById('pdf-canvas').width  = 0;
+        document.getElementById('pdf-canvas').height = 0;
+
+        loadPdfJs(function() {
+            pdfjsLib.getDocument(info.path).promise.then(function(pdf) {
+                pdfDoc = pdf;
+                showLoading(false);
+                document.getElementById('pdf-download-link').href = info.path;
+                document.getElementById('pdf-download-link').classList.remove('hidden');
+                renderPage(1);
+            }).catch(function(err) {
+                console.warn('PDF load error:', err);
+                showPlaceholder('File PDF "' + info.label + '" belum tersedia di server.');
+            });
+        });
+    }
+
+    // Public functions
+    window.switchPdfTab = function(key) {
+        curTab  = key;
+        curZoom = 1.0;
+        document.getElementById('pdf-zoom-label').textContent = '100%';
+        document.getElementById('pdf-tab-label').textContent  = PDF_FILES[key].label;
+
+        document.querySelectorAll('.pdf-tab-btn').forEach(function(btn) {
+            const active = btn.id === 'pdf-tab-' + key;
+            btn.classList.toggle('border-blue-600', active);
+            btn.classList.toggle('text-blue-700', active);
+            btn.classList.toggle('bg-white', active);
+            btn.classList.toggle('border-transparent', !active);
+            btn.classList.toggle('text-gray-500', !active);
+        });
+
+        loadPdf(key);
+    };
+
+    window.pdfPrevPage = function() {
+        if (!pdfDoc || curPage <= 1) return;
+        curPage--;
+        renderPage(curPage);
+    };
+
+    window.pdfNextPage = function() {
+        if (!pdfDoc || curPage >= pdfDoc.numPages) return;
+        curPage++;
+        renderPage(curPage);
+    };
+
+    window.pdfZoomIn = function() {
+        curZoom = Math.min(curZoom + 0.25, 3.0);
+        document.getElementById('pdf-zoom-label').textContent = Math.round(curZoom * 100) + '%';
+        renderPage(curPage);
+    };
+
+    window.pdfZoomOut = function() {
+        curZoom = Math.max(curZoom - 0.25, 0.5);
+        document.getElementById('pdf-zoom-label').textContent = Math.round(curZoom * 100) + '%';
+        renderPage(curPage);
+    };
+
+    window.pdfFullscreen = function() {
+        const container = document.getElementById('pdf-viewer-container');
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().catch(function() {});
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
+    // Keyboard shortcuts when viewer is focused
+    document.getElementById('pdf-viewer-container').addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); window.pdfNextPage(); }
+        if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); window.pdfPrevPage(); }
+        if (e.key === '+' || e.key === '=') { e.preventDefault(); window.pdfZoomIn(); }
+        if (e.key === '-')                  { e.preventDefault(); window.pdfZoomOut(); }
+        if (e.key === 'f' || e.key === 'F') { e.preventDefault(); window.pdfFullscreen(); }
+    });
+    document.getElementById('pdf-viewer-container').setAttribute('tabindex', '0');
+
+    // Fullscreen style tweak
+    document.addEventListener('fullscreenchange', function() {
+        const scrollArea = document.getElementById('pdf-scroll-area');
+        if (document.fullscreenElement) {
+            scrollArea.style.height = 'calc(100vh - 90px)';
+        } else {
+            scrollArea.style.height = '520px';
+        }
+    });
+
+    // Auto-load first tab when guide section is visible (lazy)
+    let loaded = false;
+    const observer = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting && !loaded) {
+            loaded = true;
+            loadPdf('surat-tugas');
+        }
+    }, { threshold: 0.1 });
+    observer.observe(document.getElementById('pdf-viewer-container'));
+})();
 
 window.addEventListener('scroll', highlightToc);
 highlightToc();
