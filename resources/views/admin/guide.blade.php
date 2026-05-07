@@ -1019,11 +1019,11 @@ function highlightToc() {
 (function() {
     // Map tab key → PDF path + label
     const PDF_FILES = {
-        'surat-tugas':  { path: '/guides/surat-izin-sakit-example.pdf',  label: 'Surat Izin Sakit' },
-        'daftar-hadir': { path: '/guides/guide_1.pdf', label: 'Daftar Hadir (Loop)' },
-        'kondisional':  { path: '/guides/guide_1.pdf',  label: 'Kondisional' },
-        'loop-excel':   { path: '/guides/guide_1.pdf',   label: 'Loop di Excel' },
-    };
+    'surat-tugas':  { path: '{{ route("admin.guide.asset", "surat-izin-sakit-example.pdf") }}', label: 'Surat Izin Sakit' },
+    'daftar-hadir': { path: '{{ route("admin.guide.asset", "guide_1.pdf") }}', label: 'Daftar Hadir (Loop)' },
+    'kondisional':  { path: '{{ route("admin.guide.asset", "guide_1.pdf") }}', label: 'Kondisional' },
+    'loop-excel':   { path: '{{ route("admin.guide.asset", "guide_1.pdf") }}', label: 'Loop di Excel' },
+};
 
     let pdfjsLib = null;
     let pdfDoc   = null;

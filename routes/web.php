@@ -112,6 +112,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('/guide', [AdminController::class, 'guide'])->name('guide');
         Route::get('/guide/download', [AdminController::class, 'guideDownload'])->name('guide.download');
+        Route::get('/guide/asset/{filename}', [AdminController::class, 'serveGuideAsset'])->name('admin.guide.asset');
 
         Route::get('/signatures', [SignatureRequestController::class, 'adminIndex'])->name('signatures');
         Route::patch('/signatures/{signatureRequest}/approve', [SignatureRequestController::class, 'adminApprove'])->name('signatures.approve');
