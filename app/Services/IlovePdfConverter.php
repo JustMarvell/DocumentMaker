@@ -55,6 +55,8 @@ class IlovePdfConverter
             }
             $token = $authRes->json('token');
 
+            Log::info("ILovePdfConverter: Step 1, Auth Success | token : {$token}");
+
             // 2. Start task
             $startRes = Http::timeout(60)
                 ->withToken($token)
@@ -66,6 +68,8 @@ class IlovePdfConverter
             $server = $startRes->json('server');
             $taskId = $startRes->json('task');
 
+            Log::info("ILovePdfConverter: Step 2, Start Task Success | server : {$server}\nTask ID : {$taskId}");
+
             // 3. Upload
             $uploadRes = Http::timeout(60)
                 ->withToken($token)
@@ -76,6 +80,8 @@ class IlovePdfConverter
                 return null;
             }
             $serverFilename = $uploadRes->json('server_filename');
+
+            Log::info("ILovePdfConverter: Step 3, Upload Success | Server Filename : {$serverFilename}");
 
             // 4. Process
             $processRes = Http::timeout(60)
@@ -95,6 +101,8 @@ class IlovePdfConverter
                 return null;
             }
 
+            Log::info("ILovePdfConverter: Step 4, Process Success Success");
+
             // 5. Download
             $downloadRes = Http::timeout(60)
                 ->withToken($token)
@@ -104,9 +112,12 @@ class IlovePdfConverter
                 return null;
             }
 
+            
             $pdfFilename = pathinfo($sourceFilename, PATHINFO_FILENAME) . '.pdf';
             $pdfPath = $sourceDir . DIRECTORY_SEPARATOR . $pdfFilename;
             file_put_contents($pdfPath, $downloadRes->body());
+
+            Log::info("ILovePdfConverter: Step 5, Download Success | PDF Filename : {$pdfFilename}\nPDF Path : {$pdfPath}");
 
             $setting->incrementUsage();
 
