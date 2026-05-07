@@ -1056,6 +1056,31 @@
             else { countEl.textContent = checked + ' dipilih'; countEl.classList.remove('hidden'); }
         }
 
+        function loopSelectAll(btn) {
+            const list = btn.closest('[data-loop-type]').querySelector('.loop-checklist');
+            list.querySelectorAll('.loop-item input[type="checkbox"]').forEach(function(cb) {
+                if (!cb.checked) { cb.checked = true; cb.closest('.loop-item').classList.add('checked-item'); }
+            });
+            updateLoopCount(btn.closest('[data-loop-type]'));
+        }
+
+        function loopDeselectAll(btn) {
+            const list = btn.closest('[data-loop-type]').querySelector('.loop-checklist');
+            list.querySelectorAll('.loop-item input[type="checkbox"]').forEach(function(cb) {
+                if (cb.checked) { cb.checked = false; cb.closest('.loop-item').classList.remove('checked-item'); }
+            });
+            updateLoopCount(btn.closest('[data-loop-type]'));
+        }
+
+        function loopInvert(btn) {
+            const list = btn.closest('[data-loop-type]').querySelector('.loop-checklist');
+            list.querySelectorAll('.loop-item input[type="checkbox"]').forEach(function(cb) {
+                cb.checked = !cb.checked;
+                cb.closest('.loop-item').classList.toggle('checked-item', cb.checked);
+            });
+            updateLoopCount(btn.closest('[data-loop-type]'));
+        }
+
         function initLoopDrag(listEl) {
             let dragging = null;
             listEl.addEventListener('dragstart', function(e) {

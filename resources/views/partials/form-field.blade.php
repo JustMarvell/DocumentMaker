@@ -187,6 +187,23 @@ $isAutofillable = !$isAutoNumber && $field->staff_autofill_column && $field->aut
                     </span>
                     <div style="display:flex;align-items:center;gap:0.5rem;">
                         <span class="badge badge-gold loop-count hidden" style="font-size:0.62rem;"></span>
+                        <div style="display:flex;gap:0.3rem;">
+                            <button type="button"
+                                onclick="loopSelectAll(this)"
+                                style="font-size:0.62rem;padding:0.15rem 0.5rem;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;"
+                                onmouseover="this.style.background='rgba(255,255,255,0.16)'"
+                                onmouseout="this.style.background='rgba(255,255,255,0.08)'">Semua</button>
+                            <button type="button"
+                                onclick="loopDeselectAll(this)"
+                                style="font-size:0.62rem;padding:0.15rem 0.5rem;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;"
+                                onmouseover="this.style.background='rgba(255,255,255,0.16)'"
+                                onmouseout="this.style.background='rgba(255,255,255,0.08)'">Kosong</button>
+                            <button type="button"
+                                onclick="loopInvert(this)"
+                                style="font-size:0.62rem;padding:0.15rem 0.5rem;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;font-family:var(--font-body);transition:all 0.15s;"
+                                onmouseover="this.style.background='rgba(255,255,255,0.16)'"
+                                onmouseout="this.style.background='rgba(255,255,255,0.08)'">Balik</button>
+                        </div> 
                         <span style="font-size:0.65rem;color:rgba(255,255,255,0.35);">Drag ⠿ untuk urutkan</span>
                     </div>
                 </div>
