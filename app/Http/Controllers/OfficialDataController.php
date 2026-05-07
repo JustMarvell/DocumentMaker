@@ -87,4 +87,11 @@ class OfficialDataController extends Controller
         }
         return back()->with('success', "Gambar tanda tangan {$officialDatum->staff_name} berhasil dihapus.");
     }
+
+    public function serveSignature(string $filename)
+    {
+        $path = storage_path('app/signatures/' . basename($filename));
+        abort_unless(file_exists($path), 404);
+        return response()->file($path);
+    }
 }

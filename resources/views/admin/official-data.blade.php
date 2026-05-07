@@ -120,7 +120,7 @@
                         <td class="px-4 py-3 text-center">
                             @if ($official->hasSignatureImage())
                                 <div class="flex flex-col items-center gap-1">
-                                    <img src="{{ Storage::url($official->signature_image) }}" alt="TTD"
+                                    <img src="{{ route('admin.official-data.signature', basename($official->signature_image)) }}" alt="TTD"
                                         class="h-8 object-contain border border-gray-200 rounded px-1 bg-gray-50"
                                         title="Klik untuk hapus" />
                                     <form method="POST" action="{{ route('admin.official-data.delete-signature', $official) }}"
