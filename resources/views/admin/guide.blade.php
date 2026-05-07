@@ -474,7 +474,7 @@
                 {{-- Tab bar --}}
                 <div class="flex gap-0 border-b border-gray-200 bg-gray-50 overflow-x-auto" id="pdf-tab-bar">
                     @foreach([
-                        ['surat-tugas', 'Surat Tugas'],
+                        ['surat-tugas', 'Surat Izin Sakit'],
                         ['daftar-hadir', 'Daftar Hadir (Loop)'],
                         ['kondisional', 'Kondisional'],
                         ['loop-excel', 'Loop di Excel'],
@@ -516,7 +516,7 @@
                     </div>
 
                     {{-- Current tab label --}}
-                    <span id="pdf-tab-label" class="text-xs text-gray-400 flex-1 text-center truncate px-2">Surat Tugas</span>
+                    <span id="pdf-tab-label" class="text-xs text-gray-400 flex-1 text-center truncate px-2">Surat Izin Sakit</span>
 
                     {{-- Zoom + fullscreen --}}
                     <div class="flex items-center gap-1.5">
@@ -1019,7 +1019,7 @@ function highlightToc() {
 (function() {
     // Map tab key → PDF path + label
     const PDF_FILES = {
-        'surat-tugas':  { path: '/guides/guide_1.pdf',  label: 'Surat Tugas' },
+        'surat-tugas':  { path: '/guides/surat-izin-sakit-example.pdf',  label: 'Surat Izin Sakit' },
         'daftar-hadir': { path: '/guides/guide_1.pdf', label: 'Daftar Hadir (Loop)' },
         'kondisional':  { path: '/guides/guide_1.pdf',  label: 'Kondisional' },
         'loop-excel':   { path: '/guides/guide_1.pdf',   label: 'Loop di Excel' },
