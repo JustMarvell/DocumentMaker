@@ -19,6 +19,7 @@
 /public/storage
 /public/cached_result
 /public/videos
+/public/guides
 /storage/*.key
 /storage/pail
 /vendor
