@@ -362,7 +362,7 @@
         <section id="template" class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Panduan Membuat Template Dokumen</h2>
             @include('components.video-player', [
-                'src'    => 'videos/test1.mp4',
+                'src'    => 'guide_videos/test1.mp4',
                 'title'  => '1. Cara Menambah Template Baru',
             ])
 
@@ -474,7 +474,7 @@
                 {{-- Tab bar --}}
                 <div class="flex gap-0 border-b border-gray-200 bg-gray-50 overflow-x-auto" id="pdf-tab-bar">
                     @foreach([
-                        ['surat-tugas', 'Surat Tugas'],
+                        ['surat-tugas', 'Surat Izin Sakit'],
                         ['daftar-hadir', 'Daftar Hadir (Loop)'],
                         ['kondisional', 'Kondisional'],
                         ['loop-excel', 'Loop di Excel'],
@@ -516,7 +516,7 @@
                     </div>
 
                     {{-- Current tab label --}}
-                    <span id="pdf-tab-label" class="text-xs text-gray-400 flex-1 text-center truncate px-2">Surat Tugas</span>
+                    <span id="pdf-tab-label" class="text-xs text-gray-400 flex-1 text-center truncate px-2">Surat Izin Sakit</span>
 
                     {{-- Zoom + fullscreen --}}
                     <div class="flex items-center gap-1.5">
@@ -1019,11 +1019,11 @@ function highlightToc() {
 (function() {
     // Map tab key → PDF path + label
     const PDF_FILES = {
-        'surat-tugas':  { path: '/guides/guide_1.pdf',  label: 'Surat Tugas' },
-        'daftar-hadir': { path: '/guides/guide_1.pdf', label: 'Daftar Hadir (Loop)' },
-        'kondisional':  { path: '/guides/guide_1.pdf',  label: 'Kondisional' },
-        'loop-excel':   { path: '/guides/guide_1.pdf',   label: 'Loop di Excel' },
-    };
+    'surat-tugas':  { path: '{{ route("admin.guide.asset", "surat-izin-sakit-example.pdf") }}', label: 'Surat Izin Sakit' },
+    'daftar-hadir': { path: '{{ route("admin.guide.asset", "guide_1.pdf") }}', label: 'Daftar Hadir (Loop)' },
+    'kondisional':  { path: '{{ route("admin.guide.asset", "guide_1.pdf") }}', label: 'Kondisional' },
+    'loop-excel':   { path: '{{ route("admin.guide.asset", "guide_1.pdf") }}', label: 'Loop di Excel' },
+};
 
     let pdfjsLib = null;
     let pdfDoc   = null;

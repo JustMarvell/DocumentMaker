@@ -30,7 +30,7 @@ class OfficialDataController extends Controller
 
         if ($request->hasFile('signature_image')) {
             $data['signature_image'] = $request->file('signature_image')
-                ->store('signatures', 'public');
+                ->store('', 'signatures');
         }
 
         OfficialData::create($data);
@@ -56,10 +56,10 @@ class OfficialDataController extends Controller
         if ($request->hasFile('signature_image')) {
             // Delete old image
             if ($officialDatum->signature_image) {
-                Storage::disk('public')->delete($officialDatum->signature_image);
+                Storage::disk('signatures')->delete($officialDatum->signature_image);
             }
             $data['signature_image'] = $request->file('signature_image')
-                ->store('signatures', 'public');
+                ->store('', 'signatures');
         }
 
         $officialDatum->update($data);
@@ -71,7 +71,7 @@ class OfficialDataController extends Controller
     {
         // Delete signature image from storage
         if ($officialDatum->signature_image) {
-            Storage::disk('public')->delete($officialDatum->signature_image);
+            Storage::disk('signatures')->delete($officialDatum->signature_image);
         }
 
         $name = $officialDatum->staff_name;
@@ -82,9 +82,16 @@ class OfficialDataController extends Controller
     public function deleteSignatureImage(OfficialData $officialDatum)
     {
         if ($officialDatum->signature_image) {
-            Storage::disk('public')->delete($officialDatum->signature_image);
+            Storage::disk('signatures')->delete($officialDatum->signature_image);
             $officialDatum->update(['signature_image' => null]);
         }
         return back()->with('success', "Gambar tanda tangan {$officialDatum->staff_name} berhasil dihapus.");
+    }
+
+    public function serveSignature(string $filename)
+    {
+        $path = storage_path('app/signatures/' . basename($filename));
+        abort_unless(file_exists($path), 404);
+        return response()->file($path);
     }
 }

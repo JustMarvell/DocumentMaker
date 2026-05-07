@@ -36,7 +36,7 @@ class IlovePdfConverter
             return null;
         }
 
-        $sourceDir = public_path('cached_result');
+        $sourceDir = storage_path('app/cached_result');
         $sourcePath = $sourceDir . DIRECTORY_SEPARATOR . $sourceFilename;
 
         if (!file_exists($sourcePath)) {

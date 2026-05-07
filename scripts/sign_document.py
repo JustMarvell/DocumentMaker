@@ -375,7 +375,7 @@ def main() -> None:
     args = parse_args()
     
     base_dir = Path(__file__).resolve().parent.parent
-    result_dir = base_dir / "public" / "cached_result"
+    result_dir = base_dir / "storage" / "app" / "cached_result"
     input_path = str(result_dir / args.input)
     output_path = str(result_dir / args.output)
 

@@ -33,7 +33,7 @@ class OfficialData extends Model
         if (!$this->signature_image) {
             return null;
         }
-        $path = storage_path('app/public/' . $this->signature_image);
+        $path = storage_path('app/signatures/' . $this->signature_image);
         return file_exists($path) ? $path : null;
     }
 

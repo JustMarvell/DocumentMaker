@@ -7,12 +7,14 @@
     ])
 --}}
 @props([
-    'src'    => '',
-    'title'  => '',
+    'src' => '',
+    'title' => '',
     'poster' => '',
 ])
 
-@php static $vpIndex = 0; $vpIndex++; $id = 'vp-' . $vpIndex; @endphp
+@php static $vpIndex = 0;
+$vpIndex++;
+$id = 'vp-' . $vpIndex; @endphp
 
 <div class="sipadu-video-player" id="{{ $id }}" data-vp>
     <div class="vp-title-bar">
@@ -27,9 +29,9 @@
 
     <div class="vp-wrap">
         <video class="vp-video"
-               @if($poster) poster="{{ asset($poster) }}" @endif
-               preload="metadata">
-            <source src="{{ asset($src) }}" type="video/mp4">
+               @if($poster) poster="{{ route("admin.guide.asset", "test.png") }}" @endif
+               preload="metadata">  
+            <source src="{{ route("admin.guide.asset", "test1.mp4") }}" type="video/mp4">
             Browser Anda tidak mendukung video HTML5.
         </video>
 

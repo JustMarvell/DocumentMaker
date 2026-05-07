@@ -16,7 +16,7 @@ class PurgeCachedDocuments extends Command
     public function handle()
     {
         $ttl = (int) $this->option('ttl');
-        $dir = public_path('cached_result');
+        $dir = storage_path('app/cached_result');
         $deleted = 0;
 
         foreach (glob("{$dir}/*") as $file) {

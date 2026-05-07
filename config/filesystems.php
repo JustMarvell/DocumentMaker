@@ -60,6 +60,25 @@ return [
             'report' => false,
         ],
 
+        'cached_result' => [
+            'driver' => 'local',
+            'root' => storage_path('app/cached_result'),
+        ],
+
+        'signatures' => [
+            'driver' => 'local',
+            'root' => storage_path('app/signatures'),
+        ],
+
+        'guide_videos' => [
+            'driver' => 'local',
+            'root' => storage_path('guide_videos'),
+        ],
+
+        'guides' => [
+            'driver' => 'local',
+            'root' => storage_path('app/guides'),
+        ],
     ],
 
     /*

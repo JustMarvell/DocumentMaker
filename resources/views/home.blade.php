@@ -822,8 +822,8 @@
                     @foreach ($documentHistory as $log)
                     @php
             $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
-            $fileExists = file_exists(public_path('cached_result/' . $log->output_filename));
-            $signedExists = $sigReq?->signed_filename && file_exists(public_path('cached_result/' . $sigReq->signed_filename));
+            $fileExists = file_exists(storage_path('app/cached_result/' . $log->output_filename));
+            $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename));
                     @endphp
                     <tr style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
                         onmouseover="this.style.background='rgba(42,82,152,0.03)'"
@@ -1054,6 +1054,31 @@
             if (!countEl) return;
             if (checked === 0) { countEl.textContent = ''; countEl.classList.add('hidden'); }
             else { countEl.textContent = checked + ' dipilih'; countEl.classList.remove('hidden'); }
+        }
+
+        function loopSelectAll(btn) {
+            const list = btn.closest('[data-loop-type]').querySelector('.loop-checklist');
+            list.querySelectorAll('.loop-item input[type="checkbox"]').forEach(function(cb) {
+                if (!cb.checked) { cb.checked = true; cb.closest('.loop-item').classList.add('checked-item'); }
+            });
+            updateLoopCount(btn.closest('[data-loop-type]'));
+        }
+
+        function loopDeselectAll(btn) {
+            const list = btn.closest('[data-loop-type]').querySelector('.loop-checklist');
+            list.querySelectorAll('.loop-item input[type="checkbox"]').forEach(function(cb) {
+                if (cb.checked) { cb.checked = false; cb.closest('.loop-item').classList.remove('checked-item'); }
+            });
+            updateLoopCount(btn.closest('[data-loop-type]'));
+        }
+
+        function loopInvert(btn) {
+            const list = btn.closest('[data-loop-type]').querySelector('.loop-checklist');
+            list.querySelectorAll('.loop-item input[type="checkbox"]').forEach(function(cb) {
+                cb.checked = !cb.checked;
+                cb.closest('.loop-item').classList.toggle('checked-item', cb.checked);
+            });
+            updateLoopCount(btn.closest('[data-loop-type]'));
         }
 
         function initLoopDrag(listEl) {

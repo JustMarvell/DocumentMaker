@@ -107,7 +107,7 @@
                             <td class="px-4 py-3">
                                 <div class="flex flex-col gap-1">
                                     {{-- Original file --}}
-                                    @php $origExists = file_exists(public_path('cached_result/' . $log->output_filename)); @endphp
+                                    @php $origExists = file_exists(storage_path('app/cached_result/' . $log->output_filename)); @endphp
                                     @if($origExists)
                                         <a href="{{ route('document.download', $log->output_filename) }}"
                                             class="text-xs px-2 py-1 rounded border border-blue-400 text-blue-600 hover:bg-blue-50 text-center whitespace-nowrap">
@@ -122,7 +122,7 @@
 
                                     {{-- Signed file --}}
                                     @if($log->signatureRequest?->signed_filename)
-                                        @php $signedExists = file_exists(public_path('cached_result/' . $log->signatureRequest->signed_filename)); @endphp
+                                    @php $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename)); @endphp
                                         @if($signedExists)
                                             <a href="{{ route('document.download', $log->signatureRequest->signed_filename) }}"
                                                 class="text-xs px-2 py-1 rounded border border-purple-400 text-purple-600 hover:bg-purple-50 text-center whitespace-nowrap">

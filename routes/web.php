@@ -108,9 +108,11 @@ Route::middleware('auth')->group(function() {
         Route::patch('/official-data/{officialDatum}', [OfficialDataController::class, 'update'])->name('official-data.update');
         Route::delete('/official-data/{officialDatum}', [OfficialDataController::class, 'destroy'])->name('official-data.destroy');
         Route::delete('/official-data/{officialDatum}/signature-image', [OfficialDataController::class, 'deleteSignatureImage'])->name('official-data.delete-signature');
+        Route::get('/official-data/signature/{filename}', [OfficialDataController::class, 'serveSignature'])->name('official-data.signature');
 
         Route::get('/guide', [AdminController::class, 'guide'])->name('guide');
         Route::get('/guide/download', [AdminController::class, 'guideDownload'])->name('guide.download');
+        Route::get('/guide/asset/{filename}', [AdminController::class, 'serveGuideAsset'])->name('guide.asset');
 
         Route::get('/signatures', [SignatureRequestController::class, 'adminIndex'])->name('signatures');
         Route::patch('/signatures/{signatureRequest}/approve', [SignatureRequestController::class, 'adminApprove'])->name('signatures.approve');

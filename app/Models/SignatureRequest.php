@@ -55,7 +55,7 @@ class SignatureRequest extends Model
     }
 
     public function documentFilePath(): string {
-        return public_path('cached_result/' . $this->documentLog->output_filename);
+        return storage_path('app/cached_result/' . $this->documentLog->output_filename);
     }
 
     public function documentFileExists(): bool {
@@ -66,7 +66,7 @@ class SignatureRequest extends Model
     {
         if (!$this->signed_filename)
             return null;
-        $path = public_path('cached_result/' . $this->signed_filename);
+        $path = storage_path('app/cached_result/' . $this->signed_filename);
         return file_exists($path) ? $path : null;
     }
 
