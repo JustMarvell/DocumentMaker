@@ -208,6 +208,13 @@ def expand_loop(ws, block: dict, context: dict, env: Environment):
     for item_idx, item in enumerate(items):
         item_ctx = dict(context)
         item_ctx[var] = item
+        item_ctx["loop"] = {
+            "index" : item_idx + 1,
+            "index0" : item_idx,
+            "first" : item_idx == 0,
+            "last" : item_idx == len(items) - 1,
+            "length" : len(items),
+        }
         for body_idx, snap_row in enumerate(snapshot):
             tgt_row = for_row + item_idx * num_body + body_idx
             for col_idx, cd in enumerate(snap_row):
