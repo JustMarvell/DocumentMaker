@@ -19,9 +19,14 @@ use App\Models\SignatureRequest;
 
 class DocumentController extends Controller
 {
+    private function cachedResultPath(string $filename): string
+    {
+        return storage_path('app/cached_result/' . $filename);
+    }
+
     public function index() {
 
-    $role = auth()->check() ? auth()->user()->role : 'guest';
+        $role = auth()->check() ? auth()->user()->role : 'guest';
 
         $documentTypes = DocumentType::active()
             ->accessibleBy($role)
@@ -181,7 +186,7 @@ class DocumentController extends Controller
 
     public function download(string $filename) {
         $filename = basename($filename);
-        $path = public_path("cached_result/{$filename}");
+        $path = $this->cachedResultPath($filename);
 
         abort_unless(file_exists($path), 404);
 
@@ -195,14 +200,14 @@ class DocumentController extends Controller
     public function preview(string $filename)
     {
         $filename = basename($filename);
-        $sourcePath = public_path("cached_result/{$filename}");
+        $sourcePath = $this->cachedResultPath($filename);
 
         if (!file_exists($sourcePath)) {
-            return response()->json(['error' => 'File dokumen tidak ditemukan. Mungkin sudah terhapus otomatis.'], 404);
+            return response()->json(['error' => 'File dokumen tidak ditemukan. Mungkin sudah terhapus.'], 404);
         }
 
         $pdfFilename = pathinfo($filename, PATHINFO_FILENAME) . '.pdf';
-        $pdfPath = public_path("cached_result/{$pdfFilename}");
+        $pdfPath = $this->cachedResultPath($pdfFilename);
 
         if (!file_exists($pdfPath)) {
             $setting = PdfConversionSetting::instance();
@@ -222,7 +227,7 @@ class DocumentController extends Controller
                 return response()->json(['error' => 'Konversi PDF gagal. Periksa log server atau konfigurasi iLoveAPI.'], 500);
             }
 
-            $pdfPath = public_path("cached_result/{$pdfFilename}");
+            $pdfPath = $this->cachedResultPath($pdfFilename);
         }
 
         return response()->file($pdfPath, [
@@ -289,6 +294,12 @@ class DocumentController extends Controller
         if (!$process->isSuccessful()) {
             Log::error("Generation failed [{$documentType->script_name}]: " . $process->getErrorOutput());
             return back()->with('error', 'Gagal membuat dokumen. Silakan coba lagi atau hubungi administrator.');
+        }
+
+        $outputPath = storage_path('app/cached_result/' . $uniqueFilename);
+        if (!file_exists($outputPath)) {
+            Log::error("Generated file not found at: {$outputPath}");
+            return back()->with('error', 'Dokumen berhasil diproses tapi file tidak ditemukan.');
         }
 
         $downloadUrl = route('document.download', ['filename' => $uniqueFilename]);
