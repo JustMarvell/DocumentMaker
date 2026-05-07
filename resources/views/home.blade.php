@@ -821,9 +821,10 @@
                 <tbody>
                     @foreach ($documentHistory as $log)
                     @php
+            $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
             $fileExists = file_exists(storage_path('app/cached_result/' . $log->output_filename));
             $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename));
-            @endphp
+                    @endphp
                     <tr style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
                         onmouseover="this.style.background='rgba(42,82,152,0.03)'"
                         onmouseout="this.style.background=''">

@@ -362,7 +362,7 @@
         <section id="template" class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Panduan Membuat Template Dokumen</h2>
             @include('components.video-player', [
-                'src'    => 'videos/test1.mp4',
+                'src'    => 'guide_videos/test1.mp4',
                 'title'  => '1. Cara Menambah Template Baru',
             ])
 

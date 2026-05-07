@@ -43,7 +43,7 @@ class AdminController extends Controller
 
     public function logs(Request $request) { 
 
-        $query = DocumentLog::with('user', 'documentType', 'status' , 'signatureRequest')
+        $query = DocumentLog::with('user', 'documentType' , 'signatureRequest')
             ->latest('generated_at');
         
         if ($request->filled('type')) {
@@ -62,9 +62,9 @@ class AdminController extends Controller
         $logs = $query->paginate(20)->withQueryString();
         $documentTypes = DocumentType::orderBy('name')->get();
         $users = User::orderBy('name')->get();
-        $status = DocumentLog::orderBy('name')->get();
+        // $status = DocumentLog::orderBy('name')->get();
 
-        return view('admin.logs', compact('logs', 'documentTypes', 'users', 'status'));
+        return view('admin.logs', compact('logs', 'documentTypes', 'users'));
     }
 
     public function users(Request $request) {
