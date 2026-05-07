@@ -20,6 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\DB::connection()->getSchemaBuilder()
+            ->defaultStringLength(191);
+
         // if (request()->getHost() !== '127.0.0.1' && request()->getHost() !== 'localhost') {
         //     URL::forceScheme('https');
         // }
