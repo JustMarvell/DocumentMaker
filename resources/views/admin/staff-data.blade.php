@@ -295,6 +295,8 @@
         </div>
     </div>
 
+    <div class="mt-4">{{ $staffList->links() }}</div>
+
     <script>
         function openEditModal(id, name, nip, email, workUnit, rank, position, phone) {
             document.getElementById('edit-form').action = `/admin/staff-data/${id}`;

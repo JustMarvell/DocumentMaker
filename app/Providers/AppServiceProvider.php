@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
     {
         \Illuminate\Support\Facades\DB::connection()->getSchemaBuilder()
             ->defaultStringLength(191);
+
+        Paginator::useTailwind();
 
         // if (request()->getHost() !== '127.0.0.1' && request()->getHost() !== 'localhost') {
         //     URL::forceScheme('https');
