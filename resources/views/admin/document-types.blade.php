@@ -187,6 +187,9 @@
 
     <div class="mt-4"> {{ $documentTypes->links() }} </div>
 
+    <p class="text-xs text-gray-400">Total: {{ $documentTypes->total() }} | Current page:
+        {{ $documentTypes->currentPage() }}</p>
+
     <script>
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
 
