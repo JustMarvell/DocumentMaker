@@ -14,6 +14,7 @@ export default defineConfig({
                 'resources/css/home.css',
                 'resources/css/home-new.css',
                 'resources/css/welcome.css',
+                'resources/css/signature/already-reviewed.css',
                 'resources/css/video-player.css',
                 'resources/js/app.js',
                 'resources/js/video-player.js',

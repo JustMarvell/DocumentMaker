@@ -5,18 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name') }} - Sudah Ditinjau</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        body {
-            background: linear-gradient(160deg, #0a0f1e 0%, #0d1526 60%, #101c38 100%);
-            min-height: 100vh;
-            font-family: var(--font-body);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 1rem;
-        }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/signature/already-reviewed.css'])
 </head>
 
 <body>
