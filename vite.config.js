@@ -17,6 +17,7 @@ export default defineConfig({
                 'resources/css/signature/already-reviewed.css',
                 'resources/css/signature/create.css',
                 'resources/css/signature/review-done.css',
+                'resources/css/signature/review.css',
                 'resources/css/video-player.css',
                 'resources/js/app.js',
                 'resources/js/video-player.js',
