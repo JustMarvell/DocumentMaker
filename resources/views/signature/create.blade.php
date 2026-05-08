@@ -4,38 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name') }} - Minta Tanda Tangan</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        body {
-            background: linear-gradient(155deg, #eef2f8 0%, #f5f7fc 55%, #edf1f7 100%);
-            min-height: 100vh;
-            font-family: var(--font-body);
-        }
-
-        #sig-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(10, 15, 30, 0.55);
-            backdrop-filter: blur(6px);
-            z-index: 9998;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-        }
-        #sig-overlay.active { display: flex; }
-        #sig-overlay p {
-            color: rgba(255,255,255,0.9);
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin: 0;
-        }
-        #sig-overlay small {
-            color: rgba(255,255,255,0.5);
-            font-size: 0.75rem;
-        }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/signature/create.css'])
 </head>
 <body>
 
