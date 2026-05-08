@@ -10,6 +10,7 @@ use App\Models\StaffData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\DocumentNumberCounter;
+use App\Models\SignatureRequest;
 
 class AdminController extends Controller
 {
@@ -37,6 +38,20 @@ class AdminController extends Controller
             'recentLogs',
         ));
 
+    }
+
+    public function adminIndex(Request $request) {
+        $query = SignatureRequest::with(['user', 'documentLog.documentType', 'official'])
+            ->latest('requested_at');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $requests = $query->paginate(15)->withQueryString();
+        $pendingCount = SignatureRequest::where('status', 'pending')->count();
+
+        return view('admin.signatures', compact('requests', 'pendingCount'));
     }
 
     // comment
@@ -104,7 +119,7 @@ class AdminController extends Controller
     public function documentTypes() {
         $documentTypes = DocumentType::withCount('documentLogs')
             ->orderBy('name')
-            ->get();
+            ->paginate(20);
 
         return view('admin.document-types', compact('documentTypes'));
     }
@@ -631,7 +646,7 @@ class AdminController extends Controller
         $deleted = 0;
 
         foreach ($logs as $log) {
-            $dir = public_path('cached_result/');
+            $dir = storage_path('app/cached_result/');
             $base = pathinfo($log->output_filename, PATHINFO_FILENAME);
 
             // delete the original file
