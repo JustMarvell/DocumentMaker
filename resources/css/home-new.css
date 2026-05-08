@@ -1,0 +1,353 @@
+body {
+    background: linear-gradient(155deg, #eef2f8 0%, #f5f7fc 55%, #edf1f7 100%);
+}
+
+/* ── Page Header ──────────────────────────────────── */
+.page-hero {
+    background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-800) 60%, #1a2a50 100%);
+    border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+    padding: 1.5rem 0;
+}
+
+/* ── Form Card ────────────────────────────────────── */
+.form-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(13, 21, 38, 0.1);
+}
+
+/* ── Document type tab strip ──────────────────────── */
+.doc-type-select-wrap {
+    background: linear-gradient(135deg, rgba(13, 21, 38, 0.03), rgba(42, 82, 152, 0.05));
+    border: 1.5px solid var(--navy-100);
+    border-radius: 10px;
+    padding: 0.85rem;
+}
+
+/* ── Autofill slot panel ──────────────────────────── */
+.autofill-panel {
+    background: linear-gradient(135deg, rgba(42, 82, 152, 0.04), rgba(201, 168, 76, 0.04));
+    border: 1.5px solid rgba(42, 82, 152, 0.12);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.autofill-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--navy-500), var(--gold-400));
+    border-radius: 0 2px 2px 0;
+}
+
+/* ── Loop checklist container ─────────────────────── */
+.loop-container {
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.loop-header {
+    background: linear-gradient(90deg, var(--navy-800), var(--navy-700));
+    padding: 0.6rem 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.loop-search-wrap {
+    padding: 0.5rem 0.65rem;
+    border-bottom: 1px solid var(--slate-200);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.loop-search {
+    width: 100%;
+    border: 1px solid var(--slate-200);
+    border-radius: 6px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.78rem;
+    font-family: var(--font-body);
+    background: #fff;
+    color: var(--slate-700);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.loop-search:focus {
+    border-color: var(--navy-300);
+}
+
+.loop-checklist {
+    overflow-y: auto;
+    max-height: 220px;
+    padding: 0.35rem;
+}
+
+.loop-footer {
+    padding: 0.45rem 0.85rem;
+    background: rgba(42, 82, 152, 0.04);
+    border-top: 1px solid rgba(42, 82, 152, 0.08);
+}
+
+/* ── Form section heading ─────────────────────────── */
+.form-section-heading {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--navy-500);
+    border-bottom: 1px solid var(--navy-100);
+    padding-bottom: 0.4rem;
+    margin: 1.25rem 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-section-heading::before {
+    content: '';
+    width: 16px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold-500), var(--gold-300));
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* ── Submit button ────────────────────────────────── */
+#submit-btn {
+    background: linear-gradient(135deg, var(--navy-700), var(--navy-600));
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    letter-spacing: 0.03em;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(31, 64, 104, 0.3);
+    font-family: var(--font-body);
+}
+
+#submit-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--navy-600), var(--navy-500));
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(31, 64, 104, 0.4);
+}
+
+#submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+#submit-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* ── Consent area ─────────────────────────────────── */
+.consent-area {
+    background: rgba(42, 82, 152, 0.04);
+    border: 1px solid rgba(42, 82, 152, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+/* ── Row item (repeating group) ───────────────────── */
+.row-item {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.15s ease;
+}
+
+.row-item:hover {
+    border-color: var(--navy-200);
+}
+
+/* ── Guide panel adjustments ──────────────────────── */
+.guide-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--navy-700);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.guide-section-title::before {
+    content: '';
+    width: 12px;
+    height: 2px;
+    background: var(--gold-400);
+    border-radius: 2px;
+}
+
+.guide-step {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(42, 82, 152, 0.06);
+}
+
+.guide-step:last-child {
+    border-bottom: none;
+}
+
+.guide-step-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--navy-700);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+.guide-step-num.done {
+    background: #15803d;
+}
+
+.guide-step-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--slate-700);
+}
+
+.guide-step-desc {
+    font-size: 0.72rem;
+    color: var(--slate-500);
+    line-height: 1.45;
+    margin-top: 0.1rem;
+}
+
+/* ── Warning / tip box ────────────────────────────── */
+.tip-box {
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
+.tip-box-gold {
+    background: rgba(201, 168, 76, 0.08);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    color: #7a5f1a;
+}
+
+.tip-box-navy {
+    background: rgba(42, 82, 152, 0.06);
+    border: 1px solid rgba(42, 82, 152, 0.15);
+    color: var(--navy-700);
+}
+
+/* ── Download success banner ──────────────────────── */
+.success-banner {
+    background: linear-gradient(135deg, rgba(21, 128, 61, 0.08), rgba(42, 82, 152, 0.06));
+    border: 1px solid rgba(21, 128, 61, 0.2);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+}
+
+.download-btn {
+    background: linear-gradient(135deg, #15803d, #16a34a);
+    color: #fff;
+    padding: 0.5rem 1.1rem;
+    border-radius: 7px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 10px rgba(21, 128, 61, 0.2);
+}
+
+.download-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(21, 128, 61, 0.3);
+}
+
+.preview-btn {
+    background: linear-gradient(135deg, var(--navy-600), var(--navy-500));
+    color: #fff;
+    padding: 0.5rem 1.1rem;
+    border-radius: 7px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 10px rgba(31, 64, 104, 0.2);
+    font-family: var(--font-body);
+}
+
+.preview-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(31, 64, 104, 0.3);
+}
+
+/* ── Autofill flash ───────────────────────────────── */
+@keyframes autofillFlash {
+    0% {
+        background-color: rgba(201, 168, 76, 0.15);
+        border-color: var(--gold-400) !important;
+    }
+
+    100% {
+        background-color: transparent;
+        border-color: var(--slate-200) !important;
+    }
+}
+
+.autofill-highlight {
+    animation: autofillFlash 1.3s ease-out forwards;
+}
+
+/* ── Loop item ────────────────────────────────────── */
+.loop-item {
+    border: 1px solid transparent;
+}
+
+.loop-item.checked-item {
+    background: rgba(42, 82, 152, 0.06);
+    border-color: rgba(42, 82, 152, 0.15) !important;
+}
+
+/* ── Mobile ───────────────────────────────────────── */
+@media (max-width: 640px) {
+    .row-group-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .loop-checklist {
+        max-height: 180px;
+    }
+}
