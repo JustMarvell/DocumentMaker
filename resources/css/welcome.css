@@ -1,0 +1,149 @@
+body {
+    background: #0d1526;
+    font-family: var(--font-body);
+}
+
+/* Hero background */
+.hero-bg {
+    min-height: 100vh;
+    background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(42, 82, 152, 0.35) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(201, 168, 76, 0.12) 0%, transparent 60%),
+        linear-gradient(160deg, #0a0f1e 0%, #0d1526 50%, #101c38 100%);
+}
+
+/* Geometric decoration */
+.geo-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(201, 168, 76, 0.08);
+    animation: expandCircle 8s ease-in-out infinite alternate;
+}
+
+@keyframes expandCircle {
+    from {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+
+    to {
+        transform: scale(1.04);
+        opacity: 0.7;
+    }
+}
+
+/* Grid pattern overlay */
+.grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(42, 82, 152, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42, 82, 152, 0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+
+/* Gold accent line */
+.gold-accent-line {
+    width: 48px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold-500), transparent);
+}
+
+/* Feature cards */
+.feature-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(201, 168, 76, 0.2);
+    transform: translateY(-2px);
+}
+
+.feature-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(201, 168, 76, 0.12);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold-400);
+    margin-bottom: 0.85rem;
+}
+
+.feature-title {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.feature-desc {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.78rem;
+    line-height: 1.55;
+}
+
+/* Login card */
+.login-panel {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(1.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* Seal / emblem circle */
+.emblem {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--gold-500), var(--gold-300));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 6px rgba(201, 168, 76, 0.12), 0 8px 24px rgba(201, 168, 76, 0.25);
+    animation: pulse-gold 3s ease-in-out infinite;
+}
+
+/* Scroll fade hint */
+.scroll-hint {
+    opacity: 0;
+    animation: fadeIn 1s ease 1.8s forwards;
+}
+
+/* Stats strip */
+.stats-strip {
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.stat-num {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--gold-400);
+    line-height: 1;
+}
+
+.stat-desc {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+}
+
+/* Footer */
+.welcome-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
