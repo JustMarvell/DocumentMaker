@@ -157,10 +157,10 @@
                 </tbody>
             </table>
         </div>
-    </form>
 
-    {{-- Pagination --}}
-    <div class="mt-4">{{ $logs->links() }}</div>
+        {{-- Pagination --}}
+        <div class="mt-4">{{ $logs->links() }}</div>
+    </form>
 
     <script>
         function getCheckboxes() {
