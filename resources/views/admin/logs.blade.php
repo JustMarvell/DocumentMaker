@@ -121,6 +121,9 @@
                                     @endif
 
                                     {{-- Signed file --}}
+                                    @php 
+                                        $sigReq = $log->signatureRequest; 
+                                    @endphp
                                     @if($log->signatureRequest?->signed_filename)
                                     @php $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename)); @endphp
                                         @if($signedExists)
@@ -158,9 +161,10 @@
             </table>
         </div>
 
-        {{-- Pagination --}}
-        <div class="mt-4">{{ $logs->links() }}</div>
     </form>
+
+    {{-- Pagination --}}
+    <div class="mt-4">{{ $logs->links() }}</div>
 
     <script>
         function getCheckboxes() {
