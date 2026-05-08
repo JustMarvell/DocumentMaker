@@ -4,50 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name') }} - Verifikasi Dokumen</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        body {
-            background:
-                radial-gradient(ellipse 80% 60% at 50% -5%, rgba(42,82,152,0.25) 0%, transparent 60%),
-                linear-gradient(160deg, #0a0f1e 0%, #0d1526 60%, #101c38 100%);
-            min-height: 100vh;
-            font-family: var(--font-body);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 1rem;
-        }
-
-        .verify-card {
-            width: 100%;
-            max-width: 520px;
-            background: rgba(255,255,255,0.07);
-            backdrop-filter: blur(24px) saturate(1.3);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 20px;
-            box-shadow: 0 24px 80px rgba(0,0,0,0.45);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 1.5rem;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            padding: 0.65rem 0;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            font-size: 0.82rem;
-            gap: 1rem;
-        }
-        .info-row:last-child { border-bottom: none; }
-        .info-label { color: rgba(255,255,255,0.4); flex-shrink: 0; }
-        .info-value { color: rgba(255,255,255,0.88); font-weight: 500; text-align: right; }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/signature/verify.css'])
 </head>
 <body>
 
