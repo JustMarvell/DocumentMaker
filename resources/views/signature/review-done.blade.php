@@ -5,20 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name') }} - Tinjauan Selesai</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        body {
-            background:
-                radial-gradient(ellipse 80% 60% at 50% -5%, rgba(42, 82, 152, 0.25) 0%, transparent 60%),
-                linear-gradient(160deg, #0a0f1e 0%, #0d1526 60%, #101c38 100%);
-            min-height: 100vh;
-            font-family: var(--font-body);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 1rem;
-        }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/signature/review-done.css'])
 </head>
 
 <body>
