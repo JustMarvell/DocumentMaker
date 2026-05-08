@@ -185,6 +185,8 @@
         </table>
     </div>
 
+    <div class="mt-4"> {{ $documentTypes->links() }} </div>
+
     <script>
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
 
