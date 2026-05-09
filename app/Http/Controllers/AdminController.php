@@ -254,7 +254,7 @@ class AdminController extends Controller
             'row_group'             => 'nullable|integer|min:1',
             'icon'                  => ['nullable', 'string', 'max:100', function($attribute, $value, $fail)
             {
-                if ($value && !in_array($value, array_merge(...array_values(\App\Models\DocumentField::availableIcons())))) {
+                if ($value && !in_array($value, array_merge(...array_values(DocumentField::availableIcons())))) {
                     // just allow
                     // uncomment if want hard fail
                     // $fail('Icon tidak valid');
@@ -708,5 +708,48 @@ class AdminController extends Controller
         $path = storage_path('app/' . $disk . '/' . $filename);
         abort_unless(file_exists($path), 404);
         return response()->file($path);
+    }
+
+    public function uploadPreviewPdf(Request $request, DocumentType $documentType)
+    {
+        $request->validate([
+            'preview_pdf' => 'required|file|mimes:pdf|max:20480',
+        ]);
+
+        if ($documentType->preview_pdf) {
+            $oldPath = storage_path('app/document_previews/' . $documentType->preview_pdf);
+            if (file_exists($oldPath))
+                unlink($oldPath);
+        }
+
+        $file = $request->file('preview_pdf');
+        $filename = 'preview_' . $documentType->key . '_' . time() . '.pdf';
+        $dir = storage_path('app/document_previews');
+        if (!is_dir($dir))
+            mkdir($dir, 0775, true);
+        $file->move($dir, $filename);
+
+        $documentType->update(['preview_pdf' => $filename]);
+
+        return back()->with('success', "Preview PDF untuk '{$documentType->name}' berhasil diupload.");
+    }
+
+    public function deletePreviewPdf(DocumentType $documentType)
+    {
+        if ($documentType->preview_pdf) {
+            $path = storage_path('app/document_previews/' . $documentType->preview_pdf);
+            if (file_exists($path))
+                unlink($path);
+            $documentType->update(['preview_pdf' => null]);
+        }
+        return back()->with('success', "Preview PDF berhasil dihapus.");
+    }
+
+    public function servePreviewPdf(DocumentType $documentType)
+    {
+        abort_unless($documentType->preview_pdf, 404);
+        $path = storage_path('app/document_previews/' . $documentType->preview_pdf);
+        abort_unless(file_exists($path), 404);
+        return response()->file($path, ['Content-Type' => 'application/pdf']);
     }
 }

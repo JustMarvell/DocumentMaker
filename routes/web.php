@@ -51,6 +51,8 @@ Route::middleware('auth')->group(function() {
         Route::get('/signature/request/{documentLog}', [SignatureRequestController::class, 'create'])->name('signature.create');
         Route::post('/signature/request/{documentLog}', [SignatureRequestController::class, 'store'])->name('signature.store');
         Route::post('/signature/resend/{signatureRequest}', [SignatureRequestController::class, 'resendRequestEmail'])->name('signature.resend');
+
+        Route::get('/document-preview/{documentType}', [AdminController::class, 'servePreviewPdf'])->name('document-types.preview-pdf.serve');
     });
 
     Route::middleware('role:staff,admin')->group(function(){
@@ -97,6 +99,8 @@ Route::middleware('auth')->group(function() {
         Route::patch('/document-types/{documentType}/number-counter/reset', [AdminController::class, 'resetNumberCounter'])->name('document-types.number-counter.reset');
         Route::post('/document-types/{documentType}/scan-fields', [AdminController::class,'scanFields'])->name('document-types.fields.scan');
         Route::post('/document-types/{documentType}/fields/bulk-store', [AdminController::class, 'bulkStoreFields'])->name('document-types.fields.bulk-store');
+        Route::post('/document-types/{documentType}/preview-pdf', [AdminController::class, 'uploadPreviewPdf'])->name('document-types.preview-pdf.upload');
+        Route::delete('/document-types/{documentType}/preview-pdf', [AdminController::class, 'deletePreviewPdf'])->name('document-types.preview-pdf.delete');
 
         Route::get('/staff-data', [AdminController::class,'staffData'])->name('staff-data');
         Route::post('/staff-data', [StaffDataController::class, 'store'])->name('staff-data.store');
