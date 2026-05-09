@@ -248,6 +248,23 @@
                                         <option value="{{ $type->key }}">{{ $type->name }}</option>
                                     @endforeach
                                 </select>
+                                <div class="mt-2 flex items-center gap-2" id="template-preview-btn-wrap">
+                                    @foreach ($documentTypes as $type)
+                                        @if ($type->preview_pdf)
+                                        <button type="button"
+                                            id="tpl-preview-btn-{{ $type->key }}"
+                                            onclick="openTemplatePreview('{{ route('document-types.preview-pdf.serve', $type) }}', '{{ addslashes($type->name) }}')"
+                                            class="tpl-preview-btn hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+                                            style="background:rgba(42,82,152,0.08);border:1.5px solid rgba(42,82,152,0.2);color:var(--navy-700);">
+                                            <svg style="width:12px;height:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            Lihat Contoh Dokumen
+                                        </button>
+                                        @endif
+                                    @endforeach
+                                </div>
                             </div>
 
                             {{-- ── Dynamic form sections ────────── --}}
@@ -661,6 +678,25 @@
         </div>
     </div>
 
+    <div id="tpl-preview-modal"
+            class="sipadu-modal-bg"
+                style="display:none;"
+                onclick="if(event.target===this)closeTplPreview()">
+            <div class="sipadu-modal w-full max-w-4xl mx-4 flex flex-col" style="height:90vh;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--slate-200);">
+                    <div style="display:flex;align-items:center;gap:0.6rem;">
+                            <div style="width:3px;height:20px;background:linear-gradient(180deg,var(--gold-500),var(--gold-300));border-radius:2px;"></div>
+                    <h2 id="tpl-preview-title" style="font-size:0.95rem;font-weight:700;color:var(--navy-800);"></h2>
+                    </div>
+                    <button        onclick="closeTplPreview()"
+                            style="width:28px;height:28px;border-radius:6px;border:1px solid var(--slate-200);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--slate-400);font-size:1rem;"
+                    onmouseover="this.style.background='var(--slate-100)'"
+                            onmouseout="this.style.background='transparent'">✕</button>
+            </div>
+                <iframe id="tpl-preview-iframe" class="flex-1 w-full rounded-b-2xl" src="" title="Template Preview"></iframe>
+        </div>
+    </div>
+
     <script>
         const autofillMap = {
             @foreach ($documentTypes as $docType)
@@ -892,6 +928,11 @@
                     setTimeout(() => { target.style.transition = ''; target.style.opacity = ''; target.style.transform = ''; }, 230);
                 }
             }, 160);
+            document.querySelectorAll('.tpl-preview-btn').forEach(function(btn) {
+                btn.classList.add('hidden');
+            });
+            const activeBtn = document.getElementById('tpl-preview-btn-' + selectedKey);
+            if (activeBtn) activeBtn.classList.remove('hidden');
         }
 
         function submitIfConsented() {
@@ -981,9 +1022,27 @@
             document.getElementById('preview-modal').style.display = 'none';
             document.getElementById('preview-iframe').src = '';
             document.body.style.overflow = '';
-        }       
+        }
+        
+        function openTemplatePreview(url, name) {
+            document.getElementById('tpl-preview-title').textContent = 'Contoh: ' + name;
+            document.getElementById('tpl-preview-iframe').src = url;
+            document.getElementById('tpl-preview-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
 
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePreview(); });
+        function closeTplPreview() {
+            document.getElementById('tpl-preview-modal').style.display = 'none';
+            document.getElementById('tpl-preview-iframe').src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', function(e) { 
+            if (e.key === 'Escape') {
+                closePreview(); 
+                closeTplPreview(); 
+            }
+        });
 
         function switchTab(tab) {
             const panels = { form: 'panel-form', requests: 'panel-requests', history: 'panel-history' };
@@ -1013,6 +1072,8 @@
                     initial.classList.remove('hidden');
                     initial.querySelectorAll('input, select, textarea').forEach(i => i.disabled = false);
                 }
+                const initBtn = document.getElementById('tpl-preview-btn-' + select.value);
+                if (initBtn) initBtn.classList.remove('hidden');
             }
             document.getElementById('submit-overlay').classList.remove('active');
             const btn = document.getElementById('submit-btn');
