@@ -32,6 +32,7 @@
                     <th class="px-4 py-3 text-center">TTD Digital</th>
                     <th class="px-4 py-3 text-center">Gambar TTD</th>
                     <th class="px-4 py-3 text-center">QR Code</th>
+                    <th class="px-4 py-3 text-center">Preview PDF</th>
                     <th class="px-4 py-3 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -137,6 +138,31 @@
                                 </button>
                             @else
                                 <span class="text-xs text-gray-300" id="placeholder-sig-qr-{{ $type->id }}">—</span>
+                            @endif
+                        </td>
+
+                        <td class="px-4 py-3 text-center" id="cell-preview-pdf-{{ $type->id }}">
+                            @if ($type->preview_pdf)
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="text-xs text-green-600 font-semibold">✓ Ada</span>
+                                    <form method="POST" action="{{ route('admin.document-types.preview-pdf.delete', $type) }}"
+                                        onsubmit="return confirm('Hapus preview PDF?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="text-xs px-2 py-0.5 rounded border border-red-300 text-red-400 hover:bg-red-50">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                <form method="POST" action="{{ route('admin.document-types.preview-pdf.upload', $type) }}" enctype="multipart/form-data"
+                                    class="flex flex-col items-center gap-1">
+                                    @csrf
+                                    <input type="file" name="preview_pdf" accept="application/pdf" class="text-xs w-24"
+                                        onchange="this.closest('form').submit()" />
+                                    <span class="text-xs text-gray-300">PDF, maks 20MB</span>
+                                </form>
                             @endif
                         </td>
 
