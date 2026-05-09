@@ -254,7 +254,7 @@ class AdminController extends Controller
             'row_group'             => 'nullable|integer|min:1',
             'icon'                  => ['nullable', 'string', 'max:100', function($attribute, $value, $fail)
             {
-                if ($value && !in_array($value, array_merge(...array_values(\App\Models\DocumentField::availableIcons())))) {
+                if ($value && !in_array($value, array_merge(...array_values(DocumentField::availableIcons())))) {
                     // just allow
                     // uncomment if want hard fail
                     // $fail('Icon tidak valid');
