@@ -13,7 +13,7 @@ class DocumentType extends Model
         'output_filename', 'access_level', 'is_active',
         'file_type', 'preview_enabled', 'signature_enabled',
         'signature_use_image', 'signature_use_qr',
-
+        'preview_pdf',
     ];
 
     protected function casts() : array {
