@@ -119,6 +119,8 @@ Route::middleware('auth')->group(function() {
         Route::get('/guide/asset/pdf/{filename}', [AdminController::class, 'serveGuideAssetPdf'])->name('guide.asset.pdf');
         Route::get('/guide/asset/video/{filename}', [AdminController::class, 'serveGuideAssetVideo'])->name('guide.asset.video');
         Route::get('/guide/asset/image/{filename}', [AdminController::class, 'serveGuideAssetImage'])->name('guide.asset.image');
+        Route::get('/guide/asset/placeholder-ttd', [AdminController::class, 'downloadPlaceholderTtd'])->name('guide.placeholder-ttd');
+        Route::get('/guide/asset/placeholder-qr', [AdminController::class, 'downloadPlaceholderQr'])->name('guide.placeholder-qr');
 
         Route::get('/signatures', [SignatureRequestController::class, 'adminIndex'])->name('signatures');
         Route::patch('/signatures/{signatureRequest}/approve', [SignatureRequestController::class, 'adminApprove'])->name('signatures.approve');

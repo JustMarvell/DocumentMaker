@@ -510,26 +510,40 @@ class AdminController extends Controller
     }
 
     public function toggleSignatureImage(DocumentType $documentType) {
-        $documentType->update(['signature_use_image' => !$documentType->signature_use_image]);
-        $status = $documentType->signature_use_image ? 'diaktifkan' : 'dinonaktifkan';
+        $newVal = !$documentType->signature_use_image;
+        $documentType->update([
+            'signature_use_image' => $newVal,
+            'signature_use_qr' => $newVal ? false : $documentType->signature_use_qr,
+        ]);
+        $status = $newVal ? 'diaktifkan' : 'dinonaktifkan';
 
         if (request()->expectsJson()) {
-            return response()->json(['success' => true, 'signature_use_image' => $documentType->signature_use_image]);
+            return response()->json([
+                'success' => true,
+                'signature_use_image' => $documentType->signature_use_image,
+                'signature_use_qr' => $documentType->signature_use_qr,
+            ]);
         }
-
-        return back()->with('succes', "Embed gambar untuk {$documentType->name} berhasil {$status}.");
+        return back()->with('success', "Embed gambar untuk {$documentType->name} berhasil {$status}.");
     }
 
     public function toggleSignatureQr(DocumentType $documentType)
     {
-        $documentType->update(['signature_use_qr' => !$documentType->signature_use_qr]);
-        $status = $documentType->signature_use_qr ? 'diaktifkan' : 'dinonaktifkan';
+        $newVal = !$documentType->signature_use_qr;
+        $documentType->update([
+            'signature_use_qr' => $newVal,
+            'signature_use_image' => $newVal ? false : $documentType->signature_use_image,
+        ]);
+        $status = $newVal ? 'diaktifkan' : 'dinonaktifkan';
 
         if (request()->expectsJson()) {
-            return response()->json(['success' => true, 'signature_use_qr' => $documentType->signature_use_qr]);
+            return response()->json([
+                'success' => true,
+                'signature_use_qr' => $documentType->signature_use_qr,
+                'signature_use_image' => $documentType->signature_use_image,
+            ]);
         }
-
-        return back()->with('succes', "Embed QR untuk {$documentType->name} berhasil {$status}.");
+        return back()->with('success', "Embed QR untuk {$documentType->name} berhasil {$status}.");
     }
 
     public function numberCounter(DocumentType $documentType) {
@@ -765,5 +779,19 @@ class AdminController extends Controller
         $path = storage_path('app/document_previews/' . $documentType->preview_pdf);
         abort_unless(file_exists($path), 404);
         return response()->file($path, ['Content-Type' => 'application/pdf']);
+    }
+
+    public function downloadPlaceholderTtd()
+    {
+        $path = base_path('resources/img/placeholder_ttd.png');
+        abort_unless(file_exists($path), 404);
+        return response()->download($path, 'placeholder_ttd.png');
+    }
+
+    public function downloadPlaceholderQr()
+    {
+        $path = base_path('resources/img/dummy_qr.png');
+        abort_unless(file_exists($path), 404);
+        return response()->download($path, 'dummy_qr.png');
     }
 }

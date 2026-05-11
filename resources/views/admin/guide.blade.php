@@ -590,32 +590,6 @@
             </div>
         </section>
 
-        <section id="preview" class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Fitur Preview Dokumen</h2>
-            <p class="text-sm text-gray-700 mb-4">
-                Fitur preview menggunakan LibreOffice untuk mengkonversi file ke PDF dan menampilkannya di browser.
-            </p>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-gray-50 rounded p-3">
-                    <p class="text-xs font-semibold text-gray-600 mb-2">Cara Mengaktifkan (Admin)</p>
-                    <ol class="text-xs text-gray-700 space-y-1 list-decimal list-inside">
-                        <li>Buka Admin Panel → Jenis Dokumen</li>
-                        <li>Klik toggle di kolom Preview pada template yang diinginkan</li>
-                        <li>Toggle biru = aktif, abu = nonaktif</li>
-                    </ol>
-                </div>
-                <div class="bg-gray-50 rounded p-3">
-                    <p class="text-xs font-semibold text-gray-600 mb-2">Persyaratan Preview</p>
-                    <ul class="text-xs text-gray-700 space-y-1">
-                        <li>• LibreOffice terinstall di server</li>
-                        <li>• Folder <code class="bg-gray-100 px-1 rounded">public/cached_result/</code> dapat ditulis</li>
-                        <li>• Fitur preview diaktifkan admin untuk template</li>
-                    </ul>
-                </div>
-            </div>
-            <x-code class="mt-3">sudo apt install libreoffice   # instalasi LibreOffice</x-code>
-        </section>
-
         <section id="scheduler" class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Sistem Pembersihan File Otomatis</h2>
             <p class="text-sm text-gray-700 mb-3">
@@ -769,7 +743,7 @@ UPDATE users SET role = 'admin' WHERE email = 'admin@dinas.go.id';
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Placeholder Gambar</p>
                         <ul class="text-xs text-gray-700 space-y-2">
                             <li>
-                                <code class="bg-gray-100 px-1 rounded">transparent35mm.png</code> — dummy untuk gambar tanda tangan.
+                                <code class="bg-gray-100 px-1 rounded">placeholder_ttd.png</code> — dummy untuk gambar tanda tangan.
                                 Letakkan di template sebagai gambar inline/text box.
                                 Sistem swap gambar ini dengan foto TTD pejabat.
                             </li>
@@ -780,6 +754,24 @@ UPDATE users SET role = 'admin' WHERE email = 'admin@dinas.go.id';
                         </ul>
                         <div class="bg-blue-50 border border-blue-200 rounded px-2 py-1.5 mt-2 text-xs text-blue-800">
                             File dummy tersedia di <code class="bg-blue-100 px-1 rounded">resources/img/</code>. Gunakan sebagai gambar placeholder di template.
+                            <div class="flex gap-2 mt-2">
+                                <a href="{{ route('admin.guide.placeholder-ttd') }}"
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-blue-300 bg-white text-blue-700 hover:bg-blue-100 font-semibold transition"
+                                    style="font-size:0.72rem;">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    placeholder_ttd.png
+                                </a>
+                                <a href="{{ route('admin.guide.placeholder-qr') }}"
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-blue-300 bg-white text-blue-700 hover:bg-blue-100 font-semibold transition"
+                                    style="font-size:0.72rem;">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    dummy_qr.png
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
