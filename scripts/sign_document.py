@@ -96,31 +96,31 @@ def sign_docx(input_path: str, output_path: str, args: argparse.Namespace) -> No
     use_image = args.use_image == "1"
     use_qr    = args.use_qr    == "1"
 
-    base_dir   = Path(__file__).resolve().parent.parent
-    dummy_path = str(base_dir / "resources" / "img" / "transparent35mm.png")  # <- dummy source
+    base_dir       = Path(__file__).resolve().parent.parent
+    dummy_ttd_path = str(base_dir / "resources" / "img" / "placeholder_ttd.png")
+    dummy_qr_path  = str(base_dir / "resources" / "img" / "dummy_qr.png")
 
-    # -- signature image --
-    if use_image:
-        sig_src = args.sig_image if (args.sig_image and os.path.exists(args.sig_image)) else dummy_path
-        try:
-            doc.replace_media(dummy_path, sig_src)  # <- swaps dummy_sig slot
-        except Exception:
-            pass  # image not in template, skip silently
-
-    # -- QR code --
     qr_tmp_path = None
+
+    # Generate QR bytes early so we can decide what goes where
+    qr_bytes = None
     if use_qr and args.verify_url:
         qr_bytes = make_qr_png(args.verify_url)
+
+    if use_image and args.sig_image and os.path.exists(args.sig_image):
+        try:
+            doc.replace_media(dummy_ttd_path, args.sig_image)
+        except Exception as e:
+            print(f"WARNING: replace_media (ttd) failed: {e}", file=sys.stderr)
+
+    if use_qr and qr_bytes:
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
             tmp.write(qr_bytes)
             qr_tmp_path = tmp.name
-
-        # dummy_qr.png is a copy of the transparent image placed separately in the template
-        dummy_qr = str(base_dir / "resources" / "img" / "dummy_qr.png")
         try:
-            doc.replace_media(dummy_qr, qr_tmp_path)  # <- swaps dummy_qr slot
-        except Exception:
-            pass
+            doc.replace_media(dummy_qr_path, qr_tmp_path)
+        except Exception as e:
+            print(f"WARNING: replace_media (qr) failed: {e}", file=sys.stderr)
 
     try:
         doc.render(context)
@@ -320,10 +320,13 @@ def _render_drawing_xml(xml_bytes: bytes, context: dict) -> bytes:
     xml = re.sub(r"<a:t([^>]*)>(.*?)</a:t>", replace_t, xml, flags=re.DOTALL)
     return xml.encode("utf-8")
 
+# sign_xlsx
 def sign_xlsx(input_path: str, output_path: str, args: argparse.Namespace) -> None:
-    base_dir      = Path(__file__).resolve().parent.parent
-    dummy_sig_src = base_dir / "resources" / "img" / "transparent35mm.png"
-    dummy_qr_src  = base_dir / "resources" / "img" / "dummy_qr.png"
+    import hashlib
+
+    base_dir       = Path(__file__).resolve().parent.parent
+    dummy_ttd_src  = base_dir / "resources" / "img" / "placeholder_ttd.png" 
+    dummy_qr_src   = base_dir / "resources" / "img" / "dummy_qr.png"
 
     use_image = args.use_image == "1"
     use_qr    = args.use_qr    == "1"
@@ -347,21 +350,30 @@ def sign_xlsx(input_path: str, output_path: str, args: argparse.Namespace) -> No
         if re.match(r"xl/drawings/.*\.xml$", name, re.IGNORECASE) and not name.endswith(".rels"):
             zip_files[name] = _render_drawing_xml(zip_files[name], text_ctx)
 
-    # match by content, not filename <- fix
     def swap_by_content(dummy_src: Path, new_bytes: bytes) -> bool:
+        """Swap by content hash — more reliable than byte equality."""
         if not dummy_src.exists():
+            print(f"WARNING: dummy file not found: {dummy_src}", file=sys.stderr)
             return False
-        dummy_bytes = dummy_src.read_bytes()
+        dummy_hash = hashlib.md5(dummy_src.read_bytes()).hexdigest()
+        swapped = False
         for zip_path in list(zip_files.keys()):
-            if zip_path.startswith("xl/media/") and zip_files[zip_path] == dummy_bytes:
-                zip_files[zip_path] = new_bytes  # <- swap
-                return True
-        return False
+            if not zip_path.startswith("xl/media/"):
+                continue
+            if hashlib.md5(zip_files[zip_path]).hexdigest() == dummy_hash:
+                zip_files[zip_path] = new_bytes
+                swapped = True
+                # don't break — swap ALL matches (in case template has it twice)
+        if not swapped:
+            print(f"WARNING: no media matched dummy {dummy_src.name}", file=sys.stderr)
+        return swapped
 
     if use_image:
         sig_path = args.sig_image if (args.sig_image and os.path.exists(args.sig_image)) else None
         if sig_path:
-            swap_by_content(dummy_sig_src, open(sig_path, "rb").read())
+            swap_by_content(dummy_ttd_src, open(sig_path, "rb").read())
+        else:
+            print("WARNING: use_image=1 but sig_image not found", file=sys.stderr)
 
     if use_qr and args.verify_url:
         swap_by_content(dummy_qr_src, make_qr_png(args.verify_url))
