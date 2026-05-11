@@ -590,32 +590,6 @@
             </div>
         </section>
 
-        <section id="preview" class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Fitur Preview Dokumen</h2>
-            <p class="text-sm text-gray-700 mb-4">
-                Fitur preview menggunakan LibreOffice untuk mengkonversi file ke PDF dan menampilkannya di browser.
-            </p>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-gray-50 rounded p-3">
-                    <p class="text-xs font-semibold text-gray-600 mb-2">Cara Mengaktifkan (Admin)</p>
-                    <ol class="text-xs text-gray-700 space-y-1 list-decimal list-inside">
-                        <li>Buka Admin Panel → Jenis Dokumen</li>
-                        <li>Klik toggle di kolom Preview pada template yang diinginkan</li>
-                        <li>Toggle biru = aktif, abu = nonaktif</li>
-                    </ol>
-                </div>
-                <div class="bg-gray-50 rounded p-3">
-                    <p class="text-xs font-semibold text-gray-600 mb-2">Persyaratan Preview</p>
-                    <ul class="text-xs text-gray-700 space-y-1">
-                        <li>• LibreOffice terinstall di server</li>
-                        <li>• Folder <code class="bg-gray-100 px-1 rounded">public/cached_result/</code> dapat ditulis</li>
-                        <li>• Fitur preview diaktifkan admin untuk template</li>
-                    </ul>
-                </div>
-            </div>
-            <x-code class="mt-3">sudo apt install libreoffice   # instalasi LibreOffice</x-code>
-        </section>
-
         <section id="scheduler" class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Sistem Pembersihan File Otomatis</h2>
             <p class="text-sm text-gray-700 mb-3">
