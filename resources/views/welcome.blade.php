@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <title>{{ config('app.name') }} - Selamat Datang</title>
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/welcome.css'])
 </head>
@@ -110,11 +111,11 @@
                     <!-- Feature list -->
                     <div class="space-y-3 mb-6">
                         @foreach([
-                            ['Pembuatan Surat Otomatis', 'Isi form, sistem mengisi template — selesai dalam hitungan detik.'],
-                            ['Autofill Data Pegawai', 'Data nama, NIP, jabatan terisi otomatis dari database dinas.'],
-                            ['Multi-format Dokumen', 'Dukungan template Word (.docx) dan Excel (.xlsx).'],
-                            ['Riwayat & Audit', 'Setiap dokumen tercatat dengan lengkap untuk keperluan audit.'],
-                        ] as $f)
+    ['Pembuatan Surat Otomatis', 'Isi form, sistem mengisi template — selesai dalam hitungan detik.'],
+    ['Autofill Data Pegawai', 'Data nama, NIP, jabatan terisi otomatis dari database dinas.'],
+    ['Multi-format Dokumen', 'Dukungan template Word (.docx) dan Excel (.xlsx).'],
+    ['Riwayat & Audit', 'Setiap dokumen tercatat dengan lengkap untuk keperluan audit.'],
+] as $f)
                         <div class="flex items-start gap-3 py-2 border-b" style="border-color:rgba(255,255,255,0.06);">
                             <div class="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5" style="background:rgba(201,168,76,0.15);">
                                 <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--gold-400);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
@@ -131,7 +132,7 @@
                     <div class="rounded-10 p-3 mb-5" style="background:rgba(42,82,152,0.15);border:1px solid rgba(42,82,152,0.2);border-radius:8px;">
                         <p style="font-size:0.72rem;color:rgba(255,255,255,0.5);margin-bottom:0.5rem;letter-spacing:0.04em;text-transform:uppercase;font-weight:600;">Level Akses</p>
                         <div class="flex gap-3">
-                            @foreach([['Guest','Dokumen Publik'],['Staff','Semua Dokumen'],['Admin','Kelola Sistem']] as $r)
+                            @foreach([['Guest', 'Dokumen Publik'], ['Staff', 'Semua Dokumen'], ['Admin', 'Kelola Sistem']] as $r)
                             <div class="text-center flex-1">
                                 <div style="color:var(--gold-400);font-size:0.78rem;font-weight:700;">{{ $r[0] }}</div>
                                 <div style="color:rgba(255,255,255,0.35);font-size:0.65rem;margin-top:0.1rem;">{{ $r[1] }}</div>
@@ -161,7 +162,7 @@
         <!-- Stats strip -->
         <div class="stats-strip mt-20 rounded-2xl fade-up fade-up-5">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-0 divide-x" style="divide-color:rgba(255,255,255,0.06);">
-                @foreach([['3','Jenis Dokumen'],['Auto','Pengisian Data'],['PDF','Preview Instan'],['Aman','Berbasis Akun']] as $s)
+                @foreach([['3', 'Jenis Dokumen'], ['Auto', 'Pengisian Data'], ['PDF', 'Preview Instan'], ['Aman', 'Berbasis Akun']] as $s)
                 <div class="text-center py-5 px-4">
                     <div class="stat-num">{{ $s[0] }}</div>
                     <div class="stat-desc">{{ $s[1] }}</div>
@@ -178,13 +179,13 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach([
-                    ['M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z','Template Fleksibel','Dukung format Word dan Excel dengan placeholder Jinja2 yang powerful.'],
-                    ['M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0','Data Staff & Pejabat','Database terpusat untuk pegawai dan pejabat, mengisi form secara otomatis.'],
-                    ['M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z','Preview PDF','Pratinjau dokumen langsung di browser sebelum mengunduh.'],
-                    ['M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2','Daftar Peserta','Pilih dan urutkan peserta dari daftar dengan drag-and-drop.'],
-                    ['M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z','Kontrol Akses','Tiga tingkat akses: Guest, Staff, dan Admin dengan hak yang berbeda.'],
-                    ['M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z','Hapus Otomatis','File temporer dibersihkan otomatis, menjaga server tetap efisien.'],
-                ] as $feat)
+    ['M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'Template Fleksibel', 'Dukung format Word dan Excel dengan placeholder Jinja2 yang powerful.'],
+    ['M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0', 'Data Staff & Pejabat', 'Database terpusat untuk pegawai dan pejabat, mengisi form secara otomatis.'],
+    ['M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z', 'Preview PDF', 'Pratinjau dokumen langsung di browser sebelum mengunduh.'],
+    ['M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'Daftar Peserta', 'Pilih dan urutkan peserta dari daftar dengan drag-and-drop.'],
+    ['M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', 'Kontrol Akses', 'Tiga tingkat akses: Guest, Staff, dan Admin dengan hak yang berbeda.'],
+    ['M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'Hapus Otomatis', 'File temporer dibersihkan otomatis, menjaga server tetap efisien.'],
+] as $feat)
                 <div class="feature-card">
                     <div class="feature-icon">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $feat[0] }}"/></svg>

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <title>{{ config('app.name') }} - Buat Dokumen</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
         integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
@@ -459,13 +460,12 @@
         <div id="panel-requests" style="display:none;">
             @if ($signatureRequests->isEmpty())
                 <div class="form-card p-12 text-center fade-up" style="color:var(--slate-400);">
-                    <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                    </svg>
+                    {{-- empty state icon --}}
                     Belum ada permintaan tanda tangan.
                 </div>
             @else
-                <div class="form-card overflow-hidden fade-up">
+                {{-- Desktop table --}}
+                <div class="form-card overflow-hidden fade-up hidden sm:block">
                     <table class="w-full text-sm">
                         <thead style="background:linear-gradient(90deg,var(--navy-800),var(--navy-700));">
                             <tr>
@@ -513,16 +513,12 @@
                                         <a href="{{ route('signature.verify', $req->token) }}"
                                             style="font-size:0.75rem;color:var(--navy-600);text-decoration:none;font-weight:500;padding:0.3rem 0.7rem;border:1px solid var(--navy-200);border-radius:6px;transition:all 0.15s;"
                                             onmouseover="this.style.background='var(--navy-100)'"
-                                            onmouseout="this.style.background=''">
-                                            Detail
-                                        </a>
+                                            onmouseout="this.style.background=''">Detail</a>
                                         @if ($req->isPending())
                                             <form method="POST" action="{{ route('signature.resend', $req) }}">
                                                 @csrf
                                                 <button type="submit"
-                                                    style="font-size:0.72rem;color:var(--slate-500);padding:0.25rem 0.6rem;border:1px solid var(--slate-200);border-radius:6px;background:transparent;cursor:pointer;font-family:var(--font-body);margin-top:0.2rem;transition:all 0.15s;"
-                                                    onmouseover="this.style.background='var(--slate-100)'"
-                                                    onmouseout="this.style.background='transparent'">
+                                                    style="font-size:0.72rem;color:var(--slate-500);padding:0.25rem 0.6rem;border:1px solid var(--slate-200);border-radius:6px;background:transparent;cursor:pointer;font-family:var(--font-body);margin-top:0.2rem;">
                                                     ↺ Kirim Ulang Email
                                                 </button>
                                             </form>
@@ -533,6 +529,65 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Mobile cards --}}
+                <div class="sm:hidden space-y-3 fade-up">
+                    @foreach ($signatureRequests as $req)
+                    <div class="form-card p-4">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;">
+                            <p style="font-weight:700;color:var(--navy-800);font-size:0.85rem;flex:1;margin-right:0.5rem;">{{ $req->documentLog->documentType->name }}</p>
+                            @if ($req->status === 'pending')
+                                <span style="background:#fef9c3;color:#854d0e;padding:0.2rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:600;white-space:nowrap;flex-shrink:0;">Menunggu</span>
+                            @elseif ($req->status === 'approved')
+                                <span style="background:#dcfce7;color:#15803d;padding:0.2rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:600;white-space:nowrap;flex-shrink:0;">✓ Disetujui</span>
+                            @else
+                                <span style="background:#fee2e2;color:#b91c1c;padding:0.2rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:600;white-space:nowrap;flex-shrink:0;">✕ Ditolak</span>
+                            @endif
+                        </div>
+                        <p style="font-family:var(--font-mono);font-size:0.65rem;color:var(--slate-400);margin-bottom:0.5rem;">{{ Str::limit($req->documentLog->output_filename, 40) }}</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem 0.75rem;margin-bottom:0.75rem;">
+                            <div>
+                                <p style="font-size:0.65rem;color:var(--slate-400);text-transform:uppercase;letter-spacing:0.04em;">Pejabat</p>
+                                <p style="font-size:0.78rem;color:var(--slate-700);font-weight:500;">{{ $req->official?->staff_name ?? '—' }}</p>
+                                @if($req->official?->position)
+                                    <p style="font-size:0.68rem;color:var(--slate-400);">{{ $req->official->position }}</p>
+                                @endif
+                            </div>
+                            <div>
+                                <p style="font-size:0.65rem;color:var(--slate-400);text-transform:uppercase;letter-spacing:0.04em;">Diminta</p>
+                                <p style="font-size:0.78rem;color:var(--slate-600);">{{ $req->requested_at?->locale('id')->translatedFormat('d M Y') ?? '—' }}</p>
+                            </div>
+                            @if($req->reviewed_at)
+                            <div>
+                                <p style="font-size:0.65rem;color:var(--slate-400);text-transform:uppercase;letter-spacing:0.04em;">Ditinjau</p>
+                                <p style="font-size:0.78rem;color:var(--slate-600);">{{ $req->reviewed_at->locale('id')->translatedFormat('d M Y') }}</p>
+                            </div>
+                            @endif
+                            @if($req->notes)
+                            <div>
+                                <p style="font-size:0.65rem;color:var(--slate-400);text-transform:uppercase;letter-spacing:0.04em;">Catatan</p>
+                                <p style="font-size:0.72rem;color:var(--slate-500);font-style:italic;">"{{ Str::limit($req->notes, 35) }}"</p>
+                            </div>
+                            @endif
+                        </div>
+                        <div style="display:flex;gap:0.5rem;">
+                            <a href="{{ route('signature.verify', $req->token) }}"
+                                style="flex:1;text-align:center;font-size:0.78rem;color:var(--navy-600);font-weight:600;padding:0.45rem;border:1px solid var(--navy-200);border-radius:7px;text-decoration:none;background:rgba(42,82,152,0.04);">
+                                Detail
+                            </a>
+                            @if ($req->isPending())
+                                <form method="POST" action="{{ route('signature.resend', $req) }}" style="flex:1;">
+                                    @csrf
+                                    <button type="submit"
+                                        style="width:100%;font-size:0.78rem;color:var(--slate-500);padding:0.45rem;border:1px solid var(--slate-200);border-radius:7px;background:transparent;cursor:pointer;font-family:var(--font-body);">
+                                        ↺ Kirim Ulang
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
             @endif
         </div>
@@ -546,7 +601,8 @@
             Belum ada riwayat dokumen.
         </div>
     @else
-        <div class="form-card overflow-hidden fade-up">
+        {{-- Desktop table --}}
+        <div class="form-card overflow-hidden fade-up hidden sm:block">
             <table class="w-full text-sm">
                 <thead style="background:linear-gradient(90deg,var(--navy-800),var(--navy-700));">
                     <tr>
@@ -561,9 +617,9 @@
                 <tbody>
                     @foreach ($documentHistory as $log)
                     @php
-            $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
-            $fileExists = file_exists(storage_path('app/cached_result/' . $log->output_filename));
-            $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename));
+                        $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
+                        $fileExists = file_exists(storage_path('app/cached_result/' . $log->output_filename));
+                        $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename));
                     @endphp
                     <tr style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
                         onmouseover="this.style.background='rgba(42,82,152,0.03)'"
@@ -602,15 +658,11 @@
                             <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:center;">
                                 @if ($signedExists)
                                     <a href="{{ route('document.download', $sigReq->signed_filename) }}"
-                                        style="font-size:0.75rem;color:#fff;background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.3rem;">
-                                        ⬇ Bertanda Tangan
-                                    </a>
+                                        style="font-size:0.75rem;color:#fff;background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;font-weight:600;">⬇ Signed</a>
                                 @endif
                                 @if ($fileExists)
                                     <a href="{{ route('document.download', $log->output_filename) }}"
-                                        style="font-size:0.75rem;color:#fff;background:linear-gradient(135deg,#15803d,#16a34a);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.3rem;">
-                                        ⬇ Unduh
-                                    </a>
+                                        style="font-size:0.75rem;color:#fff;background:linear-gradient(135deg,#15803d,#16a34a);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;font-weight:600;">⬇ Unduh</a>
                                 @elseif (!$signedExists)
                                     <button onclick="showToast('File telah dihapus dari server.', 'error')"
                                         style="font-size:0.75rem;color:var(--slate-400);background:transparent;border:1px solid var(--slate-200);padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;font-family:var(--font-body);">
@@ -619,9 +671,7 @@
                                 @endif
                                 @if ($log->documentType->signature_enabled && !$sigReq && $fileExists)
                                     <a href="{{ route('signature.create', $log) }}"
-                                        style="font-size:0.72rem;color:var(--navy-600);padding:0.25rem 0.6rem;border:1px solid var(--navy-200);border-radius:6px;text-decoration:none;transition:all 0.15s;"
-                                        onmouseover="this.style.background='var(--navy-100)'"
-                                        onmouseout="this.style.background=''">
+                                        style="font-size:0.72rem;color:var(--navy-600);padding:0.25rem 0.6rem;border:1px solid var(--navy-200);border-radius:6px;text-decoration:none;">
                                         Minta TTD
                                     </a>
                                 @endif
@@ -631,6 +681,68 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        {{-- Mobile cards --}}
+        <div class="sm:hidden space-y-3 fade-up">
+            @foreach ($documentHistory as $log)
+            @php
+                $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
+                $fileExists = file_exists(storage_path('app/cached_result/' . $log->output_filename));
+                $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename));
+            @endphp
+            <div class="form-card p-4">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
+                    <p style="font-weight:700;color:var(--navy-800);font-size:0.85rem;flex:1;margin-right:0.5rem;">{{ $log->documentType->name }}</p>
+                    @if ($log->status === 'success')
+                        <span style="background:#dcfce7;color:#15803d;padding:0.2rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:600;white-space:nowrap;flex-shrink:0;">Berhasil</span>
+                    @else
+                        <span style="background:#fee2e2;color:#b91c1c;padding:0.2rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:600;white-space:nowrap;flex-shrink:0;">Gagal</span>
+                    @endif
+                </div>
+                <p style="font-family:var(--font-mono);font-size:0.65rem;color:var(--slate-400);margin-bottom:0.5rem;">{{ Str::limit($log->output_filename, 40) }}</p>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">
+                    <p style="font-size:0.75rem;color:var(--slate-500);">{{ $log->generated_at->locale('id')->translatedFormat('d M Y, H:i') }}</p>
+                    @if ($sigReq)
+                        @if ($sigReq->status === 'approved')
+                            <span style="background:#dcfce7;color:#15803d;padding:0.15rem 0.5rem;border-radius:20px;font-size:0.65rem;font-weight:600;">TTD ✓</span>
+                        @elseif ($sigReq->status === 'pending')
+                            <span style="background:#fef9c3;color:#854d0e;padding:0.15rem 0.5rem;border-radius:20px;font-size:0.65rem;font-weight:600;">TTD Menunggu</span>
+                        @else
+                            <span style="background:#fee2e2;color:#b91c1c;padding:0.15rem 0.5rem;border-radius:20px;font-size:0.65rem;font-weight:600;">TTD Ditolak</span>
+                        @endif
+                    @endif
+                </div>
+                @if (!$fileExists && !$signedExists)
+                    <p style="font-size:0.72rem;color:#b91c1c;margin-bottom:0.5rem;">⚠ File sudah dihapus dari server</p>
+                @endif
+                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+                    @if ($signedExists)
+                        <a href="{{ route('document.download', $sigReq->signed_filename) }}"
+                            style="font-size:0.78rem;color:#fff;background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:0.4rem 0.8rem;border-radius:7px;text-decoration:none;font-weight:600;">
+                            ⬇ Bertanda Tangan
+                        </a>
+                    @endif
+                    @if ($fileExists)
+                        <a href="{{ route('document.download', $log->output_filename) }}"
+                            style="font-size:0.78rem;color:#fff;background:linear-gradient(135deg,#15803d,#16a34a);padding:0.4rem 0.8rem;border-radius:7px;text-decoration:none;font-weight:600;">
+                            ⬇ Unduh
+                        </a>
+                    @elseif (!$signedExists)
+                        <button onclick="showToast('File telah dihapus dari server.', 'error')"
+                            style="font-size:0.78rem;color:var(--slate-400);background:transparent;border:1px solid var(--slate-200);padding:0.4rem 0.8rem;border-radius:7px;cursor:pointer;font-family:var(--font-body);">
+                            Tidak Tersedia
+                        </button>
+                    @endif
+                    @if ($log->documentType->signature_enabled && !$sigReq && $fileExists)
+                        <a href="{{ route('signature.create', $log) }}"
+                            style="font-size:0.78rem;color:var(--navy-600);padding:0.4rem 0.8rem;border:1px solid var(--navy-200);border-radius:7px;text-decoration:none;background:rgba(42,82,152,0.04);">
+                            Minta TTD
+                        </a>
+                    @endif
+                </div>
+            </div>
+            @endforeach
         </div>
     @endif
 </div>

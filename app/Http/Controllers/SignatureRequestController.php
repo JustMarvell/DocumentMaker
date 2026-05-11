@@ -24,7 +24,7 @@ class SignatureRequestController extends Controller
     {
         $this->authorizeDocumentLog($documentLog);
 
-        if (!file_exists(public_path('cached_result/' . $documentLog->output_filename))) {
+        if (!file_exists(storage_path('app/cached_result/' . $documentLog->output_filename))) {
             return back()->with('error', 'File dokumen sudah dihapus dari server. Silakan buat ulang dokumen terlebih dahulu.');
         }
 
@@ -49,7 +49,7 @@ class SignatureRequestController extends Controller
             'official_id' => 'required|exists:official_data,id',
         ]);
 
-        if (!file_exists(public_path('cached_result/' . $documentLog->output_filename))) {
+        if (!file_exists(storage_path('app/cached_result/' . $documentLog->output_filename))) {
             return back()->with('error', 'File dokumen sudah dihapus. Buat ulang dokumen terlebih dahulu.');
         }
 
