@@ -291,16 +291,32 @@
         }
 
         // Show/hide dependent toggles when signature master is flipped
-        if (type === 'signature') {
-            const nowOn = !isOn;
-            ['sig-image', 'sig-qr'].forEach(function(sub) {
-                const cell  = document.getElementById('cell-' + sub.replace('-', '-sig-').replace('sig-sig-', 'sig-') + '-' + id);
-                // simpler: just update the two specific cells
-            });
-            updateSignatureDependents(id, nowOn);
-        }
+        if (type === 'sig-image' || type === 'sig-qr') {
+            const colorMap = { 'sig-image': 'bg-purple-600', 'sig-qr': 'bg-indigo-600' };
+            const other    = type === 'sig-image' ? 'sig-qr' : 'sig-image';
+            const btn      = document.getElementById('toggle-' + type + '-' + id);
+            const thumb    = document.getElementById('thumb-' + type + '-' + id);
+            const otherBtn = document.getElementById('toggle-' + other + '-' + id);
+            const otherThumb = document.getElementById('thumb-' + other + '-' + id);
+            if (!btn || !thumb) return;
 
-        showToast('Pengaturan berhasil diperbarui.');
+            const isOn = btn.classList.contains(colorMap[type]);
+            // toggle current
+            if (isOn) {
+                btn.classList.replace(colorMap[type], 'bg-gray-300');
+                thumb.classList.replace('translate-x-6', 'translate-x-1');
+            } else {
+                btn.classList.replace('bg-gray-300', colorMap[type]);
+                thumb.classList.replace('translate-x-1', 'translate-x-6');
+                // turn off the other  // <- mutual exclusivity
+                if (otherBtn && otherThumb) {
+                    otherBtn.classList.replace(colorMap[other], 'bg-gray-300');
+                    otherThumb.classList.replace('translate-x-6', 'translate-x-1');
+                }
+            }
+            showTsoast('Pengaturan berhasil diperbarui.');
+            return;
+        }
     }
 
     function updateSignatureDependents(id, sigEnabled) {
