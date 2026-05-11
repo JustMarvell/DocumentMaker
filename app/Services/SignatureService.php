@@ -21,6 +21,8 @@ class SignatureService
         $docLog = $signatureRequest->documentLog;
         $official = $signatureRequest->official;
         $documentType = $signatureRequest->documentLog->documentType;
+        $useImage = $documentType->signature_use_image && !$documentType->signature_use_qr;
+        $useQr = $documentType->signature_use_qr && !$documentType->signature_use_image;
 
         // Build the signed output filename  e.g. "signed_surat-tugas_<uuid>.docx"
         $ext = pathinfo($docLog->output_filename, PATHINFO_EXTENSION);
@@ -47,8 +49,8 @@ class SignatureService
             '--official-name', $official?->staff_name ?? '',
             '--official-position', $official?->position ?? '',
             '--approval-date', $approvalDate,
-            '--use-image', $documentType->signature_use_image ? '1' : '0',
-            '--use-qr', $documentType->signature_use_qr ? '1' : '0',
+            '--use-image', $useImage ? '1' : '0',
+            '--use-qr', $useQr ? '1' : '0',
         ];
 
         $process = new Process($cmd);
