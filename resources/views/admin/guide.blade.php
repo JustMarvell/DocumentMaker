@@ -780,6 +780,24 @@ UPDATE users SET role = 'admin' WHERE email = 'admin@dinas.go.id';
                         </ul>
                         <div class="bg-blue-50 border border-blue-200 rounded px-2 py-1.5 mt-2 text-xs text-blue-800">
                             File dummy tersedia di <code class="bg-blue-100 px-1 rounded">resources/img/</code>. Gunakan sebagai gambar placeholder di template.
+                            <div class="flex gap-2 mt-2">
+                                <a href="{{ route('admin.guide.placeholder-ttd') }}"
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-blue-300 bg-white text-blue-700 hover:bg-blue-100 font-semibold transition"
+                                    style="font-size:0.72rem;">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    placeholder_ttd.png
+                                </a>
+                                <a href="{{ route('admin.guide.placeholder-qr') }}"
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-blue-300 bg-white text-blue-700 hover:bg-blue-100 font-semibold transition"
+                                    style="font-size:0.72rem;">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    dummy_qr.png
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
