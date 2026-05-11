@@ -362,8 +362,8 @@
         <section id="template" class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-bold text-blue-700 border-b border-blue-100 pb-2 mb-4">Panduan Membuat Template Dokumen</h2>
             @include('components.video-player', [
-                'src'    => 'guide_videos/test1.mp4',
-                'title'  => '1. Cara Menambah Template Baru',
+                'src'    => 'guide_001.mp4',
+                'title'  => '1. Cara Membuat Template',
             ])
 
             <div class="bg-red-50 border border-red-200 rounded px-3 py-2 text-sm text-red-800 mb-4">
@@ -474,10 +474,10 @@
                 {{-- Tab bar --}}
                 <div class="flex gap-0 border-b border-gray-200 bg-gray-50 overflow-x-auto" id="pdf-tab-bar">
                     @foreach([
-                        ['surat-tugas', 'Surat Izin Sakit'],
+                        ['surat-keterangan-tidak-sidik', 'Surat Keterangan Tidak Sidik'],
                         ['daftar-hadir', 'Daftar Hadir (Loop)'],
-                        ['kondisional', 'Kondisional'],
-                        ['loop-excel', 'Loop di Excel'],
+                        ['surat-perintah-tugas', 'Surat Perintah Tugas'],
+                        ['dokumen-evaluasi-kinerja-pegawai', 'Dokumen Evaluasi Kinerja Pegawai'],
                     ] as $i => [$key, $label])
                     <button
                         onclick="switchPdfTab('{{ $key }}')"
@@ -516,7 +516,7 @@
                     </div>
 
                     {{-- Current tab label --}}
-                    <span id="pdf-tab-label" class="text-xs text-gray-400 flex-1 text-center truncate px-2">Surat Izin Sakit</span>
+                    <span id="pdf-tab-label" class="text-xs text-gray-400 flex-1 text-center truncate px-2">Surat Keterangan Tidak Sidik</span>
 
                     {{-- Zoom + fullscreen --}}
                     <div class="flex items-center gap-1.5">
@@ -1019,17 +1019,17 @@ function highlightToc() {
 (function() {
     // Map tab key → PDF path + label
     const PDF_FILES = {
-    'surat-tugas':  { path: '{{ route("admin.guide.asset", "surat-izin-sakit-example.pdf") }}', label: 'Surat Izin Sakit' },
-    'daftar-hadir': { path: '{{ route("admin.guide.asset", "guide_1.pdf") }}', label: 'Daftar Hadir (Loop)' },
-    'kondisional':  { path: '{{ route("admin.guide.asset", "guide_1.pdf") }}', label: 'Kondisional' },
-    'loop-excel':   { path: '{{ route("admin.guide.asset", "guide_1.pdf") }}', label: 'Loop di Excel' },
+    'surat-keterangan-tidak-sidik':  { path: "{{ route("admin.guide.asset.pdf", "surat-keterangan-tidak-sidik-example.pdf") }}", label: 'Surat Keterangan Tidak Sidik' },
+    'daftar-hadir': { path: "{{ route("admin.guide.asset.pdf", "daftar-hadir-pegawai-example.pdf") }}", label: 'Daftar Hadir (Loop)' },
+    'surat-perintah-tugas':  { path: "{{ route("admin.guide.asset.pdf", "surat-perintah-tugas-example.pdf") }}", label: 'Surat Perintah Tugas' },
+    'dokumen-evaluasi-kinerja-pegawai':   { path: "{{ route("admin.guide.asset.pdf", "dokumen-evaluasi-kinerja-pegawai-example.pdf") }}", label: 'Dokumen Evaluasi Kinerja Pegawai' },
 };
 
     let pdfjsLib = null;
     let pdfDoc   = null;
     let curPage  = 1;
     let curZoom  = 1.0;
-    let curTab   = 'surat-tugas';
+    let curTab   = 'surat-keterangan-tidak-sidik';
     let renderTask = null;
 
     // Load pdf.js lazily
@@ -1182,7 +1182,7 @@ function highlightToc() {
     const observer = new IntersectionObserver(function(entries) {
         if (entries[0].isIntersecting && !loaded) {
             loaded = true;
-            loadPdf('surat-tugas');
+            loadPdf('surat-keterangan-tidak-sidik');
         }
     }, { threshold: 0.1 });
     observer.observe(document.getElementById('pdf-viewer-container'));

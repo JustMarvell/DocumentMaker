@@ -700,12 +700,26 @@ class AdminController extends Controller
         return back()->with('success', 'Counter konversi PDF direset ke 0.');
     }
 
-    public function serveGuideAsset(string $filename)
+    public function serveGuideAssetVideo(string $filename)
     {
         $filename = basename($filename);
-        $ext = pathinfo($filename, PATHINFO_EXTENSION);
-        $disk = in_array($ext, ['mp4', 'webm']) ? 'guide_videos' : 'guides';
-        $path = storage_path('app/' . $disk . '/' . $filename);
+        $path = storage_path('app/guide_videos/' . $filename);
+        abort_unless(file_exists($path), 404);
+        return response()->file($path);
+    }
+
+    public function serveGuideAssetPdf(string $filename)
+    {
+        $filename = basename($filename);
+        $path = storage_path('app/guides/' . $filename);
+        abort_unless(file_exists($path), 404);
+        return response()->file($path);
+    }
+
+    public function serveGuideAssetImage(string $filename)
+    {
+        $filename = basename($filename);
+        $path = storage_path('app/guides/' . $filename);
         abort_unless(file_exists($path), 404);
         return response()->file($path);
     }

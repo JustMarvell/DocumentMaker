@@ -29,9 +29,9 @@ $id = 'vp-' . $vpIndex; @endphp
 
     <div class="vp-wrap">
         <video class="vp-video"
-               @if($poster) poster="{{ route("admin.guide.asset", "test.png") }}" @endif
+               @if($poster) poster="{{ route("admin.guide.asset.image", $poster) }}" @endif
                preload="metadata">  
-            <source src="{{ route("admin.guide.asset", "test1.mp4") }}" type="video/mp4">
+            <source src="{{ route("admin.guide.asset.video", $src) }}" type="video/mp4">
             Browser Anda tidak mendukung video HTML5.
         </video>
 
