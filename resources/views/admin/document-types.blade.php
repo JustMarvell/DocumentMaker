@@ -4,10 +4,26 @@
 
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Jenis Dokumen</h1>
-        <a href="{{ route('admin.document-types.create') }}"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium">
-            + Tambah Template Baru
-        </a>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.guide.placeholder-ttd') }}"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                placeholder_ttd.png
+            </a>
+            <a href="{{ route('admin.guide.placeholder-qr') }}"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                dummy_qr.png
+            </a>
+            <a href="{{ route('admin.document-types.create') }}"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium">
+                + Tambah Template Baru
+            </a>
+        </div>
     </div>
 
     {{-- Toast --}}
