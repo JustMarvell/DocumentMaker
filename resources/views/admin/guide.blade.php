@@ -769,7 +769,7 @@ UPDATE users SET role = 'admin' WHERE email = 'admin@dinas.go.id';
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Placeholder Gambar</p>
                         <ul class="text-xs text-gray-700 space-y-2">
                             <li>
-                                <code class="bg-gray-100 px-1 rounded">transparent35mm.png</code> — dummy untuk gambar tanda tangan.
+                                <code class="bg-gray-100 px-1 rounded">placeholder_ttd.png</code> — dummy untuk gambar tanda tangan.
                                 Letakkan di template sebagai gambar inline/text box.
                                 Sistem swap gambar ini dengan foto TTD pejabat.
                             </li>
