@@ -780,4 +780,18 @@ class AdminController extends Controller
         abort_unless(file_exists($path), 404);
         return response()->file($path, ['Content-Type' => 'application/pdf']);
     }
+
+    public function downloadPlaceholderTtd()
+    {
+        $path = base_path('resources/img/placeholder_ttd.png');
+        abort_unless(file_exists($path), 404);
+        return response()->download($path, 'placeholder_ttd.png');
+    }
+
+    public function downloadPlaceholderQr()
+    {
+        $path = base_path('resources/img/dummy_qr.png');
+        abort_unless(file_exists($path), 404);
+        return response()->download($path, 'dummy_qr.png');
+    }
 }
