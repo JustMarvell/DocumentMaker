@@ -224,7 +224,7 @@ class DocumentController extends Controller
             $pdfFilename = $converter->convert($filename);
 
             if (!$pdfFilename) {
-                return response()->json(['error' => 'Konversi PDF gagal. Periksa log server atau konfigurasi iLoveAPI.'], 500);
+                return response()->json(['error' => 'Konversi PDF gagal. Mohon coba lagi. Jika masalah masih berlanjut, Periksa log server atau konfigurasi iLoveAPI.'], 500);
             }
 
             $pdfPath = $this->cachedResultPath($pdfFilename);
