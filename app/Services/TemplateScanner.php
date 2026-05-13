@@ -26,13 +26,27 @@ class TemplateScanner
 
         $variables = [];
         $jinja2Keywords = ['for', 'endfor', 'if', 'endif', 'else', 'elif', 'loop', 'true', 'false', 'none'];
+        $iteratorVars = [];
 
+        // First pass — collect all iterator vars and list vars
         foreach ($xmlContents as $xml) {
-            // Match {{ variable_name }} and {{ variable.property }}
+            preg_match_all('/\{%[-\s]*for\s+(\w+)\s+in\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*[-\s]*%\}/', $xml, $forMatches);
+            foreach ($forMatches[1] as $iterVar) {
+                $iteratorVars[] = $iterVar;  // e.g. 'staff', 'item'
+            }
+            foreach ($forMatches[2] as $listVar) {
+                if (!in_array(strtolower($listVar), $jinja2Keywords)) {
+                    $variables[] = $listVar;  // e.g. 'staff_list'
+                }
+            }
+        }
+
+        // Second pass — collect {{ }} vars, excluding iterators
+        foreach ($xmlContents as $xml) {
             preg_match_all('/\{\{\s*([a-zA-Z_][a-zA-Z0-9_.]*)\s*(?:\|[^}]*)?\}\}/', $xml, $matches);
             foreach ($matches[1] as $var) {
-                $root = explode('.', $var)[0]; // get root: peserta.name -> peserta
-                if (!in_array(strtolower($root), $jinja2Keywords)) {
+                $root = explode('.', $var)[0];
+                if (!in_array(strtolower($root), $jinja2Keywords) && !in_array($root, $iteratorVars)) {  // <- exclude iterators
                     $variables[] = $root;
                 }
             }
@@ -91,6 +105,6 @@ class TemplateScanner
 
     private function mergeDocxRuns(string $xml): string
     {
-        return preg_replace('/<[^>]+>/', ' ', $xml);
+        return preg_replace('/<[^>]+>/', '', $xml);
     }
 }
