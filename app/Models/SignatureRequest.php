@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Helpers\StoragePath;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Storage;
 
 class SignatureRequest extends Model
 {
@@ -55,7 +57,7 @@ class SignatureRequest extends Model
     }
 
     public function documentFilePath(): string {
-        return storage_path('app/cached_result/' . $this->documentLog->output_filename);
+        return StoragePath::cachedResult($this->documentLog->output_filename);
     }
 
     public function documentFileExists(): bool {
@@ -66,7 +68,7 @@ class SignatureRequest extends Model
     {
         if (!$this->signed_filename)
             return null;
-        $path = storage_path('app/cached_result/' . $this->signed_filename);
+        $path = StoragePath::cachedResult($this->signed_filename);
         return file_exists($path) ? $path : null;
     }
 

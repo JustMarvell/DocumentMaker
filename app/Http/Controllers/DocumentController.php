@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\StoragePath;
 use App\Models\DocumentField;
 use App\Models\DocumentLog;
 use App\Models\DocumentType;
@@ -21,7 +22,7 @@ class DocumentController extends Controller
 {
     private function cachedResultPath(string $filename): string
     {
-        return storage_path('app/cached_result/' . $filename);
+        return StoragePath::cachedResult($filename);
     }
 
     public function index() {
@@ -232,6 +233,10 @@ class DocumentController extends Controller
             $pdfPath = $this->cachedResultPath($pdfFilename);
         }
 
+        if (!file_exists($pdfPath)) {
+            return response()->json(['error' => 'Konversi PDF gagal. Mohon coba lagi.'], 500);
+        }
+
         return response()->file($pdfPath, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="preview.pdf"',
@@ -294,7 +299,7 @@ class DocumentController extends Controller
             return back()->with('error', 'Gagal membuat dokumen. Silakan coba lagi atau hubungi administrator.');
         }
 
-        $outputPath = storage_path('app/cached_result/' . $uniqueFilename);
+        $outputPath = StoragePath::cachedResult($uniqueFilename);
         if (!file_exists($outputPath)) {
             Log::error("Generated file not found at: {$outputPath}");
             return back()->with('error', 'Dokumen berhasil diproses tapi file tidak ditemukan.');

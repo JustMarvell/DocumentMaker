@@ -90,6 +90,8 @@ class OfficialDataController extends Controller
 
     public function serveSignature(string $filename)
     {
+        abort_unless(auth()->check() && auth()->user()->isAdmin(), 403);
+
         $path = storage_path('app/signatures/' . basename($filename));
         abort_unless(file_exists($path), 404);
         return response()->file($path);

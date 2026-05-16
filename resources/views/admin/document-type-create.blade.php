@@ -64,28 +64,6 @@
                     </div>
                 </div>
 
-                {{-- Staff autofill role --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Staff Autofill
-                    </label>
-                    <select name="staff_autofill_role"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="none" {{ old('staff_autofill_role') === 'none' ? 'selected' : '' }}>Tidak ada autofill
-                        </option>
-                        <option value="employee" {{ old('staff_autofill_role') === 'employee' ? 'selected' : '' }}>Pegawai
-                            saja</option>
-                        <option value="appraiser" {{ old('staff_autofill_role') === 'appraiser' ? 'selected' : '' }}>Penilai
-                            saja</option>
-                        <option value="both" {{ old('staff_autofill_role') === 'both' ? 'selected' : '' }}>Pegawai dan Penilai
-                        </option>
-                    </select>
-                    <p class="text-xs text-gray-400 mt-1">
-                        Menentukan apakah form akan menampilkan dropdown pilih staff untuk mengisi otomatis.
-                    </p>
-                    @error('staff_autofill_role') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-
                 {{-- Template file upload --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
