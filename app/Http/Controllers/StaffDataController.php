@@ -16,7 +16,7 @@ class StaffDataController extends Controller
         // return as JSON derulo.....
         $request->validate([
             'staff_name' => 'required|string|max:255',
-            'nip' => 'required|string|unique:staff_data,nip,',
+            'nip' => 'required|string|unique:staff_data,nip',
             'email' => 'required|email',
             'work_unit' => 'required|string|max:255',
             'rank' => 'nullable|string|max:255',
@@ -40,7 +40,7 @@ class StaffDataController extends Controller
     public function update(Request $request , StaffData $staffDatum) {
         $request->validate([
             'staff_name' => 'required|string|max:255',
-            'nip' => 'required|string|unique:staff_data,nip' . $staffDatum->id,
+            'nip' => 'required|string|unique:staff_data,nip,' . $staffDatum->id,
             'email' => 'required|email',
             'work_unit' => 'required|string|max:255',
             'rank' => 'required|string|max:255',
