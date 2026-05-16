@@ -22,18 +22,26 @@ class PurgeCachedDocuments extends Command
         foreach (glob("{$dir}/*") as $file) {
             if (!is_file($file))
                 continue;
+            if ((time() - filemtime($file)) < $ttl)
+                continue;
 
-            if ((time() - filemtime($file)) >= $ttl) {
-                $filename = basename($file);
+            $filename = basename($file);
 
-                // Update the log record before deleting
-                DocumentLog::where('output_filename', $filename)
-                    ->whereNull('deleted_at')
-                    ->update(['deleted_at' => now()]);
-
-                unlink($file);
-                $deleted++;
+            // <- skip orphan PDFs , let them be purged on next cycle   | maybe they will be usefull in the house of hearth
+            // once their source is also gone
+            if (str_ends_with($filename, '.pdf')) {
+                $sourceBase = pathinfo($filename, PATHINFO_FILENAME);
+                $hasLivingSource = !empty(glob("{$dir}/{$sourceBase}.{docx,xlsx}", GLOB_BRACE));
+                if ($hasLivingSource)
+                    continue;
             }
+
+            DocumentLog::where('output_filename', $filename)
+                ->whereNull('deleted_at')
+                ->update(['deleted_at' => now()]);
+
+            unlink($file);
+            $deleted++;
         }
 
         $this->info("Purged {$deleted} file(s) older than {$ttl} seconds.");

@@ -233,6 +233,10 @@ class DocumentController extends Controller
             $pdfPath = $this->cachedResultPath($pdfFilename);
         }
 
+        if (!file_exists($pdfPath)) {
+            return response()->json(['error' => 'Konversi PDF gagal. Mohon coba lagi.'], 500);
+        }
+
         return response()->file($pdfPath, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="preview.pdf"',
