@@ -40,7 +40,9 @@ class DocumentController extends Controller
 
         $numberCounters = DocumentNumberCounter::whereIn('document_type_id', $documentTypes->pluck('id'))
             ->where('enabled', true)
-            ->pluck('field_key', 'document_type_id');
+            ->get()
+            ->keyBy('document_type_id')
+            ->map(fn($c) => $c->field_key);
 
         $signatureRequests = collect();
         $documentHistory = collect();
