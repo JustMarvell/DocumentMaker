@@ -40,20 +40,6 @@ class AdminController extends Controller
 
     }
 
-    public function adminIndex(Request $request) {
-        $query = SignatureRequest::with(['user', 'documentLog.documentType', 'official'])
-            ->latest('requested_at');
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $requests = $query->paginate(15)->withQueryString();
-        $pendingCount = SignatureRequest::where('status', 'pending')->count();
-
-        return view('admin.signatures', compact('requests', 'pendingCount'));
-    }
-
     // comment
 
     public function logs(Request $request) { 
@@ -146,7 +132,6 @@ class AdminController extends Controller
             'key' => 'required|string|unique:document_types,key|regex:/^[a-z0-9\-]+$/',
             'access_level' => 'required|in:guest,staff',
             'file_type' => 'required|in:docx,xlsx',
-            'staff_autofill_role' => 'required|in:none,employee,appraiser,both',
             'template_file' => 'required|file|mimes:docx,xlsx,vnd.openxmlformats-officedocument.wordprocessingml.document,vnd.openxmlformats-officedocument.spreadsheetml.sheet|max:10240',
         ]);
 

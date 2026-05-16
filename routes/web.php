@@ -41,19 +41,17 @@ Route::middleware('auth')->group(function() {
     Route::patch('/profile', [ProfileController::class,'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class,'destroy'])->name('profile.destroy');
 
-    // document generator -> all logeged user
-    Route::middleware('auth')->group(function(){
-        Route::get('/home', [DocumentController::class,'index'])->name('home');
-        Route::post('/generate', [DocumentController::class,'generate'])->name('document.generate');
-        Route::get('/download/{filename}', [DocumentController::class, 'download'])->name('document.download');
-        Route::get('/preview/{filename}', [DocumentController::class, 'preview'])->name('document.preview');
+    // document generator
+    Route::get('/home', [DocumentController::class,'index'])->name('home');
+    Route::post('/generate', [DocumentController::class,'generate'])->name('document.generate');
+    Route::get('/download/{filename}', [DocumentController::class, 'download'])->name('document.download');
+    Route::get('/preview/{filename}', [DocumentController::class, 'preview'])->name('document.preview');
 
-        Route::get('/signature/request/{documentLog}', [SignatureRequestController::class, 'create'])->name('signature.create');
-        Route::post('/signature/request/{documentLog}', [SignatureRequestController::class, 'store'])->name('signature.store');
-        Route::post('/signature/resend/{signatureRequest}', [SignatureRequestController::class, 'resendRequestEmail'])->name('signature.resend');
+    Route::get('/signature/request/{documentLog}', [SignatureRequestController::class, 'create'])->name('signature.create');
+    Route::post('/signature/request/{documentLog}', [SignatureRequestController::class, 'store'])->name('signature.store');
+    Route::post('/signature/resend/{signatureRequest}', [SignatureRequestController::class, 'resendRequestEmail'])->name('signature.resend');
 
-        Route::get('/document-preview/{documentType}', [AdminController::class, 'servePreviewPdf'])->name('document-types.preview-pdf.serve');
-    });
+    Route::get('/document-preview/{documentType}', [AdminController::class, 'servePreviewPdf'])->name('document-types.preview-pdf.serve');
 
     Route::middleware('role:staff,admin')->group(function(){
         // add later
