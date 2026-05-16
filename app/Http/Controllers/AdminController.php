@@ -146,7 +146,6 @@ class AdminController extends Controller
             'key' => 'required|string|unique:document_types,key|regex:/^[a-z0-9\-]+$/',
             'access_level' => 'required|in:guest,staff',
             'file_type' => 'required|in:docx,xlsx',
-            'staff_autofill_role' => 'required|in:none,employee,appraiser,both',
             'template_file' => 'required|file|mimes:docx,xlsx,vnd.openxmlformats-officedocument.wordprocessingml.document,vnd.openxmlformats-officedocument.spreadsheetml.sheet|max:10240',
         ]);
 
