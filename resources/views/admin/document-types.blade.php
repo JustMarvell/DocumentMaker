@@ -330,7 +330,7 @@
                     otherThumb.classList.replace('translate-x-6', 'translate-x-1');
                 }
             }
-            showTsoast('Pengaturan berhasil diperbarui.');
+            showToast('Pengaturan berhasil diperbarui.');
             return;
         }
     }
