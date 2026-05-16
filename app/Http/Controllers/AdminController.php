@@ -148,7 +148,6 @@ class AdminController extends Controller
             'output_filename' => Str::slug($request->key),
             'access_level' => $request->access_level,
             'file_type' => $request->file_type,
-            'staff_autofill_role' => $request->staff_autofill_role,
             'is_active' => true,
             'signature_enabled' => false,
         ]);
