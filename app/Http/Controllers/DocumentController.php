@@ -107,7 +107,7 @@ class DocumentController extends Controller
             $rule .= '|' . match ($field->field_type) {
                 'date' => 'date',
                 'number' => 'numeric',
-                'checkbox' => 'boolean',
+                'checkbox' => 'nullable|boolean',
                 default => 'string',
             };
             $rules["field_{$field->field_key}"] = $rule;
