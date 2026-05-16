@@ -40,20 +40,6 @@ class AdminController extends Controller
 
     }
 
-    public function adminIndex(Request $request) {
-        $query = SignatureRequest::with(['user', 'documentLog.documentType', 'official'])
-            ->latest('requested_at');
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $requests = $query->paginate(15)->withQueryString();
-        $pendingCount = SignatureRequest::where('status', 'pending')->count();
-
-        return view('admin.signatures', compact('requests', 'pendingCount'));
-    }
-
     // comment
 
     public function logs(Request $request) { 
