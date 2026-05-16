@@ -19,7 +19,7 @@ use App\Models\SignatureRequest;
 
 class DocumentController extends Controller
 {
-    public function cachedResultPath(string $filename): string
+    private function cachedResultPath(string $filename): string
     {
         return storage_path('app/cached_result/' . $filename);
     }
