@@ -278,10 +278,6 @@ class DocumentController extends Controller
 
         $status = $process->isSuccessful() ? 'success' : 'failed';
 
-        if ($counter && $counter->enabled && $status === 'success') {
-            $counter->generateNext();
-        }
-
         $log = DocumentLog::create([
             'user_id' => auth()->id(),
             'document_type_id' => $documentType->id,
@@ -300,6 +296,10 @@ class DocumentController extends Controller
         if (!file_exists($outputPath)) {
             Log::error("Generated file not found at: {$outputPath}");
             return back()->with('error', 'Dokumen berhasil diproses tapi file tidak ditemukan.');
+        }
+
+        if ($counter && $counter->enabled && $status === 'success') {
+            $counter->generateNext();
         }
 
         $downloadUrl = route('document.download', ['filename' => $uniqueFilename]);
