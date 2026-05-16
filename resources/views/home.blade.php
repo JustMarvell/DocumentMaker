@@ -617,9 +617,9 @@
                 <tbody>
                     @foreach ($documentHistory as $log)
                     @php
-                        $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
-                        $fileExists = file_exists(storage_path('app/cached_result/' . $log->output_filename));
-                        $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename));
+            $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
+            $fileExists = file_exists(storage_path('app/cached_result/' . $log->output_filename));
+            $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename));
                     @endphp
                     <tr style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
                         onmouseover="this.style.background='rgba(42,82,152,0.03)'"
@@ -687,9 +687,9 @@
         <div class="sm:hidden space-y-3 fade-up">
             @foreach ($documentHistory as $log)
             @php
-                $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
-                $fileExists = file_exists(storage_path('app/cached_result/' . $log->output_filename));
-                $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename));
+            $sigReq = $log->signatureRequests->sortByDesc('requested_at')->first();
+            $fileExists = file_exists(storage_path('app/cached_result/' . $log->output_filename));
+            $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename));
             @endphp
             <div class="form-card p-4">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
@@ -749,10 +749,8 @@
         @endauth
     </main>
 
-    {{-- ── Preview Modal ───────────────────────────────────── --}}
-    <div id="preview-modal"
-        class="sipadu-modal-bg"
-        style="display: none;"
+    {{-- Preview Modal --}}
+    <div id="preview-modal" class="sipadu-modal-bg" style="display:none;"
         onclick="if(event.target===this) closePreview()">
         <div class="sipadu-modal w-full max-w-4xl mx-4 flex flex-col" style="height:90vh;">
 
@@ -762,14 +760,28 @@
                     <h2 style="font-size:0.95rem;font-weight:700;color:var(--navy-800);">Preview Dokumen</h2>
                 </div>
                 <div style="display:flex;align-items:center;gap:0.75rem;">
-                    <a id="preview-download-btn" href="{{ session('download_url') }}" class="download-btn hidden" style="padding:0.4rem 0.9rem;">
-                        ⬇ Unduh
-                    </a>
+                    <a id="preview-download-btn" href="{{ session('download_url') }}" class="download-btn hidden" style="padding:0.4rem 0.9rem;">⬇ Unduh</a>
                     <button onclick="closePreview()"
-                        style="width:28px;height:28px;border-radius:6px;border:1px solid var(--slate-200);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--slate-400);font-size:1rem;transition:all 0.2s;"
-                        onmouseover="this.style.background='var(--slate-100)';this.style.color='var(--slate-700)'"
-                        onmouseout="this.style.background='transparent';this.style.color='var(--slate-400)'">✕</button>
+                        style="width:28px;height:28px;border-radius:6px;border:1px solid var(--slate-200);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--slate-400);font-size:1rem;"
+                        onmouseover="this.style.background='var(--slate-100)'"
+                        onmouseout="this.style.background='transparent'">✕</button>
                 </div>
+            </div>
+
+            {{-- Progress / status bar --}}
+            <div id="preview-status" style="display:none;padding:0.5rem 1.25rem;border-bottom:1px solid var(--slate-100);background:var(--slate-50);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
+                    <span id="preview-status-text" style="font-size:0.78rem;font-weight:500;color:var(--navy-700);">Mengkonversi dokumen...</span>
+                    <button id="preview-cancel-btn" onclick="cancelPreview()"
+                        style="font-size:0.72rem;padding:0.2rem 0.65rem;border-radius:5px;border:1px solid var(--slate-300);background:transparent;cursor:pointer;color:var(--slate-500);font-family:var(--font-body);display:none;">
+                        Batalkan
+                    </button>
+                </div>
+                <div style="height:4px;background:var(--slate-200);border-radius:4px;overflow:hidden;">
+                    <div id="preview-progress-bar"
+                        style="height:100%;width:0%;border-radius:4px;transition:width 0.4s ease;background:linear-gradient(90deg,var(--navy-500),var(--gold-400));"></div>
+                </div>
+                <div id="preview-attempt-text" style="font-size:0.68rem;color:var(--slate-400);margin-top:0.25rem;display:none;"></div>
             </div>
 
             <div id="preview-loading" class="flex-1 flex items-center justify-center" style="color:var(--slate-400);">
@@ -784,6 +796,7 @@
                     <div style="font-size:2rem;margin-bottom:0.5rem;">⚠️</div>
                     <p style="font-size:0.85rem;font-weight:600;">Gagal memuat preview</p>
                     <p style="font-size:0.75rem;color:var(--slate-400);margin-top:0.25rem;" id="preview-error-msg"></p>
+                    <p style="font-size:0.72rem;color:var(--slate-300);margin-top:0.5rem;" id="preview-retry-exhausted" style="display:none;">Semua percobaan ulang telah habis.</p>
                 </div>
             </div>
             <iframe id="preview-iframe" class="flex-1 w-full hidden rounded-b-2xl" src="" title="Document Preview"></iframe>
@@ -1093,44 +1106,132 @@
             setTimeout(() => row.remove(), 160);
         }
 
-        async function openPreview(previewUrl) {
-            const modal   = document.getElementById('preview-modal');
-            const iframe  = document.getElementById('preview-iframe');
-            const loading = document.getElementById('preview-loading');
-            const error   = document.getElementById('preview-error');
-            const errMsg  = document.getElementById('preview-error-msg');
+        // Preview state
+        let _previewUrl     = null;
+        let _previewAborted = false;
+        let _previewAttempt = 0;
+        const _MAX_ATTEMPTS = 3; // 1 initial + 2 retries
 
-            iframe.classList.add('hidden');
-            error.classList.add('hidden');
-            loading.classList.remove('hidden');
-            iframe.src = '';
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+        function _setProgressBar(pct, statusText, showCancel, attemptText) {
+            document.getElementById('preview-status').style.display = '';
+            document.getElementById('preview-progress-bar').style.width = pct + '%';
+            if (statusText !== undefined)
+                document.getElementById('preview-status-text').textContent = statusText;
+            document.getElementById('preview-cancel-btn').style.display = showCancel ? '' : 'none';
+            const attemptEl = document.getElementById('preview-attempt-text');
+            if (attemptText) {
+                attemptEl.textContent = attemptText;
+                attemptEl.style.display = '';
+            } else {
+                attemptEl.style.display = 'none';
+            }
+        }
+
+        function _resetPreviewUI() {
+            document.getElementById('preview-loading').classList.remove('hidden');
+            document.getElementById('preview-error').classList.add('hidden');
+            document.getElementById('preview-iframe').classList.add('hidden');
+            document.getElementById('preview-iframe').src = '';
+            document.getElementById('preview-status').style.display = 'none';
+            document.getElementById('preview-progress-bar').style.width = '0%';
+            document.getElementById('preview-cancel-btn').style.display = 'none';
+            document.getElementById('preview-attempt-text').style.display = 'none';
+        }
+
+        async function _attemptPreview(url, isRetry) {
+            if (_previewAborted) return;
+
+            const attemptLabel = _previewAttempt > 0
+                ? `Percobaan ulang ${_previewAttempt}/${_MAX_ATTEMPTS - 1}...`
+                : null;
+
+            _setProgressBar(15,
+                isRetry ? 'Mengulang konversi...' : 'Mengkonversi dokumen...',
+                true,
+                attemptLabel
+            );
+
+            // Simulate progress crawl while waiting for API
+            let pct = 15;
+            const crawl = setInterval(function () {
+                if (_previewAborted) { clearInterval(crawl); return; }
+                if (pct < 80) { pct += Math.random() * 4; }
+                document.getElementById('preview-progress-bar').style.width = Math.min(pct, 80) + '%';
+            }, 600);
+
+            const fetchUrl = url + (isRetry ? (url.includes('?') ? '&' : '?') + 'retry=1' : '');
 
             try {
-                // fetch first to check for errors before loading into iframe
-                const res = await fetch(previewUrl);
+                const res = await fetch(fetchUrl);
+                clearInterval(crawl);
+                if (_previewAborted) return;
 
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
                     throw new Error(data.error || `Server error ${res.status}`);
                 }
 
-                // success — load into iframe
+                // Success
+                _setProgressBar(100, 'Berhasil! Memuat dokumen...', false, null);
+
+                const iframe = document.getElementById('preview-iframe');
                 iframe.onload = function () {
-                    loading.classList.add('hidden');
+                    document.getElementById('preview-loading').classList.add('hidden');
+                    document.getElementById('preview-status').style.display = 'none';
                     iframe.classList.remove('hidden');
                 };
-                iframe.src = previewUrl;
+                iframe.src = fetchUrl;
 
             } catch (e) {
-                loading.classList.add('hidden');
-                error.classList.remove('hidden');
-                errMsg.textContent = e.message;
+                clearInterval(crawl);
+                if (_previewAborted) return;
+
+                _previewAttempt++;
+                if (_previewAttempt < _MAX_ATTEMPTS) {
+                    // Retry
+                    _setProgressBar(0,
+                        `Gagal. Mengulang konversi (${_previewAttempt}/${_MAX_ATTEMPTS - 1})...`,
+                        true,
+                        `Error: ${e.message}`
+                    );
+                    await new Promise(r => setTimeout(r, 1500)); // brief pause before retry
+                    if (!_previewAborted) await _attemptPreview(url, true);
+                } else {
+                    // All attempts exhausted
+                    _setProgressBar(100, 'Konversi gagal.', false, null);
+                    document.getElementById('preview-progress-bar').style.background = '#dc2626';
+                    document.getElementById('preview-loading').classList.add('hidden');
+                    document.getElementById('preview-status').style.display = 'none';
+                    document.getElementById('preview-error').classList.remove('hidden');
+                    document.getElementById('preview-error-msg').textContent = e.message;
+                    document.getElementById('preview-retry-exhausted').style.display = '';
+                }
             }
         }
 
+        async function openPreview(previewUrl) {
+            _previewUrl = previewUrl;
+            _previewAborted = false;
+            _previewAttempt = 0;
+
+            _resetPreviewUI();
+            document.getElementById('preview-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            await _attemptPreview(previewUrl, false);
+        }
+        
+        function cancelPreview() {
+            _previewAborted = true;
+            document.getElementById('preview-loading').classList.add('hidden');
+            document.getElementById('preview-status').style.display = 'none';
+            document.getElementById('preview-error').classList.remove('hidden');
+            document.getElementById('preview-error-msg').textContent = 'Konversi dibatalkan oleh pengguna.';
+            document.getElementById('preview-retry-exhausted').style.display = 'none';
+        }       
+
         function closePreview() {
+            _previewAborted = true;
             document.getElementById('preview-modal').style.display = 'none';
             document.getElementById('preview-iframe').src = '';
             document.body.style.overflow = '';

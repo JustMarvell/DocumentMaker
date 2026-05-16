@@ -46,7 +46,7 @@ class IlovePdfConverter
 
         try {
             // 1. Auth
-            $authRes = Http::timeout(15)->post(config('services.iloveapi.base_url') . '/auth', [
+            $authRes = Http::timeout(30)->connectTimeout(10)->post(config('services.iloveapi.base_url') . '/auth', [
                 'public_key' => $publicKey,
             ]);
             if (!$authRes->successful()) {
@@ -58,7 +58,8 @@ class IlovePdfConverter
             Log::info("ILovePdfConverter: Step 1, Auth Success | token : {$token}");
 
             // 2. Start task
-            $startRes = Http::timeout(60)
+            $startRes = Http::timeout(90)
+                ->connectTimeout(15)
                 ->withToken($token)
                 ->get(config('services.iloveapi.base_url') . '/start/officepdf');
             if (!$startRes->successful()) {
@@ -71,7 +72,8 @@ class IlovePdfConverter
             Log::info("ILovePdfConverter: Step 2, Start Task Success | server : {$server}\nTask ID : {$taskId}");
 
             // 3. Upload
-            $uploadRes = Http::timeout(60)
+            $uploadRes = Http::timeout(120)
+                ->connectTimeout(15)
                 ->withToken($token)
                 ->attach('file', fopen($sourcePath, 'r'), $sourceFilename)
                 ->post("https://{$server}/v1/upload", ['task' => $taskId]);
@@ -84,7 +86,8 @@ class IlovePdfConverter
             Log::info("ILovePdfConverter: Step 3, Upload Success | Server Filename : {$serverFilename}");
 
             // 4. Process
-            $processRes = Http::timeout(60)
+            $processRes = Http::timeout(120)
+                ->connectTimeout(15)
                 ->withToken($token)
                 ->post("https://{$server}/v1/process", [
                     'task' => $taskId,
@@ -104,7 +107,8 @@ class IlovePdfConverter
             Log::info("ILovePdfConverter: Step 4, Process Success Success");
 
             // 5. Download
-            $downloadRes = Http::timeout(60)
+            $downloadRes = Http::timeout(120)
+                ->connectTimeout(15)
                 ->withToken($token)
                 ->get("https://{$server}/v1/download/{$taskId}");
             if (!$downloadRes->successful()) {
