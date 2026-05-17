@@ -91,7 +91,8 @@
 
                     @if ($officials->isEmpty())
                         <div class="alert alert-warning">
-                            Belum ada data pejabat. Minta administrator untuk menambahkan data pejabat terlebih dahulu.
+                            Belum ada pejabat yang dikonfigurasi untuk menandatangani dokumen.
+                            Minta administrator untuk mengaktifkan pejabat penandatangan di menu Data Pejabat.
                         </div>
                     @else
                         <div style="border:1.5px solid var(--slate-200);border-radius:10px;overflow:hidden;max-height:320px;overflow-y:auto;">

@@ -110,6 +110,7 @@ Route::middleware('auth')->group(function() {
         Route::patch('/official-data/{officialDatum}', [OfficialDataController::class, 'update'])->name('official-data.update');
         Route::delete('/official-data/{officialDatum}', [OfficialDataController::class, 'destroy'])->name('official-data.destroy');
         Route::delete('/official-data/{officialDatum}/signature-image', [OfficialDataController::class, 'deleteSignatureImage'])->name('official-data.delete-signature');
+        Route::patch('/official-data/{officialDatum}/toggle-can-sign', [OfficialDataController::class, 'toggleCanSign'])->name('official-data.toggle-can-sign');
         Route::get('/official-data/signature/{filename}', [OfficialDataController::class, 'serveSignature'])->name('official-data.signature');
 
         Route::get('/guide', [AdminController::class, 'guide'])->name('guide');
