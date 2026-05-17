@@ -36,7 +36,8 @@ class SignatureRequestController extends Controller
             return back()->with('error', 'Dokumen ini sudah memiliki permintaan tanda tangan yang aktif.');
         }
 
-        $officials = OfficialData::orderBy('staff_name')->get();
+        $officials = OfficialData::where('can_sign', true)
+            ->orderBy('staff_name')->get();
 
         return view('signature.create', compact('documentLog', 'officials'));
     }
