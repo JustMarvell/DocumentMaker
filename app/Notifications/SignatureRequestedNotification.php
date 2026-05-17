@@ -40,7 +40,7 @@ class SignatureRequestedNotification extends Notification {
             ->action('Tinjau & Tanda Tangani Dokumen', $reviewUrl)
             ->line("Tautan di atas hanya dapat digunakan satu kali dan khusus untuk permintaan ini.")
             ->line("Jika anda merasa tidak seharusnya menerima email ini, abaikan saja.")
-            ->salutation("Terima Kasih, \n**SIPADU** - Sistem Generasi Administrasi Persuratan\nDinas PUPRD Kota Tomohon");
+            ->salutation("Terima Kasih, \n**eDokPUPRD** - Sistem Pembuatan Dokumen Digital\nDinas PUPRD Kota Tomohon");
 
         if ($sr->documentFileExists()) {
             $mail->attach($filePath, ['as' => $filename]);

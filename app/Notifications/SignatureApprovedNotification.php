@@ -60,7 +60,7 @@ class SignatureApprovedNotification extends Notification {
             $mail->line("*(File tidak tersedia — mungkin sudah dihapus otomatis. Silakan hubungi administrator.)*");
         }
 
-        $mail->salutation("Salam,\nSIPADU — Sistem Generasi Administrasi Persuratan\nDinas PUPRD Kota Tomohon");
+        $mail->salutation("Salam,\neDokPUPRD — Sistem Pembuatan Dokumen Digital\nDinas PUPRD Kota Tomohon");
 
         return $mail;
     }

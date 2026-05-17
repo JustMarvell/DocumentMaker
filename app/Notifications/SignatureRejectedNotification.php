@@ -40,7 +40,7 @@ class SignatureRejectedNotification extends Notification {
 
         $mail->line("Anda dapat membuat ulang dokumen dan mengajukan permintaan baru setelah melakukan perbaikan.")
             ->line("Jika ada pertanyaan, silakan hubungi administrator.")
-            ->salutation("Salam,\nSIPADU — Sistem Generasi Administrasi Persuratan\nDinas PUPRD Kota Tomohon");
+            ->salutation("Salam,\neDokPUPRD — Sistem Pembuatan Dokumen Digital\nDinas PUPRD Kota Tomohon");
 
         return $mail;
     }
