@@ -96,4 +96,14 @@ class OfficialDataController extends Controller
         abort_unless(file_exists($path), 404);
         return response()->file($path);
     }
+
+    public function toggleCanSign(OfficialData $officialDatum)
+    {
+        $officialDatum->update(['can_sign' => !$officialDatum->can_sign]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'can_sign' => $officialDatum->can_sign]);
+        }
+        return back()->with('success', "{$officialDatum->staff_name} " . ($officialDatum->can_sign ? 'dapat' : 'tidak dapat') . " menandatangani dokumen.");
+    }
 }
