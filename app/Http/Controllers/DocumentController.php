@@ -212,6 +212,10 @@ class DocumentController extends Controller
         $pdfFilename = pathinfo($filename, PATHINFO_FILENAME) . '.pdf';
         $pdfPath = $this->cachedResultPath($pdfFilename);
 
+        if (request()->boolean('retry') && file_exists($pdfPath)) {
+            unlink($pdfPath);
+        }
+
         if (!file_exists($pdfPath)) {
             $setting = PdfConversionSetting::instance();
 
@@ -227,14 +231,14 @@ class DocumentController extends Controller
             $pdfFilename = $converter->convert($filename);
 
             if (!$pdfFilename) {
-                return response()->json(['error' => 'Konversi PDF gagal. Mohon coba lagi. Jika masalah masih berlanjut, Periksa log server atau konfigurasi iLoveAPI.'], 500);
+                return response()->json(['error' => 'Konversi PDF gagal. Server iLoveAPI tidak merespons atau file tidak valid.'], 500);
             }
 
             $pdfPath = $this->cachedResultPath($pdfFilename);
         }
 
         if (!file_exists($pdfPath)) {
-            return response()->json(['error' => 'Konversi PDF gagal. Mohon coba lagi.'], 500);
+            return response()->json(['error' => 'Konversi PDF gagal. File output tidak ditemukan.'], 500);
         }
 
         return response()->file($pdfPath, [
