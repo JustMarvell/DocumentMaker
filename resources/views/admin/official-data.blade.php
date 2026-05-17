@@ -101,6 +101,7 @@
                     <th class="px-4 py-3">Posisi</th>
                     <th class="px-4 py-3">No. HP</th>
                     <th class="px-4 py-3 text-center">TTD</th>
+                    <th class="px-4 py-3 text-center">Bisa TTD</th>
                     <th class="px-4 py-3 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -133,6 +134,19 @@
                             @else
                                 <span class="text-xs text-gray-300">Belum ada</span>
                             @endif
+                        </td>
+
+                        <!-- can_sign toggle -->
+                        <td class="px-4 py-3 text-center">
+                            <button type="button" id="toggle-can-sign-{{ $official->id }}"
+                                onclick="ajaxToggleCanSign('{{ route('admin.official-data.toggle-can-sign', $official) }}', {{ $official->id }})"
+                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
+                                    {{ $official->can_sign ? 'bg-green-600' : 'bg-gray-300' }}"
+                                title="{{ $official->can_sign ? 'Bisa menandatangani' : 'Tidak bisa menandatangani' }}">
+                                <span id="thumb-can-sign-{{ $official->id }}" class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform
+                                        {{ $official->can_sign ? 'translate-x-6' : 'translate-x-1' }}">
+                                </span>
+                            </button>
                         </td>
 
                         <td class="px-4 py-3 text-center">
@@ -271,6 +285,24 @@
 
         function closeEditModal() {
             document.getElementById('edit-modal').classList.add('hidden');
+        }
+
+        function ajaxToggleCanSign(url, id) {
+            const fd = new FormData();
+            fd.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+            fd.append('_method', 'PATCH');
+            fetch(url, { method: 'POST', body: fd })
+                .then(res => {
+                    if (!res.ok) throw new Error();
+                    const btn = document.getElementById('toggle-can-sign-' + id);
+                    const thumb = document.getElementById('thumb-can-sign-' + id);
+                    const isOn = btn.classList.contains('bg-green-600');
+                    btn.classList.toggle('bg-green-600', !isOn);
+                    btn.classList.toggle('bg-gray-300', isOn);
+                    thumb.classList.toggle('translate-x-6', !isOn);
+                    thumb.classList.toggle('translate-x-1', isOn);
+                })
+                .catch(() => alert('Gagal memperbarui.'));
         }
 
         document.getElementById('edit-modal').addEventListener('click', function (e) {
