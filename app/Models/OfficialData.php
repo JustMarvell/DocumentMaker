@@ -20,6 +20,7 @@ class OfficialData extends Model
         'position',
         'work_unit',
         'signature_image',
+        'can_sign',
     ];
 
     public function routeNotificationForMail(): string
