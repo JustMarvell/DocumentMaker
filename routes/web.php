@@ -135,6 +135,7 @@ Route::middleware('auth')->group(function() {
 
     Route::get('/api/staff', [StaffDataController::class, 'index'])->name('api.staff');
     Route::get('/api/officials', [OfficialDataController::class, 'index'])->name('api.officials');
+    Route::get('/api/signature-requests', [SignatureRequestController::class, 'pollStatus'])->name('api.signature-requests');
 });
 
 require __DIR__.'/auth.php';
