@@ -1526,5 +1526,213 @@
     </script>
     @endauth
 
+    <script>
+    (function () {
+        const DRAFT_KEY_PREFIX = 'edokpuprd_draft_';
+        const LOOP_KEY_PREFIX  = 'edokpuprd_loop_';
+        const DEBOUNCE_MS      = 800;
+        let saveTimer = null;
+
+        function currentDocKey() {
+            const sel = document.getElementById('letter-type-select');
+            return sel ? sel.value : null;
+        }
+
+        function draftKey(docKey)  { return DRAFT_KEY_PREFIX + docKey; }
+        function loopKey(docKey)   { return LOOP_KEY_PREFIX  + docKey; }
+
+        // ── Save ─────────────────────────────────────────────────────────────
+        function saveDraft() {
+            const docKey = currentDocKey();
+            if (!docKey) return;
+
+            const form   = document.getElementById('form-' + docKey);
+            if (!form) return;
+
+            const data   = {};
+            const loopData = {};
+
+            form.querySelectorAll('[data-field-key]').forEach(function (wrapper) {
+                const key = wrapper.dataset.fieldKey;
+
+                // loop items — save checked ids + order
+                const loopList = wrapper.querySelector('.loop-checklist');
+                if (loopList) {
+                    const items = [];
+                    loopList.querySelectorAll('.loop-item').forEach(function (item) {
+                        const cb = item.querySelector('input[type="checkbox"]');
+                        if (cb) items.push({ id: item.dataset.id, checked: cb.checked });
+                    });
+                    loopData[key] = items;
+                    return;
+                }
+
+                // checkbox
+                const cb = wrapper.querySelector('input[type="checkbox"]');
+                if (cb && !cb.name.endsWith('[]')) { data[key] = cb.checked; return; }
+
+                // regular inputs / selects / textareas
+                const input = wrapper.querySelector('input:not([type="checkbox"]):not([type="radio"]), select, textarea');
+                if (input && !input.readOnly) data[key] = input.value;
+            });
+
+            try {
+                localStorage.setItem(draftKey(docKey), JSON.stringify(data));
+                if (Object.keys(loopData).length) {
+                    localStorage.setItem(loopKey(docKey), JSON.stringify(loopData));
+                }
+            } catch(e) { /* quota exceeded — silent */ }
+        }
+
+        function scheduleSave() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(saveDraft, DEBOUNCE_MS);
+        }
+
+        // ── Restore ───────────────────────────────────────────────────────────
+        function restoreDraft(docKey) {
+            let data = {}, loopData = {};
+            try {
+                const raw = localStorage.getItem(draftKey(docKey));
+                if (raw) data = JSON.parse(raw);
+                const rawLoop = localStorage.getItem(loopKey(docKey));
+                if (rawLoop) loopData = JSON.parse(rawLoop);
+            } catch(e) { return; }
+
+            if (!Object.keys(data).length && !Object.keys(loopData).length) return;
+
+            const form = document.getElementById('form-' + docKey);
+            if (!form) return;
+
+            form.querySelectorAll('[data-field-key]').forEach(function (wrapper) {
+                const key = wrapper.dataset.fieldKey;
+
+                // loop items
+                if (loopData[key]) {
+                    const loopList = wrapper.querySelector('.loop-checklist');
+                    if (!loopList) return;
+
+                    const savedItems = loopData[key];
+                    const savedOrder = savedItems.map(function (i) { return String(i.id); });
+                    const checkedIds = savedItems.filter(function (i) { return i.checked; }).map(function (i) { return String(i.id); });
+
+                    // restore check states
+                    loopList.querySelectorAll('.loop-item').forEach(function (item) {
+                        const cb = item.querySelector('input[type="checkbox"]');
+                        if (!cb) return;
+                        const isChecked = checkedIds.includes(String(item.dataset.id));
+                        cb.checked = isChecked;
+                        item.classList.toggle('checked-item', isChecked);
+                    });
+
+                    // restore order — re-append in saved sequence
+                    const itemMap = {};
+                    loopList.querySelectorAll('.loop-item').forEach(function (item) {
+                        itemMap[String(item.dataset.id)] = item;
+                    });
+                    savedOrder.forEach(function (id) {
+                        if (itemMap[id]) loopList.appendChild(itemMap[id]);
+                    });
+
+                    updateLoopCount(wrapper);
+                    return;
+                }
+
+                if (!(key in data)) return;
+
+                // checkbox
+                const cb = wrapper.querySelector('input[type="checkbox"]');
+                if (cb && !cb.name.endsWith('[]')) { cb.checked = !!data[key]; return; }
+
+                // regular inputs
+                const input = wrapper.querySelector('input:not([type="checkbox"]):not([type="radio"]):not([readonly]), select, textarea');
+                if (input) input.value = data[key] ?? '';
+            });
+
+            showDraftBanner(docKey);
+        }
+
+        // ── Draft banner ──────────────────────────────────────────────────────
+        function showDraftBanner(docKey) {
+            let banner = document.getElementById('draft-restore-banner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'draft-restore-banner';
+                banner.style.cssText = [
+                    'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9990;',
+                    'background:var(--navy-800);color:#fff;border-radius:10px;',
+                    'padding:0.65rem 1rem;font-size:0.78rem;font-weight:500;',
+                    'box-shadow:0 4px 16px rgba(0,0,0,0.3);',
+                    'display:flex;align-items:center;gap:0.75rem;',
+                    'animation:fadeUp 0.3s ease;max-width:320px;'
+                ].join('');
+                document.body.appendChild(banner);
+            }
+            banner.innerHTML = [
+                '<svg style="width:14px;height:14px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">',
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>',
+                '</svg>',
+                '<span>Draft dipulihkan.</span>',
+                '<button onclick="clearDraft(\'' + docKey + '\')" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:6px;padding:0.2rem 0.55rem;font-size:0.72rem;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">Hapus draft</button>',
+                '<button onclick="document.getElementById(\'draft-restore-banner\').remove()" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:0 0.2rem;font-size:1rem;line-height:1;">✕</button>'
+            ].join('');
+        }
+
+        // ── Clear ─────────────────────────────────────────────────────────────
+        window.clearDraft = function (docKey) {
+            if (!docKey) docKey = currentDocKey();
+            try {
+                localStorage.removeItem(draftKey(docKey));
+                localStorage.removeItem(loopKey(docKey));
+            } catch(e) {}
+            const banner = document.getElementById('draft-restore-banner');
+            if (banner) banner.remove();
+        };
+
+        // ── Clear on successful submit ─────────────────────────────────────────
+        document.getElementById('main-form')?.addEventListener('submit', function () {
+            clearDraft(currentDocKey());
+        });
+
+        // ── Attach listeners ──────────────────────────────────────────────────
+        function attachListeners(docKey) {
+            const form = document.getElementById('form-' + docKey);
+            if (!form) return;
+            form.querySelectorAll('input, select, textarea').forEach(function (el) {
+                el.addEventListener('input', scheduleSave);
+                el.addEventListener('change', scheduleSave);
+            });
+            // watch for dynamic row additions (repeating group)
+            new MutationObserver(scheduleSave).observe(form, { childList: true, subtree: true });
+        }
+
+        // ── Hook into showForm ────────────────────────────────────────────────
+        // Wrap the existing showForm to also restore/attach on tab switch
+        const _origShowForm = window.showForm;
+        window.showForm = function (key) {
+            _origShowForm(key);
+            // wait for the transition to finish, then restore + attach
+            setTimeout(function () {
+                attachListeners(key);
+                restoreDraft(key);
+            }, 200);
+        };
+
+        // ── Init on first load ────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            const sel = document.getElementById('letter-type-select');
+            if (!sel) return;
+            const initial = sel.value;
+            // attach after loadAllData populates the loop lists
+            const _origLoad = window.loadAllData;
+            window.loadAllData = async function () {
+                await _origLoad();
+                attachListeners(initial);
+                restoreDraft(initial);
+            };
+        });
+    })();
+    </script>
+
 </body>
 </html>
