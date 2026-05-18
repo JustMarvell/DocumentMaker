@@ -122,13 +122,16 @@
             </button>
             @auth
                 <button onclick="switchTab('requests')" id="tab-requests"
-                    style="padding:0.5rem 1rem;font-size:0.82rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;color:var(--slate-400);font-family:var(--font-body);">
+                    style="padding:0.5rem 1rem;font-size:0.82rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;color:var(--slate-400);font-family:var(--font-body);display:inline-flex;align-items:center;">
                     Permintaan TTD
                     @if($signatureRequests->where('status', 'pending')->count() > 0)
-                        <span
+                        <span id="tab-requests-badge"
                             style="background:#7c3aed;color:#fff;border-radius:10px;padding:0.1rem 0.45rem;font-size:0.65rem;margin-left:0.3rem;">
                             {{ $signatureRequests->where('status', 'pending')->count() }}
                         </span>
+                        <span class="pending-pulse" id="tab-requests-pulse"></span> 
+                    @else
+                        <span class="pending-pulse" id="tab-requests-pulse" style="display:none;"></span> 
                     @endif
                 </button>
                 <button onclick="switchTab('history')" id="tab-history"
@@ -1484,14 +1487,20 @@
         }
 
         function updateTabBadge(pendingCount) {
-            const tab = document.getElementById('tab-requests');
+            const tab   = document.getElementById('tab-requests');
+            const badge = document.getElementById('tab-requests-badge');
+            const pulse = document.getElementById('tab-requests-pulse'); 
             if (!tab) return;
-            const old = tab.querySelector('span');
-            if (old) old.remove();
-            if (pendingCount > 0) {
-                tab.insertAdjacentHTML('beforeend',
-                    `<span style="background:#7c3aed;color:#fff;border-radius:10px;padding:0.1rem 0.45rem;font-size:0.65rem;margin-left:0.3rem;">${pendingCount}</span>`
-                );
+
+            // update badge
+            if (badge) {
+                badge.textContent = pendingCount;
+                badge.style.display = pendingCount > 0 ? '' : 'none';
+            }
+
+            // update pulse
+            if (pulse) {
+                pulse.style.display = pendingCount > 0 ? 'inline-block' : 'none';
             }
         }
 
