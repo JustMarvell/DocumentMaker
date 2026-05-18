@@ -71,15 +71,17 @@ $isAutofillable = !$isAutoNumber && $field->staff_autofill_column && $field->aut
                 value="{{ $old ?? '' }}"
                 class="form-input"
                 placeholder="{{ $isAutoNumber ? 'Digenerate otomatis...' : ($field->placeholder ?? '') }}"
+                data-required="{{ $required ? '1' : '0' }}"
+                data-label="{{ $label }}"
                 {{ $required ? 'required' : '' }}
                 {{ $field->maxlength ? "maxlength={$field->maxlength}" : '' }}
-                @if($isAutoNumber)                             {{-- <- lock if auto-number --}}
+                @if($isAutoNumber)
                     readonly
                     style="background:rgba(124,58,237,0.04);border-color:rgba(124,58,237,0.25);
                             color:rgba(109,40,217,0.6);cursor:not-allowed;padding-right:2.5rem;"
                 @endif
             >
-            @if($isAutoNumber)                                    {{-- <- lock icon --}}
+            @if($isAutoNumber)
                 <div style="position:absolute;right:0.65rem;top:50%;transform:translateY(-50%);
                             color:rgba(124,58,237,0.4);pointer-events:none;">
                     <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,29 +95,36 @@ $isAutofillable = !$isAutoNumber && $field->staff_autofill_column && $field->aut
     {{-- ── TEXTAREA ────────────────────────────────────────────── --}}
     @elseif($type === 'textarea')
         <textarea id="{{ $key }}"
-                  name="{{ $key }}"
-                  class="form-input"
-                  rows="{{ $field->rows ?? 3 }}"
-                  style="resize:vertical;"
-                  placeholder="{{ $field->placeholder ?? '' }}"
-                  {{ $required ? 'required' : '' }}>{{ $old ?? '' }}</textarea>
+            name="{{ $key }}"
+            class="form-input"
+            rows="{{ $field->rows ?? 3 }}"
+            style="resize:vertical;"
+            placeholder="{{ $field->placeholder ?? '' }}"
+            data-required="{{ $required ? '1' : '0' }}"
+            data-label="{{ $label }}"
+            {{ $required ? 'required' : '' }}>{{ $old ?? '' }}</textarea>
 
     {{-- ── NUMBER ──────────────────────────────────────────────── --}}
     @elseif($type === 'number')
         <input type="number"
-               id="{{ $key }}"
-               name="{{ $key }}"
-               value="{{ $old ?? '' }}"
-               class="form-input"
-               placeholder="{{ $field->placeholder ?? '0' }}"
-               {{ $field->min !== null ? "min={$field->min}" : '' }}
-               {{ $field->max !== null ? "max={$field->max}" : '' }}
-               {{ $field->step ? "step={$field->step}" : '' }}
-               {{ $required ? 'required' : '' }}>
+            id="{{ $key }}"
+            name="{{ $key }}"
+            value="{{ $old ?? '' }}"
+            class="form-input"
+            placeholder="{{ $field->placeholder ?? '0' }}"
+            data-required="{{ $required ? '1' : '0' }}"
+            data-label="{{ $label }}"
+            {{ $field->min !== null ? "min={$field->min}" : '' }}
+            {{ $field->max !== null ? "max={$field->max}" : '' }}
+            {{ $field->step ? "step={$field->step}" : '' }}
+            {{ $required ? 'required' : '' }}>
 
     {{-- ── DATE ───────────────────────────────────────────────── --}}
     @elseif($type === 'date')
+    @elseif($type === 'date')
         <input type="date" id="{{ $key }}" name="{{ $key }}" value="{{ $old ?? '' }}" class="form-input" style="cursor:pointer;"
+            data-required="{{ $required ? '1' : '0' }}"
+            data-label="{{ $label }}"
             {{ $required ? 'required' : '' }}>
         <script>
             (function () {
@@ -137,11 +146,14 @@ $isAutofillable = !$isAutoNumber && $field->staff_autofill_column && $field->aut
         </script>
 
             {{-- ── SELECT ──────────────────────────────────────────────── --}}
-    @elseif($type === 'select')
-        <select id="{{ $key }}" name="{{ $key }}" class="form-input"
-            style="cursor:pointer;appearance:none;background-image:url(...);" {{ $required ? 'required' : '' }}>
+            @elseif($type === 'select')
+            <select id="{{ $key }}" name="{{ $key }}" class="form-input"
+                style="cursor:pointer;appearance:none;background-image:url(...);"
+                data-required="{{ $required ? '1' : '0' }}"
+                data-label="{{ $label }}"
+                {{ $required ? 'required' : '' }}>
             <option value="">— Pilih —</option>
-            @foreach($field->field_options ?? [] as $opt) {{-- ← was $field->options --}}
+            @foreach($field->field_options ?? [] as $opt)
                 @php $val = is_array($opt) ? ($opt['value'] ?? $opt['label'] ?? $opt) : $opt;
         $lbl = is_array($opt) ? ($opt['label'] ?? $opt['value'] ?? $opt) : $opt; @endphp
                     <option value="{{ $val }}" {{ $old === $val ? 'selected' : '' }}>{{ $lbl }}</option>
