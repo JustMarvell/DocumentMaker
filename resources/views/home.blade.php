@@ -243,12 +243,90 @@
                                 <label class="form-label" style="font-size:0.72rem;margin-bottom:0.5rem;">
                                     <span style="color:var(--navy-500);">▸</span> Jenis Surat / Dokumen
                                 </label>
-                                <select name="letter-type" id="letter-type-select"
-                                    onchange="showForm(this.value)" class="w-full">
+
+                                {{-- Hidden real select (keeps form/JS compatibility) --}}
+                                <select name="letter-type" id="letter-type-select" class="hidden" aria-hidden="true">
                                     @foreach ($documentTypes as $type)
                                         <option value="{{ $type->key }}">{{ $type->name }}</option>
                                     @endforeach
                                 </select>
+
+                                {{-- Custom searchable dropdown --}}
+                                <div id="doc-type-picker" style="position:relative;">
+
+                                    {{-- Trigger button --}}
+                                    <button type="button" id="doc-type-btn"
+                                        onclick="toggleDocPicker()"
+                                        style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;
+                                            background:rgba(255,255,255,0.9);border:1.5px solid var(--navy-200);border-radius:8px;
+                                            padding:0.7rem 1rem;font-size:0.88rem;font-family:var(--font-body);color:var(--navy-800);
+                                            cursor:pointer;text-align:left;transition:all 0.2s;">
+                                        <span id="doc-type-btn-label">{{ $documentTypes->first()->name }}</span>
+                                        <svg id="doc-type-chevron" style="width:16px;height:16px;flex-shrink:0;color:var(--navy-400);transition:transform 0.2s;"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+
+                                    {{-- Dropdown panel --}}
+                                    <div id="doc-type-panel"
+                                        style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:200;
+                                                background:#fff;border:1.5px solid var(--navy-200);border-radius:10px;
+                                                box-shadow:0 8px 32px rgba(13,21,38,0.15);overflow:hidden;">
+
+                                        {{-- Search input --}}
+                                        <div style="padding:0.6rem 0.65rem;border-bottom:1px solid var(--slate-200);">
+                                            <div style="position:relative;">
+                                                <svg style="position:absolute;left:0.6rem;top:50%;transform:translateY(-50%);
+                                                            width:14px;height:14px;color:var(--slate-300);pointer-events:none;"
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                                </svg>
+                                                <input type="text" id="doc-type-search"
+                                                    placeholder="Cari jenis dokumen..."
+                                                    oninput="filterDocTypes(this.value)"
+                                                    style="width:100%;border:1px solid var(--slate-200);border-radius:6px;
+                                                            padding:0.45rem 0.75rem 0.45rem 2rem;font-size:0.82rem;
+                                                            font-family:var(--font-body);color:var(--slate-700);outline:none;
+                                                            transition:border-color 0.2s;box-sizing:border-box;"
+                                                    onfocus="this.style.borderColor='var(--navy-300)'"
+                                                    onblur="this.style.borderColor='var(--slate-200)'">
+                                            </div>
+                                        </div>
+
+                                        {{-- Options list --}}
+                                        <div id="doc-type-list" style="max-height:260px;overflow-y:auto;padding:0.35rem 0;">
+                                            @foreach ($documentTypes as $type)
+                                                <button type="button"
+                                                        class="doc-type-option"
+                                                        data-value="{{ $type->key }}"
+                                                        data-label="{{ $type->name }}"
+                                                        onclick="selectDocType('{{ $type->key }}', '{{ addslashes($type->name) }}')"
+                                                        style="width:100%;text-align:left;padding:0.6rem 1rem;font-size:0.85rem;
+                                                            font-family:var(--font-body);color:var(--slate-700);background:none;
+                                                            border:none;cursor:pointer;display:flex;align-items:center;
+                                                            justify-content:space-between;gap:0.5rem;transition:background 0.12s;"
+                                                        onmouseover="this.style.background='rgba(42,82,152,0.06)'"
+                                                        onmouseout="if(!this.classList.contains('selected'))this.style.background=''">
+                                                    <span>{{ $type->name }}</span>
+                                                    <span style="font-size:0.68rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:20px;
+                                                                background:{{ $type->file_type === 'xlsx' ? 'rgba(21,128,61,0.1)' : 'rgba(42,82,152,0.1)' }};
+                                                                color:{{ $type->file_type === 'xlsx' ? '#15803d' : 'var(--navy-600)' }};">
+                                                        {{ strtoupper($type->file_type) }}
+                                                    </span>
+                                                </button>
+                                            @endforeach
+
+                                            <p id="doc-type-empty" style="display:none;padding:1rem;text-align:center;
+                                                                        font-size:0.8rem;color:var(--slate-300);">
+                                                Tidak ada dokumen ditemukan.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- template preview buttons (unchanged) --}}
                                 <div class="mt-2 flex items-center gap-2" id="template-preview-btn-wrap">
                                     @foreach ($documentTypes as $type)
                                         @if ($type->preview_pdf)
@@ -1930,6 +2008,139 @@
             };
         });
 
+    })();
+    </script>
+
+    <script>
+    (function () {
+        let pickerOpen = false;
+
+        window.toggleDocPicker = function () {
+            pickerOpen ? closeDocPicker() : openDocPicker();
+        };
+
+        function openDocPicker() {
+            pickerOpen = true;
+            const panel   = document.getElementById('doc-type-panel');
+            const chevron = document.getElementById('doc-type-chevron');
+            const btn     = document.getElementById('doc-type-btn');
+            panel.style.display = '';
+            chevron.style.transform = 'rotate(180deg)';
+            btn.style.borderColor = 'var(--navy-400)';
+            btn.style.boxShadow   = '0 0 0 3px rgba(42,82,152,0.1)';
+
+            // clear + focus search
+            const search = document.getElementById('doc-type-search');
+            search.value = '';
+            filterDocTypes('');
+            setTimeout(function () { search.focus(); }, 50);
+        }
+
+        function closeDocPicker() {
+            pickerOpen = false;
+            const panel   = document.getElementById('doc-type-panel');
+            const chevron = document.getElementById('doc-type-chevron');
+            const btn     = document.getElementById('doc-type-btn');
+            panel.style.display = 'none';
+            chevron.style.transform = '';
+            btn.style.borderColor = 'var(--navy-200)';
+            btn.style.boxShadow   = '';
+        }
+
+        window.filterDocTypes = function (q) {
+            const query   = q.toLowerCase().trim();
+            const options = document.querySelectorAll('.doc-type-option');
+            let   visible = 0;
+
+            options.forEach(function (opt) {
+                const label = opt.dataset.label.toLowerCase();
+                const match = !query || label.includes(query);
+                opt.style.display = match ? '' : 'none';
+                if (match) visible++;
+
+                // highlight matching substring
+                const span = opt.querySelector('span:first-child');
+                if (!query) {
+                    span.textContent = opt.dataset.label;
+                } else {
+                    const idx = label.indexOf(query);
+                    if (idx !== -1) {
+                        const orig = opt.dataset.label;
+                        span.innerHTML =
+                            escHtml(orig.slice(0, idx)) +
+                            '<mark style="background:rgba(201,168,76,0.3);color:inherit;border-radius:2px;padding:0 1px;">' +
+                            escHtml(orig.slice(idx, idx + query.length)) +
+                            '</mark>' +
+                            escHtml(orig.slice(idx + query.length));
+                    } else {
+                        span.textContent = opt.dataset.label;
+                    }
+                }
+            });
+
+            document.getElementById('doc-type-empty').style.display = visible ? 'none' : '';
+        };
+
+        function escHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        window.selectDocType = function (value, label) {
+            // update hidden select
+            const sel = document.getElementById('letter-type-select');
+            sel.value = value;
+
+            // update button label
+            document.getElementById('doc-type-btn-label').textContent = label;
+
+            // mark selected option
+            document.querySelectorAll('.doc-type-option').forEach(function (opt) {
+                const active = opt.dataset.value === value;
+                opt.classList.toggle('selected', active);
+                opt.style.background = active ? 'rgba(42,82,152,0.08)' : '';
+                opt.style.fontWeight = active ? '600' : '';
+                opt.style.color      = active ? 'var(--navy-700)' : 'var(--slate-700)';
+            });
+
+            closeDocPicker();
+            showForm(value);         // existing function — switches the form panel
+        };
+
+        // close on outside click
+        document.addEventListener('click', function (e) {
+            if (!pickerOpen) return;
+            if (!document.getElementById('doc-type-picker').contains(e.target)) {
+                closeDocPicker();
+            }
+        });
+
+        // keyboard nav
+        document.addEventListener('keydown', function (e) {
+            if (!pickerOpen) return;
+
+            const options  = Array.from(document.querySelectorAll('.doc-type-option:not([style*="display: none"])'));
+            const focused  = document.activeElement;
+            const curIndex = options.indexOf(focused);
+
+            if (e.key === 'Escape') { closeDocPicker(); document.getElementById('doc-type-btn').focus(); }
+            if (e.key === 'ArrowDown') { e.preventDefault(); (options[curIndex + 1] || options[0])?.focus(); }
+            if (e.key === 'ArrowUp')   { e.preventDefault(); (options[curIndex - 1] || options[options.length - 1])?.focus(); }
+            if (e.key === 'Enter' && options[curIndex]) { e.preventDefault(); options[curIndex].click(); }
+        });
+
+        // ── Init: mark the first option as selected on load ───────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            const sel = document.getElementById('letter-type-select');
+            if (sel && sel.value) {
+                const first = document.querySelector('.doc-type-option[data-value="' + sel.value + '"]');
+                if (first) {
+                    first.classList.add('selected');
+                    first.style.background = 'rgba(42,82,152,0.08)';
+                    first.style.fontWeight = '600';
+                    first.style.color      = 'var(--navy-700)';
+                }
+            }
+        });
     })();
     </script>
 
