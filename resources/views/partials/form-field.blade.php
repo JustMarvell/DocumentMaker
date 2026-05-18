@@ -121,7 +121,6 @@ $isAutofillable = !$isAutoNumber && $field->staff_autofill_column && $field->aut
 
     {{-- ── DATE ───────────────────────────────────────────────── --}}
     @elseif($type === 'date')
-    @elseif($type === 'date')
         <input type="date" id="{{ $key }}" name="{{ $key }}" value="{{ $old ?? '' }}" class="form-input" style="cursor:pointer;"
             data-required="{{ $required ? '1' : '0' }}"
             data-label="{{ $label }}"
