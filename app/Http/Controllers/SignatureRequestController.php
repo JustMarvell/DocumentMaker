@@ -331,6 +331,7 @@ class SignatureRequestController extends Controller
             ->get()
             ->map(fn($req) => [
                 'id' => $req->id,
+                'log_id' => $req->document_log_id,
                 'status' => $req->status,
                 'doc_type' => $req->documentLog->documentType->name,
                 'filename' => $req->documentLog->output_filename,
@@ -341,6 +342,10 @@ class SignatureRequestController extends Controller
                 'notes' => $req->notes,
                 'token' => $req->token,
                 'is_pending' => $req->isPending(),
+                'signed_filename' => $req->signed_filename,
+                'signed_download_url' => $req->signed_filename
+                    ? route('document.download', $req->signed_filename)
+                    : null,
                 'resend_url' => route('signature.resend', $req),
                 'verify_url' => route('signature.verify', $req->token),
             ]);

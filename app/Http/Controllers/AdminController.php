@@ -478,7 +478,7 @@ class AdminController extends Controller
 
         abort_unless(file_exists($path), 404, 'File panduan tidak ditemukan.');
 
-        return response()->download($path, 'SIPADU_Panduan_Penggunaan.docx');
+        return response()->download($path, 'eDokPUPRD_Panduan_Penggunaan.docx');
     }
 
     public function toggleSignature(DocumentType $documentType)

@@ -50,7 +50,7 @@ class DocumentController extends Controller
         if (auth()->check()) {
             $signatureRequests = SignatureRequest::with(['documentLog.documentType', 'official'])
                 ->where('user_id', auth()->id())
-                ->latest('requested_at')
+                ->orderByRaw('COALESCE(requested_at, created_at) DESC')
                 ->take(20)
                 ->get();
 
