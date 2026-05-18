@@ -243,12 +243,90 @@
                                 <label class="form-label" style="font-size:0.72rem;margin-bottom:0.5rem;">
                                     <span style="color:var(--navy-500);">▸</span> Jenis Surat / Dokumen
                                 </label>
-                                <select name="letter-type" id="letter-type-select"
-                                    onchange="showForm(this.value)" class="w-full">
+
+                                {{-- Hidden real select (keeps form/JS compatibility) --}}
+                                <select name="letter-type" id="letter-type-select" class="hidden" aria-hidden="true">
                                     @foreach ($documentTypes as $type)
                                         <option value="{{ $type->key }}">{{ $type->name }}</option>
                                     @endforeach
                                 </select>
+
+                                {{-- Custom searchable dropdown --}}
+                                <div id="doc-type-picker" style="position:relative;">
+
+                                    {{-- Trigger button --}}
+                                    <button type="button" id="doc-type-btn"
+                                        onclick="toggleDocPicker()"
+                                        style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;
+                                            background:rgba(255,255,255,0.9);border:1.5px solid var(--navy-200);border-radius:8px;
+                                            padding:0.7rem 1rem;font-size:0.88rem;font-family:var(--font-body);color:var(--navy-800);
+                                            cursor:pointer;text-align:left;transition:all 0.2s;">
+                                        <span id="doc-type-btn-label">{{ $documentTypes->first()->name }}</span>
+                                        <svg id="doc-type-chevron" style="width:16px;height:16px;flex-shrink:0;color:var(--navy-400);transition:transform 0.2s;"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+
+                                    {{-- Dropdown panel --}}
+                                    <div id="doc-type-panel"
+                                        style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:200;
+                                                background:#fff;border:1.5px solid var(--navy-200);border-radius:10px;
+                                                box-shadow:0 8px 32px rgba(13,21,38,0.15);overflow:hidden;">
+
+                                        {{-- Search input --}}
+                                        <div style="padding:0.6rem 0.65rem;border-bottom:1px solid var(--slate-200);">
+                                            <div style="position:relative;">
+                                                <svg style="position:absolute;left:0.6rem;top:50%;transform:translateY(-50%);
+                                                            width:14px;height:14px;color:var(--slate-300);pointer-events:none;"
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                                </svg>
+                                                <input type="text" id="doc-type-search"
+                                                    placeholder="Cari jenis dokumen..."
+                                                    oninput="filterDocTypes(this.value)"
+                                                    style="width:100%;border:1px solid var(--slate-200);border-radius:6px;
+                                                            padding:0.45rem 0.75rem 0.45rem 2rem;font-size:0.82rem;
+                                                            font-family:var(--font-body);color:var(--slate-700);outline:none;
+                                                            transition:border-color 0.2s;box-sizing:border-box;"
+                                                    onfocus="this.style.borderColor='var(--navy-300)'"
+                                                    onblur="this.style.borderColor='var(--slate-200)'">
+                                            </div>
+                                        </div>
+
+                                        {{-- Options list --}}
+                                        <div id="doc-type-list" style="max-height:260px;overflow-y:auto;padding:0.35rem 0;">
+                                            @foreach ($documentTypes as $type)
+                                                <button type="button"
+                                                        class="doc-type-option"
+                                                        data-value="{{ $type->key }}"
+                                                        data-label="{{ $type->name }}"
+                                                        onclick="selectDocType('{{ $type->key }}', '{{ addslashes($type->name) }}')"
+                                                        style="width:100%;text-align:left;padding:0.6rem 1rem;font-size:0.85rem;
+                                                            font-family:var(--font-body);color:var(--slate-700);background:none;
+                                                            border:none;cursor:pointer;display:flex;align-items:center;
+                                                            justify-content:space-between;gap:0.5rem;transition:background 0.12s;"
+                                                        onmouseover="this.style.background='rgba(42,82,152,0.06)'"
+                                                        onmouseout="if(!this.classList.contains('selected'))this.style.background=''">
+                                                    <span>{{ $type->name }}</span>
+                                                    <span style="font-size:0.68rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:20px;
+                                                                background:{{ $type->file_type === 'xlsx' ? 'rgba(21,128,61,0.1)' : 'rgba(42,82,152,0.1)' }};
+                                                                color:{{ $type->file_type === 'xlsx' ? '#15803d' : 'var(--navy-600)' }};">
+                                                        {{ strtoupper($type->file_type) }}
+                                                    </span>
+                                                </button>
+                                            @endforeach
+
+                                            <p id="doc-type-empty" style="display:none;padding:1rem;text-align:center;
+                                                                        font-size:0.8rem;color:var(--slate-300);">
+                                                Tidak ada dokumen ditemukan.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- template preview buttons (unchanged) --}}
                                 <div class="mt-2 flex items-center gap-2" id="template-preview-btn-wrap">
                                     @foreach ($documentTypes as $type)
                                         @if ($type->preview_pdf)
@@ -1525,6 +1603,546 @@
     })();
     </script>
     @endauth
+
+    <script>
+    (function () {
+        const DRAFT_KEY_PREFIX = 'edokpuprd_draft_';
+        const LOOP_KEY_PREFIX  = 'edokpuprd_loop_';
+        const DEBOUNCE_MS      = 800;
+        let saveTimer = null;
+
+        function currentDocKey() {
+            const sel = document.getElementById('letter-type-select');
+            return sel ? sel.value : null;
+        }
+
+        function draftKey(docKey)  { return DRAFT_KEY_PREFIX + docKey; }
+        function loopKey(docKey)   { return LOOP_KEY_PREFIX  + docKey; }
+
+        // ── Save ─────────────────────────────────────────────────────────────
+        function saveDraft() {
+            const docKey = currentDocKey();
+            if (!docKey) return;
+
+            const form   = document.getElementById('form-' + docKey);
+            if (!form) return;
+
+            const data   = {};
+            const loopData = {};
+
+            form.querySelectorAll('[data-field-key]').forEach(function (wrapper) {
+                const key = wrapper.dataset.fieldKey;
+
+                // loop items — save checked ids + order
+                const loopList = wrapper.querySelector('.loop-checklist');
+                if (loopList) {
+                    const items = [];
+                    loopList.querySelectorAll('.loop-item').forEach(function (item) {
+                        const cb = item.querySelector('input[type="checkbox"]');
+                        if (cb) items.push({ id: item.dataset.id, checked: cb.checked });
+                    });
+                    loopData[key] = items;
+                    return;
+                }
+
+                // checkbox
+                const cb = wrapper.querySelector('input[type="checkbox"]');
+                if (cb && !cb.name.endsWith('[]')) { data[key] = cb.checked; return; }
+
+                // regular inputs / selects / textareas
+                const input = wrapper.querySelector('input:not([type="checkbox"]):not([type="radio"]), select, textarea');
+                if (input && !input.readOnly) data[key] = input.value;
+            });
+
+            try {
+                localStorage.setItem(draftKey(docKey), JSON.stringify(data));
+                if (Object.keys(loopData).length) {
+                    localStorage.setItem(loopKey(docKey), JSON.stringify(loopData));
+                }
+            } catch(e) { /* quota exceeded — silent */ }
+        }
+
+        function scheduleSave() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(saveDraft, DEBOUNCE_MS);
+        }
+
+        // ── Restore ───────────────────────────────────────────────────────────
+        function restoreDraft(docKey) {
+            let data = {}, loopData = {};
+            try {
+                const raw = localStorage.getItem(draftKey(docKey));
+                if (raw) data = JSON.parse(raw);
+                const rawLoop = localStorage.getItem(loopKey(docKey));
+                if (rawLoop) loopData = JSON.parse(rawLoop);
+            } catch(e) { return; }
+
+            if (!Object.keys(data).length && !Object.keys(loopData).length) return;
+
+            const form = document.getElementById('form-' + docKey);
+            if (!form) return;
+
+            form.querySelectorAll('[data-field-key]').forEach(function (wrapper) {
+                const key = wrapper.dataset.fieldKey;
+
+                // loop items
+                if (loopData[key]) {
+                    const loopList = wrapper.querySelector('.loop-checklist');
+                    if (!loopList) return;
+
+                    const savedItems = loopData[key];
+                    const savedOrder = savedItems.map(function (i) { return String(i.id); });
+                    const checkedIds = savedItems.filter(function (i) { return i.checked; }).map(function (i) { return String(i.id); });
+
+                    // restore check states
+                    loopList.querySelectorAll('.loop-item').forEach(function (item) {
+                        const cb = item.querySelector('input[type="checkbox"]');
+                        if (!cb) return;
+                        const isChecked = checkedIds.includes(String(item.dataset.id));
+                        cb.checked = isChecked;
+                        item.classList.toggle('checked-item', isChecked);
+                    });
+
+                    // restore order — re-append in saved sequence
+                    const itemMap = {};
+                    loopList.querySelectorAll('.loop-item').forEach(function (item) {
+                        itemMap[String(item.dataset.id)] = item;
+                    });
+                    savedOrder.forEach(function (id) {
+                        if (itemMap[id]) loopList.appendChild(itemMap[id]);
+                    });
+
+                    updateLoopCount(wrapper);
+                    return;
+                }
+
+                if (!(key in data)) return;
+
+                // checkbox
+                const cb = wrapper.querySelector('input[type="checkbox"]');
+                if (cb && !cb.name.endsWith('[]')) { cb.checked = !!data[key]; return; }
+
+                // regular inputs
+                const input = wrapper.querySelector('input:not([type="checkbox"]):not([type="radio"]):not([readonly]), select, textarea');
+                if (input) input.value = data[key] ?? '';
+            });
+
+            showDraftBanner(docKey);
+        }
+
+        // ── Draft banner ──────────────────────────────────────────────────────
+        function showDraftBanner(docKey) {
+            let banner = document.getElementById('draft-restore-banner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'draft-restore-banner';
+                banner.style.cssText = [
+                    'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9990;',
+                    'background:var(--navy-800);color:#fff;border-radius:10px;',
+                    'padding:0.65rem 1rem;font-size:0.78rem;font-weight:500;',
+                    'box-shadow:0 4px 16px rgba(0,0,0,0.3);',
+                    'display:flex;align-items:center;gap:0.75rem;',
+                    'animation:fadeUp 0.3s ease;max-width:320px;'
+                ].join('');
+                document.body.appendChild(banner);
+            }
+            banner.innerHTML = [
+                '<svg style="width:14px;height:14px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">',
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>',
+                '</svg>',
+                '<span>Draft dipulihkan.</span>',
+                '<button onclick="clearDraft(\'' + docKey + '\')" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:6px;padding:0.2rem 0.55rem;font-size:0.72rem;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">Hapus draft</button>',
+                '<button onclick="document.getElementById(\'draft-restore-banner\').remove()" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:0 0.2rem;font-size:1rem;line-height:1;">✕</button>'
+            ].join('');
+        }
+
+        // ── Clear ─────────────────────────────────────────────────────────────
+        window.clearDraft = function (docKey) {
+            if (!docKey) docKey = currentDocKey();
+            try {
+                localStorage.removeItem(draftKey(docKey));
+                localStorage.removeItem(loopKey(docKey));
+            } catch(e) {}
+            const banner = document.getElementById('draft-restore-banner');
+            if (banner) banner.remove();
+        };
+
+        // ── Clear on successful submit ─────────────────────────────────────────
+        document.getElementById('main-form')?.addEventListener('submit', function () {
+            clearDraft(currentDocKey());
+        });
+
+        // ── Attach listeners ──────────────────────────────────────────────────
+        function attachListeners(docKey) {
+            const form = document.getElementById('form-' + docKey);
+            if (!form) return;
+            form.querySelectorAll('input, select, textarea').forEach(function (el) {
+                el.addEventListener('input', scheduleSave);
+                el.addEventListener('change', scheduleSave);
+            });
+            // watch for dynamic row additions (repeating group)
+            new MutationObserver(scheduleSave).observe(form, { childList: true, subtree: true });
+        }
+
+        // ── Hook into showForm ────────────────────────────────────────────────
+        // Wrap the existing showForm to also restore/attach on tab switch
+        const _origShowForm = window.showForm;
+        window.showForm = function (key) {
+            _origShowForm(key);
+            // wait for the transition to finish, then restore + attach
+            setTimeout(function () {
+                attachListeners(key);
+                restoreDraft(key);
+            }, 200);
+        };
+
+        // ── Init on first load ────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            const sel = document.getElementById('letter-type-select');
+            if (!sel) return;
+            const initial = sel.value;
+            // attach after loadAllData populates the loop lists
+            const _origLoad = window.loadAllData;
+            window.loadAllData = async function () {
+                await _origLoad();
+                attachListeners(initial);
+                restoreDraft(initial);
+            };
+        });
+    })();
+    </script>
+
+    <script>
+    (function () {
+
+        // ── Styling helpers ───────────────────────────────────────────────────
+        const ERR_BORDER  = '1.5px solid #dc2626';
+        const OK_BORDER   = '';   // revert to CSS class default
+        const ERR_BG      = 'rgba(220,38,38,0.04)';
+
+        function getErrorEl(input) {
+            let el = input.parentElement.querySelector('.inline-field-error');
+            if (!el) {
+                el = document.createElement('p');
+                el.className = 'inline-field-error';
+                el.style.cssText = 'font-size:0.73rem;color:#dc2626;margin-top:0.3rem;display:flex;align-items:center;gap:0.35rem;';
+                el.innerHTML = '<svg style="width:12px;height:12px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span></span>';
+                input.parentElement.appendChild(el);
+            }
+            return el;
+        }
+
+        function setError(input, msg) {
+            input.style.border    = ERR_BORDER;
+            input.style.background = ERR_BG;
+            const el = getErrorEl(input);
+            el.querySelector('span').textContent = msg;
+            el.style.display = 'flex';
+
+            // highlight the wrapper card gently
+            const wrapper = input.closest('[data-field-key]');
+            if (wrapper) wrapper.style.outline = '1.5px solid rgba(220,38,38,0.25)';
+        }
+
+        function clearError(input) {
+            input.style.border    = OK_BORDER;
+            input.style.background = '';
+            const el = input.parentElement.querySelector('.inline-field-error');
+            if (el) el.style.display = 'none';
+            const wrapper = input.closest('[data-field-key]');
+            if (wrapper) wrapper.style.outline = '';
+        }
+
+        // ── Validate a single input ───────────────────────────────────────────
+        function validateInput(input) {
+            if (input.readOnly || input.disabled) return true;
+            if (input.dataset.required !== '1') return true;
+
+            const label = input.dataset.label || 'Field ini';
+            const val   = input.value.trim();
+
+            if (!val) {
+                setError(input, label + ' wajib diisi.');
+                return false;
+            }
+
+            if (input.type === 'number') {
+                const num = parseFloat(val);
+                if (isNaN(num)) { setError(input, label + ' harus berupa angka.'); return false; }
+                if (input.min !== '' && num < parseFloat(input.min)) {
+                    setError(input, label + ' minimal ' + input.min + '.'); return false;
+                }
+                if (input.max !== '' && num > parseFloat(input.max)) {
+                    setError(input, label + ' maksimal ' + input.max + '.'); return false;
+                }
+            }
+
+            clearError(input);
+            return true;
+        }
+
+        // ── Validate loop (staff/official) ────────────────────────────────────
+        function validateLoop(wrapper) {
+            const fieldKey = wrapper.dataset.fieldKey;
+            // check if there's a required attribute on the wrapper (set via field config)
+            const isRequired = wrapper.querySelector('input[type="checkbox"][name]')
+                && wrapper.closest('[id^="form-"]');
+
+            // We infer required from the label badge
+            const hasRequiredBadge = wrapper.querySelector('span[style*="color:rgba(239,68,68"]');
+            if (!hasRequiredBadge) return true;
+
+            const checked = wrapper.querySelectorAll('input[type="checkbox"]:checked').length;
+            const loopFooter = wrapper.querySelector('.loop-footer p');
+
+            let errEl = wrapper.querySelector('.loop-inline-error');
+            if (!errEl) {
+                errEl = document.createElement('p');
+                errEl.className = 'loop-inline-error';
+                errEl.style.cssText = 'font-size:0.72rem;color:#dc2626;margin:0.3rem 0.65rem 0;display:flex;align-items:center;gap:0.35rem;';
+                errEl.innerHTML = '<svg style="width:11px;height:11px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Pilih minimal satu.</span>';
+                const footer = wrapper.querySelector('.loop-footer');
+                if (footer) footer.prepend(errEl);
+            }
+
+            if (checked === 0) {
+                wrapper.style.outline = '1.5px solid rgba(220,38,38,0.35)';
+                errEl.style.display = 'flex';
+                return false;
+            } else {
+                wrapper.style.outline = '';
+                errEl.style.display = 'none';
+                return true;
+            }
+        }
+
+        // ── Validate all fields in the active form ────────────────────────────
+        function validateActiveForm() {
+            const sel = document.getElementById('letter-type-select');
+            if (!sel) return true;
+            const form = document.getElementById('form-' + sel.value);
+            if (!form) return true;
+
+            let allValid = true;
+            let firstInvalid = null;
+
+            // regular inputs
+            form.querySelectorAll('input[data-required], select[data-required], textarea[data-required]').forEach(function (input) {
+                const ok = validateInput(input);
+                if (!ok && !firstInvalid) firstInvalid = input;
+                if (!ok) allValid = false;
+            });
+
+            // loop containers
+            form.querySelectorAll('[data-loop-type]').forEach(function (wrapper) {
+                const ok = validateLoop(wrapper);
+                if (!ok && !firstInvalid) firstInvalid = wrapper;
+                if (!ok) allValid = false;
+            });
+
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            return allValid;
+        }
+
+        // ── Hook into submitIfConsented ───────────────────────────────────────
+        const _origSubmit = window.submitIfConsented;
+        window.submitIfConsented = function () {
+            if (!validateActiveForm()) {
+                // shake the submit button gently to signal blocked
+                const btn = document.getElementById('submit-btn');
+                if (btn) {
+                    const shakes = [5, -5, 3, -3, 1, 0];
+                    shakes.forEach(function (x, i) {
+                        setTimeout(function () { btn.style.transform = 'translateX(' + x + 'px)'; }, i * 50);
+                    });
+                    setTimeout(function () { btn.style.transform = ''; }, shakes.length * 50);
+                }
+                showToast('Harap isi semua field wajib terlebih dahulu.', 'error');
+                return;
+            }
+            _origSubmit();
+        };
+
+        // ── Attach blur/input listeners ───────────────────────────────────────
+        function attachValidationListeners(docKey) {
+            const form = document.getElementById('form-' + docKey);
+            if (!form) return;
+
+            form.querySelectorAll('input[data-required], select[data-required], textarea[data-required]').forEach(function (input) {
+                // clear on input (optimistic)
+                input.addEventListener('input', function () { clearError(this); });
+                // validate on blur
+                input.addEventListener('blur',  function () { validateInput(this); });
+                // selects validate immediately on change
+                if (input.tagName === 'SELECT') {
+                    input.addEventListener('change', function () { validateInput(this); });
+                }
+            });
+
+            // loop: validate when any checkbox changes
+            form.querySelectorAll('[data-loop-type]').forEach(function (wrapper) {
+                wrapper.addEventListener('change', function () { validateLoop(wrapper); });
+            });
+        }
+
+        // ── Hook into showForm ────────────────────────────────────────────────
+        const _origShowForm = window.showForm;
+        window.showForm = function (key) {
+            // Only wrap if auto-save script hasn't already wrapped it
+            // (check if already wrapped by inspecting the override chain)
+            if (_origShowForm) _origShowForm(key);
+            setTimeout(function () { attachValidationListeners(key); }, 250);
+        };
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            const sel = document.getElementById('letter-type-select');
+            if (!sel) return;
+            const _origLoad = window.loadAllData;
+            window.loadAllData = async function () {
+                await _origLoad();
+                attachValidationListeners(sel.value);
+            };
+        });
+
+    })();
+    </script>
+
+    <script>
+    (function () {
+        let pickerOpen = false;
+
+        window.toggleDocPicker = function () {
+            pickerOpen ? closeDocPicker() : openDocPicker();
+        };
+
+        function openDocPicker() {
+            pickerOpen = true;
+            const panel   = document.getElementById('doc-type-panel');
+            const chevron = document.getElementById('doc-type-chevron');
+            const btn     = document.getElementById('doc-type-btn');
+            panel.style.display = '';
+            chevron.style.transform = 'rotate(180deg)';
+            btn.style.borderColor = 'var(--navy-400)';
+            btn.style.boxShadow   = '0 0 0 3px rgba(42,82,152,0.1)';
+
+            // clear + focus search
+            const search = document.getElementById('doc-type-search');
+            search.value = '';
+            filterDocTypes('');
+            setTimeout(function () { search.focus(); }, 50);
+        }
+
+        function closeDocPicker() {
+            pickerOpen = false;
+            const panel   = document.getElementById('doc-type-panel');
+            const chevron = document.getElementById('doc-type-chevron');
+            const btn     = document.getElementById('doc-type-btn');
+            panel.style.display = 'none';
+            chevron.style.transform = '';
+            btn.style.borderColor = 'var(--navy-200)';
+            btn.style.boxShadow   = '';
+        }
+
+        window.filterDocTypes = function (q) {
+            const query   = q.toLowerCase().trim();
+            const options = document.querySelectorAll('.doc-type-option');
+            let   visible = 0;
+
+            options.forEach(function (opt) {
+                const label = opt.dataset.label.toLowerCase();
+                const match = !query || label.includes(query);
+                opt.style.display = match ? '' : 'none';
+                if (match) visible++;
+
+                // highlight matching substring
+                const span = opt.querySelector('span:first-child');
+                if (!query) {
+                    span.textContent = opt.dataset.label;
+                } else {
+                    const idx = label.indexOf(query);
+                    if (idx !== -1) {
+                        const orig = opt.dataset.label;
+                        span.innerHTML =
+                            escHtml(orig.slice(0, idx)) +
+                            '<mark style="background:rgba(201,168,76,0.3);color:inherit;border-radius:2px;padding:0 1px;">' +
+                            escHtml(orig.slice(idx, idx + query.length)) +
+                            '</mark>' +
+                            escHtml(orig.slice(idx + query.length));
+                    } else {
+                        span.textContent = opt.dataset.label;
+                    }
+                }
+            });
+
+            document.getElementById('doc-type-empty').style.display = visible ? 'none' : '';
+        };
+
+        function escHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        window.selectDocType = function (value, label) {
+            // update hidden select
+            const sel = document.getElementById('letter-type-select');
+            sel.value = value;
+
+            // update button label
+            document.getElementById('doc-type-btn-label').textContent = label;
+
+            // mark selected option
+            document.querySelectorAll('.doc-type-option').forEach(function (opt) {
+                const active = opt.dataset.value === value;
+                opt.classList.toggle('selected', active);
+                opt.style.background = active ? 'rgba(42,82,152,0.08)' : '';
+                opt.style.fontWeight = active ? '600' : '';
+                opt.style.color      = active ? 'var(--navy-700)' : 'var(--slate-700)';
+            });
+
+            closeDocPicker();
+            showForm(value);         // existing function — switches the form panel
+        };
+
+        // close on outside click
+        document.addEventListener('click', function (e) {
+            if (!pickerOpen) return;
+            if (!document.getElementById('doc-type-picker').contains(e.target)) {
+                closeDocPicker();
+            }
+        });
+
+        // keyboard nav
+        document.addEventListener('keydown', function (e) {
+            if (!pickerOpen) return;
+
+            const options  = Array.from(document.querySelectorAll('.doc-type-option:not([style*="display: none"])'));
+            const focused  = document.activeElement;
+            const curIndex = options.indexOf(focused);
+
+            if (e.key === 'Escape') { closeDocPicker(); document.getElementById('doc-type-btn').focus(); }
+            if (e.key === 'ArrowDown') { e.preventDefault(); (options[curIndex + 1] || options[0])?.focus(); }
+            if (e.key === 'ArrowUp')   { e.preventDefault(); (options[curIndex - 1] || options[options.length - 1])?.focus(); }
+            if (e.key === 'Enter' && options[curIndex]) { e.preventDefault(); options[curIndex].click(); }
+        });
+
+        // ── Init: mark the first option as selected on load ───────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            const sel = document.getElementById('letter-type-select');
+            if (sel && sel.value) {
+                const first = document.querySelector('.doc-type-option[data-value="' + sel.value + '"]');
+                if (first) {
+                    first.classList.add('selected');
+                    first.style.background = 'rgba(42,82,152,0.08)';
+                    first.style.fontWeight = '600';
+                    first.style.color      = 'var(--navy-700)';
+                }
+            }
+        });
+    })();
+    </script>
 
 </body>
 </html>
