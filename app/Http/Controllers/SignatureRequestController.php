@@ -321,4 +321,35 @@ class SignatureRequestController extends Controller
         if (!$user->isAdmin() && $documentLog->user_id !== $user->id)
             abort(403);
     }
+
+    public function pollStatus()
+    {
+        $requests = SignatureRequest::with(['documentLog.documentType', 'official'])
+            ->where('user_id', auth()->id())
+            ->latest('requested_at')
+            ->take(20)
+            ->get()
+            ->map(fn($req) => [
+                'id' => $req->id,
+                'log_id' => $req->document_log_id,
+                'status' => $req->status,
+                'doc_type' => $req->documentLog->documentType->name,
+                'filename' => $req->documentLog->output_filename,
+                'official_name' => $req->official?->staff_name,
+                'official_pos' => $req->official?->position,
+                'requested_at' => $req->requested_at?->locale('id')->translatedFormat('d M Y, H:i'),
+                'reviewed_at' => $req->reviewed_at?->locale('id')->translatedFormat('d M Y, H:i'),
+                'notes' => $req->notes,
+                'token' => $req->token,
+                'is_pending' => $req->isPending(),
+                'signed_filename' => $req->signed_filename,
+                'signed_download_url' => $req->signed_filename
+                    ? route('document.download', $req->signed_filename)
+                    : null,
+                'resend_url' => route('signature.resend', $req),
+                'verify_url' => route('signature.verify', $req->token),
+            ]);
+
+        return response()->json($requests);
+    }
 }

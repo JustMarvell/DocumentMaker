@@ -621,7 +621,7 @@
             $fileExists = file_exists(storage_path('app/cached_result/' . $log->output_filename));
             $signedExists = $sigReq?->signed_filename && file_exists(storage_path('app/cached_result/' . $sigReq->signed_filename));
                     @endphp
-                    <tr style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
+                    <tr id="hist-row-{{ $log->id }}" style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
                         onmouseover="this.style.background='rgba(42,82,152,0.03)'"
                         onmouseout="this.style.background=''">
                         <td style="padding:0.75rem 1rem;">
@@ -640,7 +640,7 @@
                                 <span style="background:#fee2e2;color:#b91c1c;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Gagal</span>
                             @endif
                         </td>
-                        <td style="padding:0.75rem 1rem;text-align:center;">
+                        <td style="padding:0.75rem 1rem;text-align:center;" data-ttd-cell>
                             @if (!$sigReq)
                                 <span style="color:var(--slate-300);font-size:0.72rem;">—</span>
                             @elseif ($sigReq->status === 'approved')
@@ -654,10 +654,10 @@
                         <td style="padding:0.75rem 1rem;font-size:0.78rem;color:var(--slate-500);">
                             {{ $log->generated_at->locale('id')->translatedFormat('d M Y, H:i') }}
                         </td>
-                        <td style="padding:0.75rem 1rem;text-align:center;">
-                            <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:center;">
+                        <td style="padding:0.75rem 1rem;text-align:center;" data-action-cell>
+                            <div style="display:flex;flex-direction:column;gap:0.3rem;">
                                 @if ($signedExists)
-                                    <a href="{{ route('document.download', $sigReq->signed_filename) }}"
+                                    <a data-signed-btn href="{{ route('document.download', $sigReq->signed_filename) }}"
                                         style="font-size:0.75rem;color:#fff;background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;font-weight:600;">⬇ Signed</a>
                                 @endif
                                 @if ($fileExists)
@@ -1373,6 +1373,158 @@
             document.addEventListener('DOMContentLoaded', () => switchTab('requests'));
         @endif
     </script>
+
+    @auth
+    <script>
+    (function() {
+        const POLL_URL = '{{ route('api.signature-requests') }}';
+        const POLL_MS  = 10000;
+        let   lastStatuses = {};
+        let   pollTimer    = null;
+        const CSRF = '{{ csrf_token() }}';
+
+        function badgeHtml(status) {
+            if (status === 'pending')
+                return '<span style="background:#fef9c3;color:#854d0e;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Menunggu</span>';
+            if (status === 'approved')
+                return '<span style="background:#dcfce7;color:#15803d;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">✓ Disetujui</span>';
+            return '<span style="background:#fee2e2;color:#b91c1c;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">✕ Ditolak</span>';
+        }
+
+        function ttdBadgeHtml(status) {
+            if (!status) return '<span style="color:var(--slate-300);font-size:0.72rem;">—</span>';
+            if (status === 'approved')
+                return '<span style="background:#dcfce7;color:#15803d;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Ditandatangani</span>';
+            if (status === 'pending')
+                return '<span style="background:#fef9c3;color:#854d0e;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Menunggu</span>';
+            return '<span style="background:#fee2e2;color:#b91c1c;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Ditolak</span>';
+        }
+
+        function notify(req) {
+            const label = req.status === 'approved' ? '✅ Disetujui' : '❌ Ditolak';
+            showToast(`TTD "${req.doc_type}": ${label}`, req.status === 'approved' ? 'success' : 'error');
+        }
+
+        function updateTabBadge(pendingCount) {
+            const tab = document.getElementById('tab-requests');
+            if (!tab) return;
+            const old = tab.querySelector('span');
+            if (old) old.remove();
+            if (pendingCount > 0) {
+                tab.insertAdjacentHTML('beforeend',
+                    `<span style="background:#7c3aed;color:#fff;border-radius:10px;padding:0.1rem 0.45rem;font-size:0.65rem;margin-left:0.3rem;">${pendingCount}</span>`
+                );
+            }
+        }
+
+        // rebuild the requests panel tbody, sorted by requested_at desc (server already sorts, just re-render in order)
+        function rebuildRequestsTable(data) {
+            const tbody = document.querySelector('#panel-requests table tbody');
+            if (!tbody) return;
+
+            if (!data.length) {
+                tbody.innerHTML = `<tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--slate-400);">Belum ada permintaan tanda tangan.</td></tr>`;
+                return;
+            }
+
+            // data is already sorted latest-first from the API
+            tbody.innerHTML = data.map(req => `
+                <tr id="sig-row-${req.id}" style="border-bottom:1px solid var(--slate-200);transition:background 0.15s;"
+                    onmouseover="this.style.background='rgba(42,82,152,0.03)'"
+                    onmouseout="this.style.background=''">
+                    <td style="padding:0.75rem 1rem;">
+                        <p style="font-weight:600;color:var(--navy-800);font-size:0.83rem;">${req.doc_type}</p>
+                        <p style="font-family:var(--font-mono);font-size:0.68rem;color:var(--slate-400);margin-top:0.1rem;">${req.filename}</p>
+                    </td>
+                    <td style="padding:0.75rem 1rem;">
+                        <p style="font-size:0.83rem;color:var(--slate-700);font-weight:500;">${req.official_name || '—'}</p>
+                        <p style="font-size:0.72rem;color:var(--slate-400);margin-top:0.1rem;">${req.official_pos || ''}</p>
+                    </td>
+                    <td style="padding:0.75rem 1rem;text-align:center;">${badgeHtml(req.status)}</td>
+                    <td style="padding:0.75rem 1rem;font-size:0.78rem;color:var(--slate-500);">${req.requested_at || '—'}</td>
+                    <td style="padding:0.75rem 1rem;font-size:0.78rem;color:var(--slate-500);">
+                        ${req.reviewed_at || '—'}
+                        ${req.notes ? `<p style="font-size:0.7rem;color:var(--slate-400);font-style:italic;margin-top:0.15rem;">"${req.notes.substring(0,40)}${req.notes.length>40?'...':''}"</p>` : ''}
+                    </td>
+                    <td style="padding:0.75rem 1rem;text-align:center;">
+                        <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:center;">
+                            <a href="${req.verify_url}" style="font-size:0.75rem;color:var(--navy-600);text-decoration:none;font-weight:500;padding:0.3rem 0.7rem;border:1px solid var(--navy-200);border-radius:6px;">Detail</a>
+                            ${req.is_pending ? `<form method="POST" action="${req.resend_url}"><input type="hidden" name="_token" value="${CSRF}"><button type="submit" style="font-size:0.72rem;color:var(--slate-500);padding:0.25rem 0.6rem;border:1px solid var(--slate-200);border-radius:6px;background:transparent;cursor:pointer;font-family:var(--font-body);margin-top:0.2rem;">↺ Kirim Ulang Email</button></form>` : ''}
+                        </div>
+                    </td>
+                </tr>`
+            ).join('');
+        }
+
+        // update only changed cells in history tab (avoid full re-render since file existence is server-side only)
+        function updateHistoryTable(data) {
+            // build a map of log_id -> sig request from poll data
+            const sigMap = {};
+            data.forEach(req => { sigMap[req.log_id] = req; });
+
+            document.querySelectorAll('#panel-history table tbody tr[id^="hist-row-"]').forEach(row => {
+                const logId = row.id.replace('hist-row-', '');
+                const req   = sigMap[logId];
+                if (!req) return;
+
+                // update TTD badge cell
+                const ttdCell = row.querySelector('[data-ttd-cell]');
+                if (ttdCell) ttdCell.innerHTML = ttdBadgeHtml(req.status);
+
+                // update action cell — only inject signed download if newly approved
+                if (req.status === 'approved' && req.signed_filename) {
+                    const actionCell = row.querySelector('[data-action-cell]');
+                    if (actionCell && !actionCell.querySelector('[data-signed-btn]')) {
+                        actionCell.insertAdjacentHTML('afterbegin',
+                            `<a data-signed-btn href="${req.signed_download_url}" style="font-size:0.75rem;color:#fff;background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;font-weight:600;">⬇ Signed</a>`
+                        );
+                    }
+                }
+            });
+        }
+
+        async function poll() {
+            try {
+                const res = await fetch(POLL_URL);
+                if (!res.ok) return;
+                const data = await res.json();
+
+                let pendingCount = 0;
+
+                data.forEach(req => {
+                    const prev = lastStatuses[req.id];
+                    if (prev !== undefined && prev !== req.status && !req.is_pending) notify(req);
+                    lastStatuses[req.id] = req.status;
+                    if (req.is_pending) pendingCount++;
+                });
+
+                updateTabBadge(pendingCount);
+                rebuildRequestsTable(data);
+                updateHistoryTable(data);
+
+            } catch(e) { /* silent */ }
+        }
+
+        // seed lastStatuses from server-rendered page
+        document.querySelectorAll('[id^="sig-row-"]').forEach(row => {
+            const id   = row.id.replace('sig-row-', '');
+            const cell = row.querySelector('td:nth-child(3)');
+            if (!cell) return;
+            const text = cell.textContent.trim();
+            lastStatuses[id] = text.includes('Disetujui') ? 'approved'
+                            : text.includes('Ditolak')   ? 'rejected'
+                            : 'pending';
+        });
+
+        pollTimer = setInterval(poll, POLL_MS);
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) { clearInterval(pollTimer); }
+            else { poll(); pollTimer = setInterval(poll, POLL_MS); }
+        });
+    })();
+    </script>
+    @endauth
 
 </body>
 </html>
