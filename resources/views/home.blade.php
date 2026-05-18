@@ -1734,5 +1734,204 @@
     })();
     </script>
 
+    <script>
+    (function () {
+
+        // ── Styling helpers ───────────────────────────────────────────────────
+        const ERR_BORDER  = '1.5px solid #dc2626';
+        const OK_BORDER   = '';   // revert to CSS class default
+        const ERR_BG      = 'rgba(220,38,38,0.04)';
+
+        function getErrorEl(input) {
+            let el = input.parentElement.querySelector('.inline-field-error');
+            if (!el) {
+                el = document.createElement('p');
+                el.className = 'inline-field-error';
+                el.style.cssText = 'font-size:0.73rem;color:#dc2626;margin-top:0.3rem;display:flex;align-items:center;gap:0.35rem;';
+                el.innerHTML = '<svg style="width:12px;height:12px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span></span>';
+                input.parentElement.appendChild(el);
+            }
+            return el;
+        }
+
+        function setError(input, msg) {
+            input.style.border    = ERR_BORDER;
+            input.style.background = ERR_BG;
+            const el = getErrorEl(input);
+            el.querySelector('span').textContent = msg;
+            el.style.display = 'flex';
+
+            // highlight the wrapper card gently
+            const wrapper = input.closest('[data-field-key]');
+            if (wrapper) wrapper.style.outline = '1.5px solid rgba(220,38,38,0.25)';
+        }
+
+        function clearError(input) {
+            input.style.border    = OK_BORDER;
+            input.style.background = '';
+            const el = input.parentElement.querySelector('.inline-field-error');
+            if (el) el.style.display = 'none';
+            const wrapper = input.closest('[data-field-key]');
+            if (wrapper) wrapper.style.outline = '';
+        }
+
+        // ── Validate a single input ───────────────────────────────────────────
+        function validateInput(input) {
+            if (input.readOnly || input.disabled) return true;
+            if (input.dataset.required !== '1') return true;
+
+            const label = input.dataset.label || 'Field ini';
+            const val   = input.value.trim();
+
+            if (!val) {
+                setError(input, label + ' wajib diisi.');
+                return false;
+            }
+
+            if (input.type === 'number') {
+                const num = parseFloat(val);
+                if (isNaN(num)) { setError(input, label + ' harus berupa angka.'); return false; }
+                if (input.min !== '' && num < parseFloat(input.min)) {
+                    setError(input, label + ' minimal ' + input.min + '.'); return false;
+                }
+                if (input.max !== '' && num > parseFloat(input.max)) {
+                    setError(input, label + ' maksimal ' + input.max + '.'); return false;
+                }
+            }
+
+            clearError(input);
+            return true;
+        }
+
+        // ── Validate loop (staff/official) ────────────────────────────────────
+        function validateLoop(wrapper) {
+            const fieldKey = wrapper.dataset.fieldKey;
+            // check if there's a required attribute on the wrapper (set via field config)
+            const isRequired = wrapper.querySelector('input[type="checkbox"][name]')
+                && wrapper.closest('[id^="form-"]');
+
+            // We infer required from the label badge
+            const hasRequiredBadge = wrapper.querySelector('span[style*="color:rgba(239,68,68"]');
+            if (!hasRequiredBadge) return true;
+
+            const checked = wrapper.querySelectorAll('input[type="checkbox"]:checked').length;
+            const loopFooter = wrapper.querySelector('.loop-footer p');
+
+            let errEl = wrapper.querySelector('.loop-inline-error');
+            if (!errEl) {
+                errEl = document.createElement('p');
+                errEl.className = 'loop-inline-error';
+                errEl.style.cssText = 'font-size:0.72rem;color:#dc2626;margin:0.3rem 0.65rem 0;display:flex;align-items:center;gap:0.35rem;';
+                errEl.innerHTML = '<svg style="width:11px;height:11px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Pilih minimal satu.</span>';
+                const footer = wrapper.querySelector('.loop-footer');
+                if (footer) footer.prepend(errEl);
+            }
+
+            if (checked === 0) {
+                wrapper.style.outline = '1.5px solid rgba(220,38,38,0.35)';
+                errEl.style.display = 'flex';
+                return false;
+            } else {
+                wrapper.style.outline = '';
+                errEl.style.display = 'none';
+                return true;
+            }
+        }
+
+        // ── Validate all fields in the active form ────────────────────────────
+        function validateActiveForm() {
+            const sel = document.getElementById('letter-type-select');
+            if (!sel) return true;
+            const form = document.getElementById('form-' + sel.value);
+            if (!form) return true;
+
+            let allValid = true;
+            let firstInvalid = null;
+
+            // regular inputs
+            form.querySelectorAll('input[data-required], select[data-required], textarea[data-required]').forEach(function (input) {
+                const ok = validateInput(input);
+                if (!ok && !firstInvalid) firstInvalid = input;
+                if (!ok) allValid = false;
+            });
+
+            // loop containers
+            form.querySelectorAll('[data-loop-type]').forEach(function (wrapper) {
+                const ok = validateLoop(wrapper);
+                if (!ok && !firstInvalid) firstInvalid = wrapper;
+                if (!ok) allValid = false;
+            });
+
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            return allValid;
+        }
+
+        // ── Hook into submitIfConsented ───────────────────────────────────────
+        const _origSubmit = window.submitIfConsented;
+        window.submitIfConsented = function () {
+            if (!validateActiveForm()) {
+                // shake the submit button gently to signal blocked
+                const btn = document.getElementById('submit-btn');
+                if (btn) {
+                    const shakes = [5, -5, 3, -3, 1, 0];
+                    shakes.forEach(function (x, i) {
+                        setTimeout(function () { btn.style.transform = 'translateX(' + x + 'px)'; }, i * 50);
+                    });
+                    setTimeout(function () { btn.style.transform = ''; }, shakes.length * 50);
+                }
+                showToast('Harap isi semua field wajib terlebih dahulu.', 'error');
+                return;
+            }
+            _origSubmit();
+        };
+
+        // ── Attach blur/input listeners ───────────────────────────────────────
+        function attachValidationListeners(docKey) {
+            const form = document.getElementById('form-' + docKey);
+            if (!form) return;
+
+            form.querySelectorAll('input[data-required], select[data-required], textarea[data-required]').forEach(function (input) {
+                // clear on input (optimistic)
+                input.addEventListener('input', function () { clearError(this); });
+                // validate on blur
+                input.addEventListener('blur',  function () { validateInput(this); });
+                // selects validate immediately on change
+                if (input.tagName === 'SELECT') {
+                    input.addEventListener('change', function () { validateInput(this); });
+                }
+            });
+
+            // loop: validate when any checkbox changes
+            form.querySelectorAll('[data-loop-type]').forEach(function (wrapper) {
+                wrapper.addEventListener('change', function () { validateLoop(wrapper); });
+            });
+        }
+
+        // ── Hook into showForm ────────────────────────────────────────────────
+        const _origShowForm = window.showForm;
+        window.showForm = function (key) {
+            // Only wrap if auto-save script hasn't already wrapped it
+            // (check if already wrapped by inspecting the override chain)
+            if (_origShowForm) _origShowForm(key);
+            setTimeout(function () { attachValidationListeners(key); }, 250);
+        };
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            const sel = document.getElementById('letter-type-select');
+            if (!sel) return;
+            const _origLoad = window.loadAllData;
+            window.loadAllData = async function () {
+                await _origLoad();
+                attachValidationListeners(sel.value);
+            };
+        });
+
+    })();
+    </script>
+
 </body>
 </html>
