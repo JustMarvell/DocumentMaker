@@ -206,7 +206,7 @@
             @if(request()->routeIs('admin.guide*'))<span class="active-dot"></span>@endif
         </a>
 
-        <a href="{{ route('admin.pdf-settings') }}"
+        <!-- <a href="{{ route('admin.pdf-settings') }}"
             class="admin-nav-link {{ request()->routeIs('admin.pdf-settings') ? 'active' : '' }}">
             <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -214,7 +214,7 @@
             </svg>
             Pengaturan PDF
             @if(request()->routeIs('admin.pdf-settings'))<span class="active-dot"></span>@endif
-        </a>
+        </a> -->
 
         <a href="{{ route('home') }}" class="admin-nav-link" style="margin-top:0.5rem;">
             <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
