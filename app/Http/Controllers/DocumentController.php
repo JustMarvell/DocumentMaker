@@ -13,10 +13,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
-use App\Services\IlovePdfConverter;
-use App\Models\PdfConversionSetting;
+// use App\Services\IlovePdfConverter;
+// use App\Models\PdfConversionSetting;
 use App\Models\DocumentNumberCounter;
 use App\Models\SignatureRequest;
+use App\Services\PdfConverter;
 
 class DocumentController extends Controller
 {
@@ -217,21 +218,15 @@ class DocumentController extends Controller
         }
 
         if (!file_exists($pdfPath)) {
-            $setting = PdfConversionSetting::instance();
-
-            if (!$setting->hasQuota()) {
-                return response()->json(['error' => 'Kuota konversi PDF bulan ini telah habis. Hubungi administrator.'], 503);
+            if (!PdfConverter::isAvailable()) {
+                return response()->json(['error' => 'LibreOffice tidak tersedia di server ini.'], 500);
             }
 
-            if (!$setting->iloveapi_public_key || !$setting->iloveapi_secret_key) {
-                return response()->json(['error' => 'API key iLoveAPI belum dikonfigurasi. Hubungi administrator.'], 500);
-            }
-
-            $converter = new IlovePdfConverter();
+            $converter = new PdfConverter();
             $pdfFilename = $converter->convert($filename);
 
             if (!$pdfFilename) {
-                return response()->json(['error' => 'Konversi PDF gagal. Server iLoveAPI tidak merespons atau file tidak valid.'], 500);
+                return response()->json(['error' => 'Konversi PDF gagal. Periksa apakah LibreOffice terinstall dengan benar.'], 500);
             }
 
             $pdfPath = $this->cachedResultPath($pdfFilename);
